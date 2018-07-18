@@ -13,6 +13,7 @@ library(lubridate)
 ## load data 
 df <- fread("data/lexington-2012-2016.csv") 
 sf_df <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 4326, agr = "constant") %>% select(-c(type,Time_offset))# convert data coordinate to geometry
+users_initial <- unique(df$u_id)  ## initially there are 86710 users 
 
 ## add census tract to data 
 census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
@@ -23,7 +24,12 @@ sf_df <- st_join(sf_df, acs_ky) %>% na.omit()
 
 ###############################################################################################
 ## home location filtering 
-home_filtering <- function(df) {
+home_filtering <- function(df, 
+                           counts = 20, 
+                           count_tract = 10, 
+                           study_period = 10, 
+                           unique_days = 10, 
+                           hours = 8) {
     home_filter <- df %>% 
         mutate(date = ymd_hms(Datetime),
                counts = n()) %>% 
@@ -34,12 +40,7 @@ home_filtering <- function(df) {
                   study_period = max(as.Date(Datetime))- min(as.Date(Datetime)),
                   unique_days = n_distinct(as.Date(date)),
                   hours = n_distinct(hour(date))) %>% 
-        filter(count_tract > 10 & study_period > 10 & unique_days > 10 & hours > 8) %>% 
-        top_n(n=1, wt = count_tract) %>% 
-        slice(1) %>% 
-        pull(GEOID)
-    if(length(home_filter) == 0) return(NA)
-    home_filter
+        filter(count_tract > 10 & study_period > 10 & unique_days > 10 & hours > 8)
 }
 
 sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>% 
@@ -47,6 +48,14 @@ sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>%
            nest()
 
 sf_user_filter <- sf_user %>%
-    mutate(home_filter = future_map_chr(data, home_filtering)) %>%
-    select(-data)
+    mutate( home_filter = future_map(data, home_filtering)) %>% select(-c(data)) 
+
+
+users <- sf_user_filter %>% unnest() %>% select(c(u_id)) %>% unique()  ## after filtering step, users decrease from 86710 to 11631 (13.4%)
+
+
+
+
+
+
 
