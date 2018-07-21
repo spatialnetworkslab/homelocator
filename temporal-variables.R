@@ -5,7 +5,7 @@ source("homelocation-filtering.R")
 ###########################################################################################
 ## expand variables 
 home_filter <- sf_user_filter %>% unnest() %>% 
-               left_join(., (sf_df %>% as_tibble() %>% select(c(u_id, GEOID, Datetime)))) %>%  
+               suppressMessages(left_join(., (sf_df %>% as_tibble() %>% select(c(u_id, GEOID, Datetime))))) %>%  ## add Datetime var
                group_by(u_id) %>% 
                mutate(date = ymd_hms(Datetime), 
                       total_counts = n(),     
@@ -18,9 +18,8 @@ home_filter <- sf_user_filter %>% unnest() %>%
                       times_numeric = hour(date) + minute(date)/60 + second(date)/3600,
                       daytimes = if_else(times_numeric >= 9 & times_numeric <= 18, 2, 1), # 1 for night time, 2 for work time
                       times = if_else(times_numeric >= 6 & times_numeric <= 12, 1, 2), # 1 for morning, 2 for afternoon and night 
-                      counts_group = cut2(total_counts, c(100, 1000, 2000, 3000, 4000, 5000, 10000, 15000, 25000)))%>% 
+                      group = cut2(total_counts, c(100, 1000, 2000, 3000, 4000, 5000, 10000, 15000, 25000)))%>% 
                select(-c(Datetime, times_numeric)) %>% nest()
-
 
 
 ##############################################################################################
@@ -67,7 +66,7 @@ score_sat_morning <- function(df){
         mutate(percent = counts/sum(counts)) %>% 
         filter(day_of_week == 7) %>% ## tweets on Sat
         select(GEOID, percent) %>% 
-        setNames(c("GEOID", "percent_Sat_morning")) %>% 
+        setNames(c("GEOID", "percent_satMorning")) %>% 
         list()
 }
 
@@ -80,7 +79,7 @@ score_daytimes <- function(df){
         mutate(percent_daytime = counts/sum(counts)) %>% 
         filter(daytimes == 1 & percent_daytime >= 0.5) %>% 
         select(GEOID, percent_daytime) %>% 
-        setNames(c("GEOID","percent_nighttime")) %>%
+        setNames(c("GEOID","percent_night")) %>%
         list()
 }
 
@@ -91,7 +90,7 @@ score_day <- function(df) {
     day_value <- df %>% 
         select(GEOID, day_of_week) %>% 
         group_by(GEOID) %>% 
-        summarise(days = n_distinct(day_of_week)) %>% 
+        summarise(unique_dayofweek = n_distinct(day_of_week)) %>% 
         list()
 }
 
@@ -102,7 +101,7 @@ score_month <- function(df) {
     month_value <- df %>% 
         select(GEOID, month) %>% 
         group_by(GEOID) %>% 
-        summarise(months = n_distinct(month)) %>%
+        summarise(unique_months = n_distinct(month)) %>%
         list()
 }
 
@@ -119,21 +118,20 @@ score <- home_filter %>%
 
 
 
-combine_score <- function(score, num){
-    combined_score <- merge(score[num,]$var_week[[1]][[1]], score[num,]$var_sat_morning[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-        merge(., score[num,]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-        merge(., score[num,]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
-        merge(., score[num,]$var_month[[1]][[1]], by = "GEOID", all=TRUE) %>% nest()
-}
-
-
+combine_results <- function(score, num, home_filter){
+        df <- merge(score[num,]$var_week[[1]][[1]], score[num,]$var_sat_morning[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+            merge(., score[num,]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+            merge(., score[num,]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
+            merge(., score[num,]$var_month[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+            mutate(u_id = rep(score$u_id[num], nrow(combined_score)))  ## add user id
+        df_2 <- subset(home_filter, home_filter$u_id == score$u_id[num]) %>% select(data) %>% unnest() %>% 
+                select(c(GEOID, total_counts, count_tract, study_period, unique_days, hours, counts_group)) %>% unique() ## add other info
+        var_info <- suppressMessages(left_join(df,df_2)) %>%
+                    select(c(u_id, GEOID, total_counts, count_tract, study_period, unique_days, months, days, hours,
+                             percent_weekend, percent_Sat_morning, percent_nighttime, counts_group)) ## order the variable 
+    }
+   
 terms <- c(1:nrow(score))
-full_result <- tibble(
-    u_id = score[1]$u_id,
-    combined_variables = map(terms, function(x) combine_score(score, x))
-)
-
-
-
+combinde_results <- future_map(terms, function(x) combine_results(score, x, home_filter)) 
 
 
