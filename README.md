@@ -17,8 +17,7 @@ For each user:
 
 - weighting: 
     - combine all info for each user, the info includes:
-    ```u_id, GEOID, total_counts, count_tract, study_period, unique_days, months, days, hours,
-     percent_weekend, percent_Sat_morning, percent_nighttime, counts_group```
+    ```u_id, GEOID, total_counts, count_tract, study_period, unique_days, months, days, hours,percent_weekend, percent_Sat_morning, percent_nighttime, counts_group```
      - give a weight to each variable and get a final score
      - change weight and monitor the change 
         
