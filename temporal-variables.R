@@ -5,7 +5,7 @@ source("homelocation-filtering.R")
 ###########################################################################################
 ## expand variables 
 home_filter <- sf_user_filter %>% unnest() %>% 
-               suppressMessages(left_join(., (sf_df %>% as_tibble() %>% select(c(u_id, GEOID, Datetime))))) %>%  ## add Datetime var
+               left_join(., (sf_df %>% as_tibble() %>% select(c(u_id, GEOID, Datetime)))) %>%  ## add Datetime var
                group_by(u_id) %>% 
                mutate(date = ymd_hms(Datetime), 
                       total_counts = n(),     
@@ -27,8 +27,8 @@ home_filter <- sf_user_filter %>% unnest() %>%
 ### Counts 
 home_extract_bycounts <- function(df){
     home_loc <- df %>% 
-        select(c(GEOID, count_tract)) %>%
-        top_n (n=1, wt = count_tract) %>% 
+        select(c(GEOID, counts)) %>%
+        top_n (n=1, wt = counts) %>% 
         slice(1) %>%
         pull(GEOID)
     home_loc
@@ -123,7 +123,7 @@ combine_results <- function(score, num, home_filter){
             merge(., score[num,]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
             merge(., score[num,]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
             merge(., score[num,]$var_month[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-            mutate(u_id = rep(score$u_id[num], nrow(combined_score)))  ## add user id
+            mutate(u_id = rep(score$u_id[num], nrow(df)))  ## add user id
         df_2 <- subset(home_filter, home_filter$u_id == score$u_id[num]) %>% select(data) %>% unnest() %>% 
                 select(c(GEOID, total_counts, count_tract, study_period, unique_days, hours, counts_group)) %>% unique() ## add other info
         var_info <- suppressMessages(left_join(df,df_2)) %>%
