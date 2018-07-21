@@ -8,11 +8,11 @@ home_filtering <- function(df) {
                           counts = n()) %>% 
                    filter(counts > 20) %>% 
                    group_by(GEOID) %>% 
-                   summarise(count_tract = n(),
+                   summarise(counts = n(),
                              study_period = max(as.Date(Datetime))- min(as.Date(Datetime)),
                              unique_days = n_distinct(as.Date(date)),
-                             distinct_hours = n_distinct(hour(date))) %>% 
-                   filter(count_tract > 10 & study_period > 10 & unique_days > 10 & hours > 8)
+                             unique_hours = n_distinct(hour(date))) %>% 
+                   filter(counts > 10 & study_period > 10 & unique_days > 10 & unique_hours > 8)
 }
 
 sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>% 
@@ -25,7 +25,6 @@ sf_user_filter <- sf_user %>%
 
 #users <- sf_user_filter %>% unnest() %>% summarise(users = n_distinct(u_id))
 ## after filtering step, users decrease from 86710 to 11631 (13.4%)
-
 
 
 
