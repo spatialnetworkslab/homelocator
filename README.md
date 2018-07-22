@@ -23,6 +23,9 @@ For each user:
 
 ## load data
 ```{r}
+library(tidycensus)
+library(tidyverse)
+library(data.table)
 library(magrittr)
 library(sf)
 library(furrr)
@@ -36,6 +39,9 @@ df <- fread(system.file("extdata", "lexington.csv", package = "homelocator", mus
 sf_df <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 4326, agr = "constant") %>% 
          select(-c(type,Time_offset))  
 
+#users_initial <- unique(df$u_id)  ## initially there are 86710 users 
+
+
 ## add census tract to data 
 census_api_key("your-api-key")
 options(tigris_use_cache = TRUE, tigris_class="sf") 
@@ -46,3 +52,10 @@ sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>%
            group_by(u_id) %>% 
            nest() 
 ```
+
+
+
+
+
+
+
