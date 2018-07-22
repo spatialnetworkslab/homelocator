@@ -1,6 +1,5 @@
 ## load library 
-library(Hmisc) 
-source("homelocation-filtering.R")
+#source("homelocation-filtering.R")
 
 ###########################################################################################
 ## expand variables 
@@ -117,21 +116,20 @@ score <- home_filter %>%
     select(-c(data)) 
 
 
-
+options(future.globals.maxSize = 768 * 1024^2)
 combine_results <- function(score, num, home_filter){
-        df <- merge(score[num,]$var_week[[1]][[1]], score[num,]$var_sat_morning[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-            merge(., score[num,]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-            merge(., score[num,]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
-            merge(., score[num,]$var_month[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-            mutate(u_id = rep(score$u_id[num], nrow(df)))  ## add user id
-        df_2 <- subset(home_filter, home_filter$u_id == score$u_id[num]) %>% select(data) %>% unnest() %>% 
-                select(c(GEOID,  count_tract, study_period, unique_days, hours, counts_group)) %>% unique() ## add other info
+        df <- merge(score[num, ]$var_week[[1]][[1]], score[num, ]$var_sat_morning[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+            merge(., score[num, ]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+            merge(., score[num, ]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
+            merge(., score[num, ]$var_month[[1]][[1]], by = "GEOID", all=TRUE) 
+        df <- df %>% 
+              mutate(u_id = rep(score$u_id[num], nrow(df)))  ## add user id
+        df_2 <- subset(home_filter, home_filter$u_id == score$u_id[num]) %>% select(c(data)) %>% unnest() %>%
+                select(c(GEOID, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
         var_info <- suppressMessages(left_join(df,df_2)) %>%
-                    select(c(u_id, GEOID, count_tract, study_period, unique_days, months, days, hours,
-                             percent_weekend, percent_satMorning, percent_nighttime, counts_group)) ## order the variable 
+                    select(c(u_id, GEOID, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
+                             percent_weekend, percent_satMorning, percent_night, group)) ## order the variable
     }
    
 terms <- c(1:nrow(score))
 combinde_results <- future_map(terms, function(x) combine_results(score, x, home_filter)) 
-
-
