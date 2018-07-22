@@ -1,5 +1,5 @@
-# Home Location 
-Calculate a person's home location based on location and timestamped data
+# Homelocator
+Analysis a person's home location based on location and timestamped data
 
 For each user:
 - filtering:
@@ -20,8 +20,26 @@ For each user:
     ```u_id, GEOID, total_counts, count_tract, study_period, unique_days, months, days, hours,percent_weekend, percent_Sat_morning, percent_nighttime, counts_group```
      - give a weight to each variable and get a final score
      - change weight and monitor the change 
-        
-        
-    
+
+## load data
+```{r}
+library(magrittr)
+library(sf)
+library(furrr)
+library(dplyr)
+library(tigris) 
+library(lubridate)
+library(Hmisc) 
 
 
+df <- fread(system.file("extdata", "lexington.csv", package = "homelocator", mustWork = TRUE)) 
+sf_df <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 4326, agr = "constant") %>% 
+         select(-c(type,Time_offset))  
+
+## add census tract to data 
+census_api_key("your-api-key")
+options(tigris_use_cache = TRUE, tigris_class="sf") 
+acs_ky <- get_acs(state = "KY", geography = "tract", variables = "B19013_001", geometry = T)  %>% 
+          st_transform(., "+init=epsg:4326") 
+sf_df <- st_join(sf_df, acs_ky) %>% na.omit()
+```
