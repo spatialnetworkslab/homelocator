@@ -1,2 +1,9 @@
 Package: homelocator
+Type: Package
+Title: Home Location Estimation
 Version: 0.1
+LazyData: true
+Description: Analysis twitter user's home location based on the location and timestamped data
+Author: Who wrote it <yourself@somewhere.net>
+Maintainer: The package maintainer <yourself@somewhere.net>
+LazyData: true
