@@ -125,11 +125,11 @@ combine_results <- function(score, num, home_filter){
         df <- df %>% 
               mutate(u_id = rep(score$u_id[num], nrow(df)))  ## add user id
         df_2 <- subset(home_filter, home_filter$u_id == score$u_id[num]) %>% select(c(data)) %>% unnest() %>%
-                select(c(GEOID, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
+                select(c(GEOID, total_counts, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
         var_info <- suppressMessages(left_join(df,df_2)) %>%
-                    select(c(u_id, GEOID, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
+                    select(c(u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
                              percent_weekend, percent_satMorning, percent_night, group)) ## order the variable
     }
    
 terms <- c(1:nrow(score))
-combinde_results <- future_map(terms, function(x) combine_results(score, x, home_filter)) 
+results <- future_map(terms, function(x) combine_results(score, x, home_filter)) 
