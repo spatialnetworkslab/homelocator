@@ -8,6 +8,7 @@ library(furrr)
 library(dplyr)
 library(tigris) 
 library(lubridate)
+library(Hmisc) 
 
 ################################################################################################
 ## load data 
