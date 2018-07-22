@@ -42,4 +42,7 @@ options(tigris_use_cache = TRUE, tigris_class="sf")
 acs_ky <- get_acs(state = "KY", geography = "tract", variables = "B19013_001", geometry = T)  %>% 
           st_transform(., "+init=epsg:4326") 
 sf_df <- st_join(sf_df, acs_ky) %>% na.omit()
+sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>% 
+           group_by(u_id) %>% 
+           nest() 
 ```
