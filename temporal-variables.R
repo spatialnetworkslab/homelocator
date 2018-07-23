@@ -121,8 +121,8 @@ scoring <- function(df) {
                   score_percent_night = percent_night/max(percent_night)) %>% 
         group_by(u_id, GEOID) %>% 
         summarise(final_score = sum(score_counts,score_study_period,score_unique_days,score_months,score_unique_dayofweek,score_hours,score_percent_weekend,score_percent_satMor,score_percent_night)) %>% 
+        left_join(df, .) %>% 
         arrange(desc(final_score)) 
-    scores <- left_join(df, scores)
 }
 
 scored_results <- future_map(results, scoring)
