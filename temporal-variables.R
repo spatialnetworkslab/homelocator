@@ -1,17 +1,4 @@
-#source("homelocation-filtering.R")
-
-##############################################################################################
-home_extract_bycounts <- function(df){
-    home_loc <- df %>% 
-        select(c(GEOID, counts)) %>%
-        top_n (n=1, wt = counts) %>% 
-        slice(1) %>%
-        pull(GEOID)
-    home_loc
-}
-
-##############################################################################################
-### Week (weekday and weekend) 
+## Week (weekday and weekend) =====================================================================
 calcu_week <- function(df){
     week_value <- df %>% 
         group_by(GEOID, week) %>% 
@@ -26,9 +13,9 @@ calcu_week <- function(df){
         list()
 }
 
-##############################################################################################
-### Sat morning
-calcu_satMor <- function(df){
+
+## Sat morning  ====================================================================================
+calcu_satmor <- function(df){
     sat_morning_value <- df %>%
         filter(times == 1) %>% ## tweets in the morning
         group_by(GEOID, day_of_week) %>% 
@@ -40,8 +27,8 @@ calcu_satMor <- function(df){
         list()
 }
 
-##############################################################################################
-### daytimes (work time, night time) 
+
+## daytimes (work time, night time) ================================================================
 calcu_daytimes <- function(df){
     daytimes_value <- df %>% 
         group_by(GEOID, daytimes) %>% 
@@ -54,8 +41,7 @@ calcu_daytimes <- function(df){
 }
 
 
-##############################################################################################
-### day
+## day ============================================================================================
 calcu_day <- function(df) {
     day_value <- df %>% 
         select(GEOID, day_of_week) %>% 
@@ -65,8 +51,7 @@ calcu_day <- function(df) {
 }
 
 
-##############################################################################################
-### month
+## month  =========================================================================================
 calcu_month <- function(df) {
     month_value <- df %>% 
         select(GEOID, month) %>% 
@@ -75,33 +60,30 @@ calcu_month <- function(df) {
         list()
 }
 
-##############################################################################################
-### combine temporal variables 
-tic("scoring")
-para_values <- home_filter %>% 
+
+## combine temporal variables ====================================================================
+para_values <- home_filter %>%
     mutate(var_week = future_map(data, calcu_week),
-           var_satMor = future_map(data, calcu_satMor),
+           var_satMor = future_map(data, calcu_satmor),
            var_daytimes = future_map(data, calcu_daytimes),
            var_day = future_map(data, calcu_day),
-           var_month = future_map(data, calcu_month)) %>% 
-    select(-c(data)) 
+           var_month = future_map(data, calcu_month)) %>%
+    select(-c(data))
 
-options(future.globals.maxSize = 768 * 1024^2)
 combine_values <- function(para_values, num, home_filter){
-        df <- merge(para_values[num, ]$var_week[[1]][[1]], para_values[num, ]$var_satMor[[1]][[1]], by = "GEOID", all=TRUE) %>% 
-            merge(., para_values[num, ]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>% 
+        df <- merge(para_values[num, ]$var_week[[1]][[1]], para_values[num, ]$var_satMor[[1]][[1]], by = "GEOID", all=TRUE) %>%
+            merge(., para_values[num, ]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>%
             merge(., para_values[num, ]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
-            merge(., para_values[num, ]$var_month[[1]][[1]], by = "GEOID", all=TRUE) 
-        df <- df %>% 
+            merge(., para_values[num, ]$var_month[[1]][[1]], by = "GEOID", all=TRUE)
+        df <- df %>%
               mutate(u_id = rep(para_values$u_id[num], nrow(df)))  ## add user id
         df_2 <- subset(home_filter, home_filter$u_id == para_values$u_id[num]) %>% select(c(data)) %>% unnest() %>%
                 select(c(GEOID, total_counts, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
         var_info <- suppressMessages(left_join(df,df_2)) %>%
                     select(c(u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
-                             percent_weekend, percent_satMor, percent_night, group)) %>% ## order the variable 
+                             percent_weekend, percent_satMor, percent_night, group)) %>% ## order the variable
                     replace(., is.na(.), 0) ## replace na with 0
-    }
-   
+}
 terms <- c(1:nrow(para_values))
 results <- future_map(terms, function(x) combine_values(para_values, x, home_filter)) 
 
@@ -116,38 +98,27 @@ scoring <- function(df) {
                   score_months = unique_months/12,
                   score_unique_dayofweek = unique_dayofweek/7,
                   score_hours = unique_hours/max(unique_hours),
-                  score_percent_weekend = percent_weekend/max(percent_weekend),
-                  score_percent_satMor = percent_satMor/max(percent_satMor),
-                  score_percent_night = percent_night/max(percent_night)) %>% 
+                  score_percent_weekend = ifelse(max(percent_weekend) == 0, 0, percent_weekend/max(percent_weekend)),
+                  score_percent_satMor = ifelse(max(percent_satMor) == 0, 0, percent_satMor/max(percent_satMor)),
+                  score_percent_night = ifelse(max(percent_night) == 0, 0, percent_night/max(percent_night))) %>% 
         group_by(u_id, GEOID) %>% 
         summarise(score = sum(score_counts,score_study_period,score_unique_days,score_months,score_unique_dayofweek,score_hours,score_percent_weekend,score_percent_satMor,score_percent_night)) %>% 
         left_join(df, .) %>% 
         arrange(desc(score)) 
 }
-
 scored_results <- future_map(results, scoring)
-toc()
-
-# home_extract <- function(df){
-#     home_loc <- df %>% 
-#         select(c(GEOID, scores)) %>%
-#         top_n (n=1, wt = scores) %>% 
-#         slice(1) %>%
-#         pull(GEOID)
-#     home_loc
-# }
 
 
+to_dataframe <- function(list_df) {
+    df_total <- data_frame()
+    for (i in list_df){
+        df <- i
+        df_total <- bind_rows(df_total, df)
+    }
+    return(df_total)
+}
 
-
-
-
-
-
-
-
-
-
+scored_results_combined <- to_dataframe(scored_results)
 
 
 
