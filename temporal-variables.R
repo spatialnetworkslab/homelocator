@@ -118,7 +118,8 @@ to_dataframe <- function(list_df) {
     return(df_total)
 }
 
-scored_results_combined <- to_dataframe(scored_results)
+scored_results_combined <- to_dataframe(scored_results) %>% 
+                           group_by(u_id) %>% nest()
 
 
 
