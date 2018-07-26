@@ -1,9 +1,31 @@
 Package: homelocator
 Type: Package
-Title: Home Location Estimation
+Title: Estimation of Home Location 
 Version: 0.1
-LazyData: true
-Description: Analysis twitter user's home location based on the location and timestamped data
-Author: Who wrote it <yourself@somewhere.net>
+Description: Estimate social media user's home location based on census tract and timestamped data in R. 
+Author@R: c(
+    person("Chen","Qingqing", "qingqing_chen@sutd.edu.sg", role = c("aut","cre")),
+    person("First","Second", "first.last@example.com", role = c("aut","cre")))
 Maintainer: The package maintainer <yourself@somewhere.net>
+License: MIT + file LICENSE
 LazyData: true
+Depends:
+    R (>= 3.1.0)
+Imports:
+    data.table,
+    dplyr,
+    Hmisc,
+    lubridate,
+    magrittr,
+    sf,
+    tidycensus,
+    tidyverse,
+    tigris
+Suggests:
+    furrr,
+    devtools,
+    roxygen2,
+    testthat
+URL: "to be added"
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
