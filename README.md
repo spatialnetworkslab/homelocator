@@ -15,42 +15,24 @@ For each user:
     - month (Jan-Dec): calculate the distinct months that has tweets 
     - day (Mon-Sun): calculate the distinct day of week that has tweets 
 
-- weighting: 
+- scoring: 
     - combine all info for each user, the info includes:
-    ```u_id, GEOID, total_counts, count_tract, study_period, unique_days, months, days, hours,percent_weekend, percent_Sat_morning, percent_nighttime, counts_group```
-     - give a weight to each variable and get a final score
-     - change weight and monitor the change 
+    ```u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,percent_weekend, percent_satMor, percent_night, group```
+     - give a score to each variable and add them together to get the final score for each user 
+ 
 
 ## load data
 ```{r}
-library(tidycensus)
-library(tidyverse)
-library(data.table)
-library(magrittr)
-library(sf)
-library(furrr)
-library(dplyr)
-library(tigris) 
-library(lubridate)
-library(Hmisc) 
-
-
-df <- fread(system.file("extdata", "lexington.csv", package = "homelocator", mustWork = TRUE)) 
-sf_df <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 4326, agr = "constant") %>% 
-         select(-c(type,Time_offset))  
-
-#users_initial <- unique(df$u_id)  ## initially there are 86710 users 
-
-
-## add census tract to data 
-census_api_key("your-api-key")
-options(tigris_use_cache = TRUE, tigris_class="sf") 
-acs_ky <- get_acs(state = "KY", geography = "tract", variables = "B19013_001", geometry = T)  %>% 
-          st_transform(., "+init=epsg:4326") 
-sf_df <- st_join(sf_df, acs_ky) %>% na.omit()
-sf_user <- sf_df %>% as_tibble() %>% select(c(u_id, Datetime, GEOID)) %>% 
-           group_by(u_id) %>% 
-           nest() 
+df <- fread(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
+home_filter <- var_expand(df)
+users <- c(1:nrow(home_filter))
+variable_values <- future_map(users, function(x) combine_values(home_filter, x)) 
+home_score <- future_map(variable_values, scoring)
+users_home <- to_dataframe(home_score) %>% 
+    group_by(u_id) %>% 
+    nest() %>% 
+    mutate(homeloc = future_map_chr(data, home_extract)) %>% 
+    select(-c(data))
 ```
 
 

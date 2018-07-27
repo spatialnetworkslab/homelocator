@@ -4,10 +4,9 @@
 #' Calculate the percentage of weekday and weekend of each tract, throw away tract that only has tweets sent on 
 #' weekday and keep weekend percent value and store the result in a list.
 #' 
-#' @param df A dataframe
-#' @example 
-calcu_week <- function(df){
-    df %>% 
+#' @param data A dataframe from a nested filtered dataframe
+calcu_week <- function(data){
+    data %>% 
         group_by(GEOID, week) %>% 
         summarise(counts = n()) %>%
         mutate(percent_week = counts/sum(counts)) %>% 
@@ -28,10 +27,9 @@ calcu_week <- function(df){
 #' calculate the percentage of tweets sent all days of a week and only keep the percentage that sent on Sat and store 
 #' the result in a list. 
 #' 
-#' @param df A dataframe
-#' @example 
-calcu_satmor <- function(df){
-    df %>%
+#' @inheritParams calcu_week
+calcu_satmor <- function(data){
+    data %>%
         filter(times == 1) %>% ## tweets in the morning
         group_by(GEOID, day_of_week) %>% 
         summarise(counts = n()) %>% 
@@ -49,10 +47,9 @@ calcu_satmor <- function(df){
 #' Calculate the percentage of tweets sent on work time and night time of each tract, throw away tracts that percentage 
 #' of work time is larger than that of night time, only keep percentage of night time and store the result in a list.
 #' 
-#' @param df A dataframe
-#' @example 
-calcu_daytimes <- function(df){
-    df %>% 
+#' @inheritParams calcu_week
+calcu_daytimes <- function(data){
+    data %>% 
         group_by(GEOID, daytimes) %>% 
         summarise(counts = n()) %>% 
         mutate(percent_daytime = counts/sum(counts)) %>% 
@@ -68,10 +65,9 @@ calcu_daytimes <- function(df){
 #' 
 #' Calculate unique day of a week of each tract, and store the result in a list.
 #' 
-#' @param df A dataframe
-#' @example 
-calcu_day <- function(df) {
-    df %>% 
+#' @inheritParams calcu_week
+calcu_day <- function(data) {
+    data %>% 
         select(GEOID, day_of_week) %>% 
         group_by(GEOID) %>% 
         summarise(unique_dayofweek = n_distinct(day_of_week)) %>% 
@@ -84,10 +80,9 @@ calcu_day <- function(df) {
 #' 
 #' Calculate unique month of a year of each tract, and store the result in a list.
 #' 
-#' @param df A dataframe
-#' @example
-calcu_month <- function(df) {
-    df %>% 
+#' @inheritParams calcu_week
+calcu_month <- function(data) {
+    data %>% 
         select(GEOID, month) %>% 
         group_by(GEOID) %>% 
         summarise(unique_months = n_distinct(month)) %>% 
@@ -101,10 +96,9 @@ calcu_month <- function(df) {
 #' Gather resutls get from funciton: calcu_week, calcu_satmor, calcu_daytimes, calcu_day, calcu_day, calcu_month 
 #' and delete data dataframe 
 #' 
-#' @param df A nested dataframe
-#' @example
-para_value <- function(home_filter){
-    home_filter %>%
+#' @param df_filter A nested dataframe from filtering step
+para_value <- function(df_filter){
+    df_filter %>%
         mutate(var_week = future_map(data, calcu_week),
             var_satMor = future_map(data, calcu_satmor),
             var_daytimes = future_map(data, calcu_daytimes),
@@ -119,28 +113,23 @@ para_value <- function(home_filter){
 #' Combine all info for each user including: u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, 
 #' unique_dayofweek, unique_hours,percent_weekend, percent_satMor, percent_night, group and replace na with 0
 #' 
-#' @param df A nested dataframe
-#' @param num A number 
-#' @example
-combine_values <- function(sf_df, num){
-    home_filter <- var_expand(sf_df)
-    para_values <- para_value(home_filter)
+#' @inheritParams para_value
+#' @param num A number of left users
+combine_values <- function(df_filter, num){
+    para_values <- para_value(df_filter)
     df <- merge(para_values[num, ]$var_week[[1]][[1]], para_values[num, ]$var_satMor[[1]][[1]], by = "GEOID", all=TRUE) %>%
         merge(., para_values[num, ]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>%
         merge(., para_values[num, ]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
         merge(., para_values[num, ]$var_month[[1]][[1]], by = "GEOID", all=TRUE)
     df <- df %>%
         mutate(u_id = rep(para_values$u_id[num], nrow(df)))  ## add user id
-    df_2 <- subset(home_filter, home_filter$u_id == para_values$u_id[num]) %>% select(c(data)) %>% unnest() %>%
+    df_2 <- subset(df_filter, df_filter$u_id == para_values$u_id[num]) %>% select(c(data)) %>% unnest() %>%
         select(c(GEOID, total_counts, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
     suppressMessages(left_join(df,df_2)) %>%
         select(c(u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
                  percent_weekend, percent_satMor, percent_night, group)) %>% ## order the variable
         replace(., is.na(.), 0) ## replace na with 0
 }
-
-# terms <- c(1:nrow(para_values))
-# results <- future_map(terms, function(x) combine_values(para_values, x, home_filter)) 
 
 
 #' Give a score to each tract for each user.
@@ -149,10 +138,9 @@ combine_values <- function(sf_df, num){
 #' Give a 0-1 range score to each variable and add up them to get a final score for each tract, order the tracts 
 #' according to the score. 
 #' 
-#' @param df A list 
-#' @example
-scoring <- function(df) {
-    df %>% 
+#' @param df_result A dataframe combined all user info
+scoring <- function(df_result) {
+    scores <- df_result %>% 
         transmute(u_id = u_id,
                   GEOID = GEOID,
                   score_counts = counts/max(counts),
@@ -166,12 +154,10 @@ scoring <- function(df) {
                   score_percent_night = ifelse(max(percent_night) == 0, 0, percent_night/max(percent_night))) %>% 
         group_by(u_id, GEOID) %>% 
         summarise(score = sum(score_counts,score_study_period,score_unique_days,score_months,score_unique_dayofweek,
-                              score_hours,score_percent_weekend,score_percent_satMor,score_percent_night)) %>% 
-        left_join(df, .) %>% 
-        arrange(desc(score)) 
+                              score_hours,score_percent_weekend,score_percent_satMor,score_percent_night)) 
+    scores <- suppressMessages(left_join(df_result, scores)) %>% arrange(desc(score))
+    scores
 }
-
-# scored_results <- future_map(results, scoring)
 
 
 #' Convert list to dataframe.
@@ -179,9 +165,8 @@ scoring <- function(df) {
 #' Convert list resutls to a dataframe and nest it by user id. 
 #
 #' 
-#' @param df A list 
-#' @example
-to_dataframe <- function(df) {
+#' @param list_df A list results 
+to_dataframe <- function(list_df) {
     df_total <- data_frame()
     for (i in list_df){
         df <- i
@@ -190,16 +175,11 @@ to_dataframe <- function(df) {
     return(df_total)
 }
 
-# scored_results_combined <- to_dataframe(scored_results) %>% 
-#     group_by(u_id) %>% nest()
 
 
 
 
-
-
-
-
+    
 
 
 

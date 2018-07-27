@@ -1,14 +1,18 @@
 #' Extract home by total tweets counts.
 #' 
 #' Estimate a user's home location according to the total number of tweets. 
-#' @param df A dataframe
-home_extract_bycounts <- function(df){
-    df %>% 
+#' @inheritParams calcu_week
+home_extract_bycounts <- function(data){
+    data %>% 
         select(c(GEOID, counts)) %>%
+        mutate(GEOID = as.character(GEOID)) %>%
         top_n (n=1, wt = counts) %>% 
         slice(1) %>%
         pull(GEOID)
 }
+
+
+
 
 
 # home_loc_bycounts <- home_filter %>%
@@ -19,16 +23,13 @@ home_extract_bycounts <- function(df){
 #' Extract home by temporal variable score.
 #' 
 #' Estimate a user's home location according to the socre calculated by temporal varialbes. 
-#' @param df A dataframe
-home_extract <- function(df){
-    df %>%
-        select(c(GEOID, score)) %>%
+#' @param result_data A dataframe
+home_extract <- function(result_data){
+    result_data %>%
+        select(c("GEOID", "score")) %>%
+        mutate(GEOID = as.character(GEOID)) %>%
         top_n (n=1, wt = score) %>%
         slice(1) %>%
         pull(GEOID)
 }
 
-
-# home_loc_byvar <- scored_results_combined %>%
-#     mutate(homeloc = future_map_chr(data, home_extract)) %>%
-#     select(-c(data))
