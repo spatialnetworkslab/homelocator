@@ -42,10 +42,6 @@ home_filtering <- function(df_data) {
 }
 
 
-
-
-
-
 #' Expand variables to dataset.
 #' 
 #' 
@@ -54,7 +50,7 @@ home_filtering <- function(df_data) {
 #' and group is produced from total tweets counts according to diffrent range.
 #' 
 #' @param df A dataframe with timestamped variable
-var_expand <- function(df){
+filtering <- function(df){
     df %>% as_tibble() %>% select(c(u_id, created_at, GEOID)) %>% 
         group_by(u_id) %>% 
         nest() %>% 

@@ -4,10 +4,10 @@
 \alias{home_extract}
 \title{Extract home by temporal variable score.}
 \usage{
-home_extract(df)
+home_extract(result_data)
 }
 \arguments{
-\item{df}{A dataframe}
+\item{result_data}{A dataframe}
 }
 \description{
 Estimate a user's home location according to the socre calculated by temporal varialbes.

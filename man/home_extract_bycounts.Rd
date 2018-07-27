@@ -4,10 +4,10 @@
 \alias{home_extract_bycounts}
 \title{Extract home by total tweets counts.}
 \usage{
-home_extract_bycounts(df)
+home_extract_bycounts(data)
 }
 \arguments{
-\item{df}{A dataframe}
+\item{data}{A dataframe from a nested filtered dataframe}
 }
 \description{
 Estimate a user's home location according to the total number of tweets.

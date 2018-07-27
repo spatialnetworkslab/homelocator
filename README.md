@@ -2,6 +2,7 @@
 Analysis a person's home location based on location and timestamped data
 
 For each user:
+
 - filtering:
     - total_tweets_counts > 20 
     - total_tweets_counts_per_tract > 20
@@ -19,12 +20,20 @@ For each user:
     - combine all info for each user, the info includes:
     ```u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,percent_weekend, percent_satMor, percent_night, group```
      - give a score to each variable and add them together to get the final score for each user 
- 
 
-## load data
+## Build package 
+``` devtools::build()```
+
+## Install package 
+```devtools:install()```
+
+## Load package 
+``` Ctrl/Cmd + Shift + L``` or ```devtools::load_all()```
+
+## Sample Testing
 ```{r}
 df <- fread(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
-home_filter <- var_expand(df)
+home_filter <- filtering(df)
 users <- c(1:nrow(home_filter))
 variable_values <- future_map(users, function(x) combine_values(home_filter, x)) 
 home_score <- future_map(variable_values, scoring)
@@ -33,6 +42,7 @@ users_home <- to_dataframe(home_score) %>%
     nest() %>% 
     mutate(homeloc = future_map_chr(data, home_extract)) %>% 
     select(-c(data))
+users_home
 ```
 
 

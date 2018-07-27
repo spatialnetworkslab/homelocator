@@ -114,7 +114,7 @@ para_value <- function(df_filter){
 #' unique_dayofweek, unique_hours,percent_weekend, percent_satMor, percent_night, group and replace na with 0
 #' 
 #' @inheritParams para_value
-#' @param num A number of left users
+#' @param num A number of users
 combine_values <- function(df_filter, num){
     para_values <- para_value(df_filter)
     df <- merge(para_values[num, ]$var_week[[1]][[1]], para_values[num, ]$var_satMor[[1]][[1]], by = "GEOID", all=TRUE) %>%
