@@ -12,14 +12,6 @@ home_extract_bycounts <- function(data){
 }
 
 
-
-
-
-# home_loc_bycounts <- home_filter %>%
-#     mutate(homeloc = future_map_chr(data, home_extract_bycounts)) %>%
-#     select(-c(data))
-
-
 #' Extract home by temporal variable score.
 #' 
 #' Estimate a user's home location according to the socre calculated by temporal varialbes. 
