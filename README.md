@@ -32,17 +32,9 @@ For each user:
 
 ## Sample Testing
 ```{r}
-df <- fread(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
-home_filter <- filtering(df)
-users <- c(1:nrow(home_filter))
-variable_values <- future_map(users, function(x) combine_values(home_filter, x)) 
-home_score <- future_map(variable_values, scoring)
-users_home <- to_dataframe(home_score) %>% 
-    group_by(u_id) %>% 
-    nest() %>% 
-    mutate(homeloc = future_map_chr(data, home_extract)) %>% 
-    select(-c(data))
-users_home
+df <- read_csv(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
+df %>% 
+  homeloc_filter(df)
 ```
 
 

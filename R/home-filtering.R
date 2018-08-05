@@ -21,24 +21,59 @@
 
 
 
-#' Filter scared data.
+#' Initial filter.
 #' 
-#' Kepp users have more than 20 tweets totally, and have more than 10 tweets, more than 10 unique days and more than 8 hours tweets in a tract record.
+#' Keep only users that meet certain preconditions.
 #' 
 #' 
-#' @param df_data A dataframe with census tract 
-home_filtering <- function(df_data) {
-    df_data %>% 
-        mutate(date = ymd_hms(created_at),
-               total_counts = n()) %>% 
-        filter(total_counts > 20) %>% 
-        group_by(GEOID) %>% 
-        mutate(counts = n(),
-               study_period = suppressWarnings(as.numeric(max(as.Date(created_at)) - min(as.Date(created_at)))),
-               unique_days = n_distinct(as.Date(date)),
-               unique_hours = n_distinct(hour(date))) %>% 
-        filter(counts > 10 & study_period > 10 & unique_days > 10 & unique_hours > 8) %>%
-        select(-c(created_at))
+#' @param df A dataframe with columns for the user id, location, timestamp
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+#' @param min_count_user Min. number of data points per user
+#' @param min_count_location Min. number of data points per user, per location
+#' @param min_period_length Min. number of days between first and last day user was active at location
+#' @param min_days Min. number of unique days user was active at location
+#' @param min_hours Min. number of unique hours user was active at location
+
+homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", min_count_user = 10,
+                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10) {
+  
+  if (!rlang::has_name(df, user)) {
+    stop("User column does not exist")
+  }
+  if (!rlang::has_name(df, timestamp)) {
+    stop("Timestamp column does not exist")
+  }
+  if (!rlang::has_name(df, location)) {
+    stop("Location column does not exist")
+  }
+  
+  user <- rlang::sym(user) 
+  timestamp <- rlang::sym(timestamp)
+  location <- rlang::sym(location)
+  
+  if (!is(df %>% pull(!!timestamp), "POSIXct")) {
+    stop("Timestamp is not of class POSIXct")
+  }
+  
+  unique_users <- df %>% pull(!!user) %>% n_distinct()
+  print(paste("Starting with", unique_users, "unique users"))
+  
+  df <- df %>%
+    group_by(!!user) %>% 
+    filter(n() > !!min_count_user) %>% 
+    group_by(!!location, !!user) %>%
+    filter(n() > !!min_count_location,
+           n_distinct(lubridate::hour(!!timestamp)) > !!min_hours,
+           n_distinct(as.Date(!!timestamp)) > !!min_days,
+           lubridate::as.period(max(!!timestamp) - min(!!timestamp), unit = "day") > !!min_period_length) %>% 
+    ungroup()
+  
+  unique_users <- df %>% pull(!!user) %>% n_distinct()
+  print(paste("After filtering,", unique_users, "unique users remain"))
+  
+  df
 }
 
 
