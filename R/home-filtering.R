@@ -37,7 +37,7 @@
 #' @param min_hours Min. number of unique hours user was active at location
 
 homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", min_count_user = 10,
-                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10) {
+                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10, keep_intermediate_vars = F) {
   
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
@@ -62,18 +62,28 @@ homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location
   
   df <- df %>%
     group_by(!!user) %>% 
-    filter(n() > !!min_count_user) %>% 
+    mutate(hl_count_user = n()) %>% 
+    filter(hl_count_user > !!min_count_user) %>% 
     group_by(!!location, !!user) %>%
-    filter(n() > !!min_count_location,
-           n_distinct(lubridate::hour(!!timestamp)) > !!min_hours,
-           n_distinct(as.Date(!!timestamp)) > !!min_days,
-           lubridate::as.period(max(!!timestamp) - min(!!timestamp), unit = "day") > !!min_period_length) %>% 
+    mutate(hl_count_location = n(),
+           hl_uniq_hours = n_distinct(lubridate::hour(!!timestamp)),
+           hl_uniq_days = n_distinct(as.Date(!!timestamp)),
+           hl_period_length = as.numeric(max(!!timestamp) - min(!!timestamp), "days")) %>% 
+    filter(hl_count_location > !!min_count_location,
+           hl_uniq_hours > !!min_hours,
+           hl_uniq_days > !!min_days,
+           hl_period_length > !!min_period_length) %>% 
     ungroup()
   
   unique_users <- df %>% pull(!!user) %>% n_distinct()
   print(paste("After filtering,", unique_users, "unique users remain"))
   
-  df
+  if (keep_intermediate_vars) {
+    df
+  } else {
+    df %>% 
+      select(-count_user, -count_location, -uniq_hours, -uniq_days, -period_length)
+  }
 }
 
 
