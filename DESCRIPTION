@@ -12,15 +12,8 @@ LazyData: true
 Depends:
     R (>= 3.1.0)
 Imports:
-    data.table,
-    dplyr,
-    Hmisc,
-    lubridate,
     magrittr,
-    sf,
-    tidycensus,
-    tidyverse,
-    tigris
+    dplyr
 Suggests:
     furrr,
     devtools,
