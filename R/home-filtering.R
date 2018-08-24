@@ -37,7 +37,7 @@
 #' @param min_hours Min. number of unique hours user was active at location
 
 homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", min_count_user = 10,
-                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10, keep_intermediate_vars = F) {
+                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10, keep_intermediate_vars = T) {
   
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
@@ -82,40 +82,47 @@ homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location
     df
   } else {
     df %>% 
-      select(-count_user, -count_location, -uniq_hours, -uniq_days, -period_length)
+      select(-hl_count_user, -hl_count_location, -hl_uniq_hours, -hl_uniq_days, -hl_period_length)
   }
 }
 
 
-#' Expand variables to dataset.
+#' Add new columns
 #' 
+#' Add new columns derived from timestamp column
 #' 
-#' Add "year, month, day, day of week, hour of day, week, daytimes, times and group columnes to dataset. 
-#' "year, month, day, day of week, hour of day, week, daytimes, times" are produced from timestamped variable,
-#' and group is produced from total tweets counts according to diffrent range.
-#' 
-#' @param df A dataframe with timestamped variable
-filtering <- function(df){
-    df %>% as_tibble() %>% select(c(u_id, created_at, GEOID)) %>% 
-        group_by(u_id) %>% 
-        nest() %>% 
-        mutate(data = future_map(data, home_filtering)) %>%
-        unnest() %>%
-        group_by(u_id) %>%
-        mutate(total_counts = n(),
-               year = year(date),
-               month = month(date),
-               day = day(date),
-               day_of_week = wday(date), # Sun is 1 and Sat is 7
-               hour_of_day = hour(date),
-               week = if_else(day_of_week %in% c(1, 7), 1, 2), ## 1 for weekend, 2 for weekday
-               times_numeric = hour(date) + minute(date) / 60 + second(date) / 3600,
-               daytimes = if_else(times_numeric >= 9 & times_numeric <= 18, 2, 1), # 1 for night time, 2 for work time
-               times = if_else(times_numeric >= 6 & times_numeric <= 12, 1, 2), # 1 for morning, 2 for afternoon and night
-               group = cut2(total_counts, c(0, 100, 1000, 2000, 3000, 4000, 5000, 10000, 15000, 25000))) %>%
-        select(-c(date, times_numeric)) %>% nest()
+#' @param df A dataframe with columns for the user id, location, timestamp
+#' @param timestamp Name of timestamp column. Should be POSIXct
+
+var_expand <- function(df, timestamp = "created_at", keep_intermediate_vars = F) {
+  
+  if (!rlang::has_name(df, timestamp)) {
+    stop("Timestamp column does not exist")
+  }
+  
+  timestamp <- rlang::sym(timestamp)
+  if (!is(df %>% pull(!!timestamp), "POSIXct")) {
+    stop("Timestamp is not of class POSIXct")
+  }
+  
+  initial_columns <- names(df)
+  print(paste("Start expanding new variables ..."))
+  
+  df <- df %>% 
+    mutate(hl_year = lubridate::year(!!timestamp), 
+           hl_month = lubridate::month(!!timestamp),
+           hl_day = lubridate::day(!!timestamp),
+           hl_day_of_week = lubridate::wday(!!timestamp), # Sun is 1 and Sat is 7
+           hl_hour_of_day = lubridate::hour(!!timestamp),
+           hl_week = if_else(hl_day_of_week %in% c(1,7), 1, 2),#1 for weekend, 2 for weekday
+           hl_times_numeric = lubridate::hour(!!timestamp) + lubridate::minute(!!timestamp) / 60 + lubridate::second(!!timestamp) / 3600,
+           hl_daytimes = if_else(hl_times_numeric >= 9 & hl_times_numeric <= 18, 2, 1), # 1 for night time, 2 for work time
+           hl_morning_time = if_else(hl_times_numeric >= 6 & hl_times_numeric <= 12, 1, 2)) %>%# 1 for morning, 2 for afternoon and night
+    select(-hl_times_numeric)
+  
+  after_expanded_columns <- names(df)
+  add_columns <- paste(dplyr::setdiff(after_expanded_columns, initial_columns), collapse = ", ")  
+  print(paste("Added new variables:", add_columns))
+  
+  df
 }
-
-
-
-
