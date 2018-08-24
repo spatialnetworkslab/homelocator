@@ -1,43 +1,51 @@
-#' Calculate week variable.
+#' Calculate hl_week variable.
 #' 
 #' 
-#' Calculate the percentage of weekday and weekend of each tract, throw away tract that only has tweets sent on 
-#' weekday and keep weekend percent value and store the result in a list.
+#' Calculate the percentage of weekday and weekend of each location, throw away location that only has tweets sent on 
+#' weekday and keep and store weekend percent value 
 #' 
-#' @param data A dataframe from a nested filtered dataframe
+#' @param data A dataframe with columns for the id, timestamp and new added variable columns from var_expand function
 calcu_week <- function(data){
-    data %>% 
-        group_by(GEOID, week) %>% 
-        summarise(counts = n()) %>%
-        mutate(percent_week = counts/sum(counts)) %>% 
-        group_by(GEOID) %>% 
-        mutate(week_type = n()) %>% 
-        filter(week_type == 2 | (week_type == 1 & week == 1)) %>% # remove tract only have weekday
-        filter(week == 1) %>% ## only keep weekend percent value 
-        select(GEOID, percent_week) %>% 
-        setNames(c("GEOID","percent_weekend")) %>% 
-        list()
+  data <- data %>% 
+              select(c(hl_week)) %>% 
+              group_by(hl_week) %>% 
+              summarise(hl_week_counts = n()) %>% 
+              mutate(hl_percent_week = hl_week_counts/sum(hl_week_counts),
+                     hl_week_type = n_distinct(hl_week)) %>% 
+              filter(hl_week_type == 2 | (hl_week_type == 1 & hl_week == 1)) %>% # remove tract only have weekday
+              filter(hl_week == 1) %>% ## only keep weekend percent value 
+              select(hl_percent_week) 
+  
+  if (plyr::empty(data)) {
+    data <- tibble::tibble(hl_percent_week = c(0))
+    data
+  } else {
+    data
+  }
 }
 
 
-#' Calculate Sat morning variable.
+#' Calculate Saturday Morning variable
 #' 
 #' 
-#' Calculate the percentage of tweets sent on Sat morning of each tract, filter tweets all sent in the morning first, 
-#' calculate the percentage of tweets sent all days of a week and only keep the percentage that sent on Sat and store 
-#' the result in a list. 
-#' 
+#' Calculate the percentage of tweets sent on Saturday morning of the location
 #' @inheritParams calcu_week
-calcu_satmor <- function(data){
-    data %>%
-        filter(times == 1) %>% ## tweets in the morning
-        group_by(GEOID, day_of_week) %>% 
-        summarise(counts = n()) %>% 
-        mutate(percent = counts/sum(counts)) %>% 
-        filter(day_of_week == 7) %>% ## tweets on Sat
-        select(GEOID, percent) %>% 
-        setNames(c("GEOID", "percent_satMor")) %>% 
-        list()
+calcu_sat_morning <- function(data){
+  data <- data %>% 
+            select(hl_day_of_week, hl_morning_time) %>% 
+            filter(hl_morning_time == 1) %>% 
+            group_by(hl_day_of_week) %>% 
+            summarise(hl_day_of_week_counts = n()) %>% 
+            mutate(hl_percent_satmorning = hl_day_of_week_counts/sum(hl_day_of_week_counts)) %>%
+            filter(hl_day_of_week == 7) %>% 
+            select(hl_percent_satmorning) 
+  
+  if (plyr::empty(data)) {
+    data <- tibble::tibble(hl_percent_satmorning = c(0))
+    data
+  } else {
+    data
+  }
 }
 
 
@@ -45,140 +53,110 @@ calcu_satmor <- function(data){
 #' 
 #' 
 #' Calculate the percentage of tweets sent on work time and night time of each tract, throw away tracts that percentage 
-#' of work time is larger than that of night time, only keep percentage of night time and store the result in a list.
-#' 
+#' of work time is larger than that of night time, keep and store the percentage of night time
 #' @inheritParams calcu_week
 calcu_daytimes <- function(data){
-    data %>% 
-        group_by(GEOID, daytimes) %>% 
-        summarise(counts = n()) %>% 
-        mutate(percent_daytime = counts/sum(counts)) %>% 
-        filter(daytimes == 1 & percent_daytime >= 0.5) %>% 
-        select(GEOID, percent_daytime) %>% 
-        setNames(c("GEOID","percent_night")) %>% 
-        list()
+    data <- data %>% 
+                select(hl_daytimes) %>%
+                group_by(hl_daytimes) %>% 
+                summarise(hl_daytimes_counts = n()) %>% 
+                mutate(hl_percent_daytimes = hl_daytimes_counts/sum(hl_daytimes_counts)) %>% 
+                filter(hl_daytimes == 1 & hl_percent_daytimes >= 0.5) %>% #tweets sent during night time is more than that during work time
+                select(hl_percent_daytimes)
+    
+    if (plyr::empty(data)) {
+      data <- tibble::tibble(hl_percent_daytimes = c(0))
+      data
+    } else {
+      data
+    }
+    
 }
+
 
 
 #' Calculate day variable.
 #' 
 #' 
-#' Calculate unique day of a week of each tract, and store the result in a list.
-#' 
+#' Calculate unique day of a week of the location
 #' @inheritParams calcu_week
 calcu_day <- function(data) {
     data %>% 
-        select(GEOID, day_of_week) %>% 
-        group_by(GEOID) %>% 
-        summarise(unique_dayofweek = n_distinct(day_of_week)) %>% 
-        list()
+        select(hl_day_of_week) %>% 
+        summarise(hl_unique_dayofweek = n_distinct(hl_day_of_week))
 }
+
 
 
 #' Calculate month variable.
 #' 
 #' 
 #' Calculate unique month of a year of each tract, and store the result in a list.
-#' 
 #' @inheritParams calcu_week
 calcu_month <- function(data) {
     data %>% 
-        select(GEOID, month) %>% 
-        group_by(GEOID) %>% 
-        summarise(unique_months = n_distinct(month)) %>% 
-        list()
+      select(hl_month) %>% 
+      summarise(hl_unique_months = n_distinct(hl_month))
 }
 
 
-#' Gather temporal variables' results.
-#' 
-#' 
-#' Gather resutls get from funciton: calcu_week, calcu_satmor, calcu_daytimes, calcu_day, calcu_day, calcu_month 
-#' and delete data dataframe 
-#' 
-#' @param df_filter A nested dataframe from filtering step
-para_value <- function(df_filter){
-    df_filter %>%
-        mutate(var_week = future_map(data, calcu_week),
-            var_satMor = future_map(data, calcu_satmor),
-            var_daytimes = future_map(data, calcu_daytimes),
-            var_day = future_map(data, calcu_day),
-            var_month = future_map(data, calcu_month)) %>%
-        select(-c(data))
-}
 
-#' Combine all info for each user.
+#' Combine variables for each user of each location
 #' 
 #' 
-#' Combine all info for each user including: u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, 
-#' unique_dayofweek, unique_hours,percent_weekend, percent_satMor, percent_night, group and replace na with 0
-#' 
-#' @inheritParams para_value
-#' @param num A number of users
-combine_values <- function(df_filter, num){
-    para_values <- para_value(df_filter)
-    df <- merge(para_values[num, ]$var_week[[1]][[1]], para_values[num, ]$var_satMor[[1]][[1]], by = "GEOID", all=TRUE) %>%
-        merge(., para_values[num, ]$var_daytimes[[1]][[1]], by = "GEOID", all=TRUE) %>%
-        merge(., para_values[num, ]$var_day[[1]][[1]], by = "GEOID", all=TRUE) %>%
-        merge(., para_values[num, ]$var_month[[1]][[1]], by = "GEOID", all=TRUE)
-    df <- df %>%
-        mutate(u_id = rep(para_values$u_id[num], nrow(df)))  ## add user id
-    df_2 <- subset(df_filter, df_filter$u_id == para_values$u_id[num]) %>% select(c(data)) %>% unnest() %>%
-        select(c(GEOID, total_counts, counts, study_period, unique_days, unique_hours, group)) %>% unique() ## add other info
-    suppressMessages(left_join(df,df_2)) %>%
-        select(c(u_id, GEOID, total_counts, counts, study_period, unique_days, unique_months, unique_dayofweek, unique_hours,
-                 percent_weekend, percent_satMor, percent_night, group)) %>% ## order the variable
-        replace(., is.na(.), 0) ## replace na with 0
+#' @param df A dataframe with columns for the user id, location, timestamp
+
+combine_variables <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID"){
+  if (!rlang::has_name(df, user)) {
+    stop("User column does not exist")
+  }
+  if (!rlang::has_name(df, location)) {
+    stop("Location column does not exist")
+  }
+  
+  user <- rlang::sym(user) 
+  location <- rlang::sym(location)
+  
+  df_sub <- df %>% 
+    select(!!user, !!location, hl_count_location, hl_uniq_hours, hl_uniq_days, hl_period_length) %>% 
+    unique()
+  df_variables <- df %>% 
+    group_by(!!user, !!location) %>% 
+    tidyr::nest() %>% 
+    mutate(var_1 = furrr::future_map(data, calcu_week),
+           var_2 = furrr::future_map(data, calcu_sat_morning),
+           var_3 = furrr::future_map(data, calcu_daytimes),
+           var_4 = furrr::future_map(data, calcu_day),
+           var_5 = furrr::future_map(data, calcu_month)) %>% 
+    select(-data) %>% unnest()
+  left_join(df_sub, df_variables)
 }
 
 
-#' Give a score to each tract for each user.
+
+#' Give a score to each location
 #' 
 #' 
 #' Give a 0-1 range score to each variable and add up them to get a final score for each tract, order the tracts 
 #' according to the score. 
 #' 
 #' @param df_result A dataframe combined all user info
-scoring <- function(df_result) {
-    scores <- df_result %>% 
-        transmute(u_id = u_id,
-                  GEOID = GEOID,
-                  score_counts = counts/max(counts),
-                  score_study_period = as.numeric(study_period)/max(as.numeric(study_period)),
-                  score_unique_days = unique_days/max(unique_days),
-                  score_months = unique_months/12,
-                  score_unique_dayofweek = unique_dayofweek/7,
-                  score_hours = unique_hours/max(unique_hours),
-                  score_percent_weekend = ifelse(max(percent_weekend) == 0, 0, percent_weekend/max(percent_weekend)),
-                  score_percent_satMor = ifelse(max(percent_satMor) == 0, 0, percent_satMor/max(percent_satMor)),
-                  score_percent_night = ifelse(max(percent_night) == 0, 0, percent_night/max(percent_night))) %>% 
-        group_by(u_id, GEOID) %>% 
-        summarise(score = sum(score_counts,score_study_period,score_unique_days,score_months,score_unique_dayofweek,
-                              score_hours,score_percent_weekend,score_percent_satMor,score_percent_night)) 
-    scores <- suppressMessages(left_join(df_result, scores)) %>% arrange(desc(score))
-    scores
-}
-
-
-#' Convert list to dataframe.
-#' 
-#' Convert list resutls to a dataframe and nest it by user id. 
-#
-#' 
-#' @param list_df A list results 
-to_dataframe <- function(list_df) {
-    df_total <- data_frame()
-    for (i in list_df){
-        df <- i
-        df_total <- bind_rows(df_total, df)
-    }
-    return(df_total)
+scoring <- function(data) {
+    data %>% 
+    transmute(hl_score_count_location = hl_count_location/max(hl_count_location),
+      hl_score_uniq_hours = hl_uniq_hours/max(hl_uniq_hours),
+      hl_score_uniq_days = hl_uniq_days/max(hl_uniq_days),
+      hl_score_period_length = as.numeric(hl_period_length)/max(as.numeric(hl_period_length)),
+      hl_score_percent_week = hl_percent_week,
+      hl_score_percent_satmorning = hl_percent_satmorning,
+      hl_score_percent_daytimes = hl_percent_daytimes,
+      hl_score_unique_dayofweek = hl_unique_dayofweek/7,
+      hl_score_unique_months = hl_unique_months/12)
 }
 
 
 
-
-
+  
     
 
 
