@@ -34,7 +34,10 @@ For each user:
 ```{r}
 df <- read_csv(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
 df %>% 
-  homeloc_filter(df)
+  homeloc_filter() %>% 
+  homeloc_valuate() %>% 
+  homeloc_score() %>% 
+  homeloc_extract()
 ```
 
 
