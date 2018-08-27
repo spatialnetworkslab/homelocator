@@ -63,17 +63,18 @@ homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location
   df <- df %>%
     group_by(!!user) %>% 
     mutate(hl_count_user = n()) %>% 
+    ungroup() %>%
     filter(hl_count_user > !!min_count_user) %>% 
     group_by(!!location, !!user) %>%
     mutate(hl_count_location = n(),
            hl_uniq_hours = n_distinct(lubridate::hour(!!timestamp)),
            hl_uniq_days = n_distinct(as.Date(!!timestamp)),
            hl_period_length = as.numeric(max(!!timestamp) - min(!!timestamp), "days")) %>% 
+    ungroup() %>% 
     filter(hl_count_location > !!min_count_location,
            hl_uniq_hours > !!min_hours,
            hl_uniq_days > !!min_days,
-           hl_period_length > !!min_period_length) %>% 
-    ungroup()
+           hl_period_length > !!min_period_length) 
   
   unique_users <- df %>% pull(!!user) %>% n_distinct()
   print(paste("After filtering,", unique_users, "unique users remain"))
