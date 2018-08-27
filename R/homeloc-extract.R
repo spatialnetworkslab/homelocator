@@ -31,11 +31,13 @@ homeloc_extract <- function(df, user = "u_id", location = "GEOID"){
   user <- rlang::sym(user) 
   location <- rlang::sym(location)
   
+  print(paste("Start extracting home location ..."))
   df %>% 
     group_by(!!user) %>% 
     tidyr::nest() %>% 
     mutate(homeloc = furrr::future_map_chr(data, pull_homeloc)) %>% 
-    select(-data)
+    select(-data) %>% 
+    ungroup()
 }
 
 
