@@ -144,81 +144,16 @@ homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", locatio
   
   
   print(paste("Start valuating variables ..."))
-  df_sub <- df %>% 
-    select(!!user, !!location, hl_count_location, hl_uniq_hours, hl_uniq_days, hl_period_length) %>% 
-    unique()
-  df_variables <- df %>% 
-    group_by(!!user, !!location) %>% 
+  df %>% 
+    group_by(!!user, !!location, hl_count_location, hl_uniq_hours, hl_uniq_days, hl_period_length) %>% 
     tidyr::nest() %>% 
-    mutate(var_1 = furrr::future_map(data, calcu_week),
+    mutate( 
+      var_1 = furrr::future_map(data, calcu_week),
       var_2 = furrr::future_map(data, calcu_sat_morning),
       var_3 = furrr::future_map(data, calcu_daytimes),
       var_4 = furrr::future_map(data, calcu_day),
       var_5 = furrr::future_map(data, calcu_month)) %>% 
+    ungroup() %>% 
     select(-data) %>% 
     tidyr::unnest()
-  
-  values <- left_join(df_sub, df_variables)
-  print(paste("Variables valuating done!!!"))
-  values
 }
-
-
-#' Calculate score of variable 
-#' 
-#' 
-#' Give a 0-1 range score to each variable and add up them to get a final score for each tract, order the tracts 
-#' according to the score. 
-#' 
-#' @param data A dataframe with columns for location, hl_count_location, hl_uniq_hours, hl_uniq_days, hl_period_length, hl_percent_week, hl_percent_satmorning, 
-#' hl_percent_daytimes, hl_unique_dayofweek and hl_unique_months
-
-calcu_scores <- function(data, location = "GEOID"){
-  if (!rlang::has_name(df, location)) {
-    stop("Location column does not exist")
-  }
-  location <- rlang::sym(location)
-  
-  data %>% 
-    transmute(GEOID = !!location,
-      hl_score_count_location = hl_count_location/max(hl_count_location),
-      hl_score_uniq_hours = hl_uniq_hours/24,
-      hl_score_uniq_days = hl_uniq_days/max(hl_uniq_days),
-      hl_score_period_length = as.numeric(hl_period_length)/max(as.numeric(hl_period_length)),
-      hl_score_percent_week = hl_percent_week,
-      hl_score_percent_satmorning = hl_percent_satmorning,
-      hl_score_percent_daytimes = hl_percent_daytimes,
-      hl_score_unique_dayofweek = hl_unique_dayofweek/7,
-      hl_score_unique_months = hl_unique_months/12) %>% 
-    transform(., hl_score = rowSums(.[ , -1]) ) 
-}
-
-
-#' Add score to users
-#' 
-#' 
-#' @param df A dataframe with columns for the user id, location, timestamp
-homeloc_score <- function(df,  user = "u_id") {
-  if (!rlang::has_name(df, user)) {
-    stop("User column does not exist")
-  }
-  user <- rlang::sym(user) 
-  df %>% 
-    group_by(!!user) %>% 
-    tidyr::nest() %>% 
-    mutate(scores = furrr::future_map(data, calcu_scores)) %>% 
-    select(-data) %>%
-    unnest()
-}
-    
-
-
-
-
-
-
-
-
-
-
-
