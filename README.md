@@ -4,7 +4,7 @@ User's locations are important to many applications such as event detection, epi
 
 ## Main functions 
 - `homeloc_filter`: Keep only users that meet certain preconditions
-- `homeloc_valuate`: Add and valuate new variables derived from timestamp varimultipleable   
+- `homeloc_valuate`: Add and valuate new variables derived from timestamp variable   
 - `homeloc_score`: Give a weight and score to each location based on the valuating results of multiple variables
 - `homeloc_extract`: Extract the location with the highest score and treat it as the user's home location
 
