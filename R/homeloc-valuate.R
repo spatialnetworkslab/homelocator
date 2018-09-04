@@ -104,6 +104,10 @@ calcu_month <- function(data) {
 #' 
 #' 
 #' @param df A dataframe with columns for the user id, location, timestamp
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+
 homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID"){
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
