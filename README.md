@@ -29,6 +29,10 @@ df %>%
 ```
 
 ## Other algorithms for home location estimation
+### Based on passive positioning data
+- [Rein Ahas et al.]: to develop and to test the model for determining meaningful locations of mobile phone users as locations of homes and work-places using passive mobile positioning data and anchor point model. Passive mobile positioning data is secondary data concerning the location of call activities or handovers in network cells that is automatically stored in the memory of service providers.
+- [Pilleriine Kamenjuk et al.]: mapping changes of residence using data from passive mobile positioning and an anchor point model to better understanding long-term mobility. The study concludes that the modst important considerations in monitoring change of residence using passive mobile position data include the continuity of the time-series data, the varing structure of the mobile tower network and the diversified nature of human mobility. 
+
 ### Based on social network 
 - [Shiori Hironaka et al.]: Analyze the function of network-based home location estimation with iteration while using the social network based on following relationship on Twitter
   - **Spatial Label Propagation (SLP)**: a way of applying the home location estimation method using the labels of the adjacent nodes iteratively
