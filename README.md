@@ -34,10 +34,8 @@ df %>%
 
 - [Efstathiades et al.2015]: proposed an approach to infer the precise home location of a Twitter user by taking the most popular location of that user's geo-tagged tweets during the so-called "Rest" and "Leisure" timeframes. Noticing that tweets generated during the Rest timeframe are more likely sent from home than those during the Leisure timeframe, they increased the popularity of a place if the tweet was generated during Rest time by assigning a higher weight value.
 
-- [Zheng et al. 2015]: proposed an approach for predicting a Flickr user’s geo-point home location based on the temporal features and visual features of that user’s photo collections. 
-
-### Based on passive positioning data
 - [Rein Ahas et al.]: to develop and to test the model for determining meaningful locations of mobile phone users as locations of homes and work-places using passive mobile positioning data and anchor point model. Passive mobile positioning data is secondary data concerning the location of call activities or handovers in network cells that is automatically stored in the memory of service providers.
+
 - [Pilleriine Kamenjuk et al.]: mapping changes of residence using data from passive mobile positioning and an anchor point model to better understanding long-term mobility. The study concludes that the modst important considerations in monitoring change of residence using passive mobile position data include the continuity of the time-series data, the varing structure of the mobile tower network and the diversified nature of human mobility. 
 
 ### Based on social network 
