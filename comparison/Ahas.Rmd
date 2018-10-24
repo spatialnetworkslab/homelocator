@@ -1,0 +1,121 @@
+---
+title: "Ahas Method"
+author: "Chen Qinqqing"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4  
+    number_sections: true  
+    theme: united  
+    highlight: tango  
+    toc_float: true   
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r load_library}
+library(tidyverse)
+library(magrittr)
+library(sf)
+library(lubridate)
+library(furrr)
+library(gridExtra)
+```
+
+
+```{r load_data}
+df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") 
+df_sub <- df %>% 
+  select(id, u_id, created_at, GEOID, text) %>% 
+  mutate(year = year(created_at), 
+         month = month(created_at),
+         day = day(created_at)) 
+head(df_sub)
+#initialy, there are 95285 users 
+```
+
+```{r step1}
+# determing points of regular cells and separating them from random cells
+## Regular cells-network cells: regularly visited by one person and from which the person has made calls on at least two different days a month, in our case, the cell treat as GEOID/location, the user should has sent tweets on at least two differnt days a month
+## Random cells- a netwok cell: from which the one respondent has made calls on only one day a month
+df_step1 <- df_sub %>% 
+  group_by(u_id, GEOID, year, month, day) %>% 
+  mutate(day_counts = n()) %>% 
+  group_by(u_id, GEOID, year, month) %>% 
+  mutate(n_day = n_distinct(day)) %>% 
+  ungroup() 
+
+regular_cells <- df_step1 %>% filter(n_day >= 2) # left 33399 users 
+random_cells <- df_step1 %>% filter(n_day < 2)
+```
+
+
+```{r step_2_too_low}
+#removal of IDs with Too High or Too low a Number of Calls Made
+# remove scared data (too low) 
+df_step2 <- regular_cells %>% 
+  group_by(u_id) %>% 
+  mutate(hl_count_user = n()) %>% 
+  ungroup() %>%
+  filter(hl_count_user > 10) %>% 
+  group_by(GEOID, u_id) %>%
+  mutate(hl_count_location = n()) %>% 
+  ungroup() %>% 
+  filter(hl_count_location > 10) 
+
+p1 <- df_step2 %>% 
+  group_by(u_id) %>% 
+  summarise(count = n()) %>% 
+  ggplot(.) + 
+  geom_boxplot(aes(x=u_id,y=count))
+p2 <- df_step2 %>% 
+  group_by(u_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count < 100) %>% 
+  ggplot(.) + 
+  geom_boxplot(aes(x=u_id,y=count))
+p3 <- df_step2 %>% 
+  group_by(u_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count < 500) %>% 
+  ggplot(.) + 
+  geom_bar(aes(count))
+grid.arrange(p1, p2,  p3,                              
+             ncol = 3, nrow = 1)
+```
+
+
+```{r step_2_too_high}
+#potential twitter bots
+bots <- regular_cells %>% 
+  group_by(u_id) %>% 
+  summarise(count = n()) %>% 
+  filter(count > 10000)
+
+# remove tweeter bot (too high)
+df_step2 <- df_step2 %>% filter(!u_id %in% bots$u_id) 
+df_step2_2 <- df_step2 %>% group_by(u_id) %>% mutate(counts = n())
+```
+
+
+```{r step3}
+#determing home and work-time Anchor Points: the two regular locations that had the highest number of days with tweets are selected for the calculation of home and work-time anchor points, and the rest are moved directly to the last stages of the model, where they are called seconday anchor points.
+df_step3  
+```
+
+
+
+
+
+
+
+
+
+
+
