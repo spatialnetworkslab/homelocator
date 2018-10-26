@@ -32,7 +32,7 @@ library(gridExtra)
 ```{r load_data}
 df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") 
 df_sub <- df %>% 
-  select(id, u_id, created_at, GEOID, text) %>% 
+  select(id, u_id, created_at, GEOID, text, screen_name) %>% 
   mutate(year = year(created_at), 
          month = month(created_at),
          day = day(created_at)) 
@@ -96,11 +96,17 @@ grid.arrange(p1, p2,  p3,
 bots <- regular_cells %>% 
   group_by(u_id) %>% 
   summarise(count = n()) %>% 
-  filter(count > 10000)
+  filter(count > 5000)   ##check users that has more than 5000 tweets 
+
+# check the user in a tweet bot detection app at: https://mikewk.shinyapps.io/botornot/
+potential_bots <- c("26266228","38553409","72076297","82637881","100008156","120647835","149017440","263529400","562979837","703914774","1833989910") # those users has high probability of bot return from the app
+
+uncertain_bots <- c("16264556","26790952","29145089","30894293","34748983","36498067","50685688","61536577","84020475","99353885","138271743","147287273","160390792","174782657","185370576","230799648","259550589","270164716","297144273","304403844","312988287","321823108","325230775","325877236","349345240","353333411","368368977","378323603","393736478","398344465","476940916","711882464") # those users has low probability of bot return from the app 
+unknown <- c("45406258", "287966483","289054915","318647970", "404843921","497192859", "612908575") # those users cannot be found in the app, so need to look into by person
+# after these, we can remove thoses potential bots (dirty data) from the dataset
 
 # remove tweeter bot (too high)
-df_step2 <- df_step2 %>% filter(!u_id %in% bots$u_id) 
-df_step2_2 <- df_step2 %>% group_by(u_id) %>% mutate(counts = n())
+df_step2 <- df_step2 %>% filter(!u_id %in% potential_bots) # after step 2, there are 16604 users remained. 
 ```
 
 
