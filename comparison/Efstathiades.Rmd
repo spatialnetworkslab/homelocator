@@ -1,0 +1,190 @@
+---
+title: "Efstathiades Method"
+author: "Chen Qinqqing"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4  
+    number_sections: true  
+    theme: united  
+    highlight: tango  
+    toc_float: true   
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r load_library, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(sf)
+library(lubridate)
+library(furrr)
+library(gridExtra)
+```
+
+# Load data
+```{r load_data, message=FALSE, warning=FALSE}
+df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") 
+#df_full <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington_tweets_2012_2018.csv")
+df_sub <- df %>% 
+  select(id, u_id, created_at, GEOID) %>% 
+  mutate(year = year(created_at), 
+         month = month(created_at),
+         day = day(created_at),
+         day_of_week = wday(created_at, label = TRUE, abbr = TRUE),
+         hour_of_day = hour(created_at), 
+         time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active time", "Leisure time"))) 
+head(df_sub)
+#initialy, there are 95285 users 
+```
+
+# Date cleanning 
+- keep only users that have least one geo-tagged tweet from the three areas of interest
+- Remove potential tweets bots
+```{r data_cleanning, message=FALSE, warning=FALSE}
+# keep only users that have least one geo-tagged tweet from the three areas of interest
+df_clean_1 <- df_sub %>% 
+  group_by(u_id) %>% 
+  mutate(n_geoid = n_distinct(GEOID)) %>% 
+  filter(n_geoid >= 3) %>% 
+  ungroup() # there are 35134 users left (36.87%)
+
+# check the user in a tweet bot detection app at: https://mikewk.shinyapps.io/botornot/
+potential_bots <- c("26266228","38553409","72076297","82637881","100008156","120647835","149017440","263529400","562979837","703914774","1833989910") # those users has high probability of bot return from the app
+# remove tweets bots 
+df_clean_2 <- df_clean_1 %>% 
+  filter(!u_id %in% potential_bots) #there are 35123 users left (36.86%)
+```
+
+- Tweets sent during different hours of the day by different day of week 
+```{r tweets_visual_overtime, message=FALSE, warning=FALSE}
+levels <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23)
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+df_clean_2 %>% 
+  group_by(day_of_week, hour_of_day) %>% 
+  summarise(n_tweets = n()) %>% 
+  group_by(day_of_week) %>% 
+  mutate(total_tweets = sum(n_tweets), 
+         freq = n_tweets/total_tweets) %>% 
+  ungroup() %>% 
+  ggplot(., aes(x=hour_of_day, y = freq, color = day_of_week)) +
+  geom_line() + 
+  geom_point() +
+  scale_x_continuous(breaks = 0:23, labels = levels) +
+  scale_colour_manual(values=cbPalette) + 
+  geom_vline(xintercept = 2, linetype="dotted") + 
+  geom_text(aes(x = 0.5, y=0.075,  label="Leisure"), colour="black") + 
+  geom_vline(xintercept = 8, linetype="dotted") + 
+  geom_text(aes(x = 5, y=0.075,  label="Rest"), colour="black") + 
+  geom_vline(xintercept = 19, linetype="dotted") + 
+  geom_text(aes(x = 13, y=0.075,  label="Active"), colour="black") + 
+  geom_text(aes(x = 21.5, y=0.075,  label="Leisure"), colour="black") + 
+  theme(legend.position = c(0.9, 0.3),
+        panel.background = element_blank(),
+        axis.line = element_line("black")) + 
+  labs(
+    x = "Hours of the day", 
+    y = "Tweet Frequency", 
+    color = "Days"
+  )
+```
+
+- Remove weekend activity
+```{r ignore_weekend_activity, message=FALSE, warning=FALSE}
+#from the plot above we can observe a slight shift in the tweeting activity of the users during weekends, as comapred to weekdays. Due to the observation, we decide to ignore weekend activity when searching for the user's home and work location.
+df_clean_3 <- df_clean_2 %>% 
+  filter(!day_of_week %in% c("Sun", "Sat"))  # there are 32600 users left (34.21%)
+head(df_clean_3)
+```
+
+# Key location identification model 
+## Work location 
+```{r work_location, message=FALSE, warning=FALSE}
+# split the cleaned dataset into three subset according to the time frame 
+df_rest <- df_clean_3 %>% filter(time_frame == "Rest time")
+df_active <- df_clean_3 %>% filter(time_frame == "Active time")
+df_leisure <- df_clean_3 %>% filter(time_frame == "Leisure time")
+
+# estimate the HOME and WORK locations of the user by finding the most "POPULAR" location during "non-working" (rest tiem & leisure time) and "working" (active) hours, respectively
+## Work location: calculates the most popular place, in number of unique days, among all the places the user tweeted during the Active timeframe 
+extract_home <- function(data){
+  data %>%
+  mutate(GEOID = as.character(GEOID)) %>% 
+  group_by(GEOID) %>% 
+  summarise(counts = n()) %>% 
+  top_n(n=1, wt = counts) %>% 
+  slice(1) %>% 
+  pull(GEOID) 
+}
+
+work_loc <- df_active %>% 
+  group_by(u_id) %>% 
+  nest() %>% 
+  mutate(work_loc = future_map(data, extract_home)) %>% 
+  select(-data) %>% 
+  ungroup()
+head(work_loc)
+```
+
+## Home location 
+```{r home_location, message=FALSE, warning=FALSE}
+## Home location: calculates the most popular place, in number of unique days, among all the places the user tweeted during both the rest time and leisure timeframe; And users tweet from Home with higher probability during rest time, so apply a different weight Wr to the popularity of a place if the tweet is included in rest time, and Wl if the tweet is included in Leisute time; calculate the weights by estimating the average, amongst all users, fraction of tweets from the home location over the total number of tweets during the two different timeframes.
+weight_rest <- mean(0.744, 0.735, 0.737)
+weight_leisure <- mean(0.362, 0.357, 0.354)
+user_rest <- df_rest$u_id  #users in rest time dataframe 
+user_leisure <- df_leisure$u_id # users in leisure time dataframe
+# user_leisure covers user_rest, which means there are others users in user_leisure that only have leisure time 
+user_onlyhave_leisure <- setdiff(user_leisure, user_rest)
+
+
+# get new subset of users that have both rest time and leisure time 
+df_rest_leisure <- df_clean_3 %>% 
+  filter(u_id %in% df_rest$u_id) %>% 
+  filter(time_frame != "Active time")
+
+
+test <- df_rest_leisure %>% 
+  group_by(u_id) %>% 
+  nest()
+
+
+# dd %>% 
+#   mutate(GEOID = as.character(GEOID)) %>% 
+#   unite(unique_day, year, month, day, sep = "-") %>% 
+#   group_by(GEOID, unique_day) %>% 
+#   summarise(counts = n()) %>% 
+#   mutate(weighted_counts = weight_rest*counts) %>% 
+#   group_by(GEOID) %>% 
+#   summarise(weighted_counts_sum = sum(weighted_counts))
+# 
+# df_clean_3 %>% filter(u_id %in% setdiff(user_leisure, user_rest)) %>% pull(., time_frame) %>% unique()
+# df_clean_3 %>% filter(u_id %in% user_rest) %>% pull(., time_frame) %>% unique()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
