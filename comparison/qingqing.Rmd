@@ -1,0 +1,48 @@
+---
+title: "Homelocator Method"
+author: "Chen Qinqqing"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4  
+    number_sections: true  
+    theme: united  
+    highlight: tango  
+    toc_float: true   
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r load_library}
+library(homelocator)
+```
+
+```{r load_data}
+df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") 
+df <- df %>% select(c(id, u_id, created_at, GEOID))
+head(df)
+```
+
+```{r data_filtering}
+df_filtered <- df %>% homeloc_filter()
+```
+
+```{r data_valuate}
+df_valuate <- df_filtered %>% homeloc_valuate()
+```
+
+```{r data_score}
+df_score <- df_valuate %>% homeloc_score()
+```
+
+```{r home_extract}
+home_loc <- df_score %>% homeloc_extract()
+head(home_loc)
+```
+
