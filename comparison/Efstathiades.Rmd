@@ -39,7 +39,7 @@ df_sub <- df %>%
          day = day(created_at),
          day_of_week = wday(created_at, label = TRUE, abbr = TRUE),
          hour_of_day = hour(created_at), 
-         time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active time", "Leisure time"))) 
+         time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest_time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active_time", "Leisure_time"))) 
 head(df_sub)
 #initialy, there are 95285 users 
 ```
@@ -107,9 +107,9 @@ head(df_clean_3)
 ## Work location 
 ```{r work_location, message=FALSE, warning=FALSE}
 # split the cleaned dataset into three subset according to the time frame 
-df_rest <- df_clean_3 %>% filter(time_frame == "Rest time")
-df_active <- df_clean_3 %>% filter(time_frame == "Active time")
-df_leisure <- df_clean_3 %>% filter(time_frame == "Leisure time")
+df_rest <- df_clean_3 %>% filter(time_frame == "Rest_time")
+df_active <- df_clean_3 %>% filter(time_frame == "Active_time")
+df_leisure <- df_clean_3 %>% filter(time_frame == "Leisure_time")
 
 # estimate the HOME and WORK locations of the user by finding the most "POPULAR" location during "non-working" (rest tiem & leisure time) and "working" (active) hours, respectively
 ## Work location: calculates the most popular place, in number of unique days, among all the places the user tweeted during the Active timeframe 
@@ -118,6 +118,7 @@ extract_home <- function(data){
   mutate(GEOID = as.character(GEOID)) %>% 
   group_by(GEOID) %>% 
   summarise(counts = n()) %>% 
+  ungroup() %>% 
   top_n(n=1, wt = counts) %>% 
   slice(1) %>% 
   pull(GEOID) 
@@ -128,7 +129,8 @@ work_loc <- df_active %>%
   nest() %>% 
   mutate(work_loc = future_map(data, extract_home)) %>% 
   select(-data) %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(work_loc = unlist(work_loc))
 head(work_loc)
 ```
 
@@ -137,34 +139,35 @@ head(work_loc)
 ## Home location: calculates the most popular place, in number of unique days, among all the places the user tweeted during both the rest time and leisure timeframe; And users tweet from Home with higher probability during rest time, so apply a different weight Wr to the popularity of a place if the tweet is included in rest time, and Wl if the tweet is included in Leisute time; calculate the weights by estimating the average, amongst all users, fraction of tweets from the home location over the total number of tweets during the two different timeframes.
 weight_rest <- mean(0.744, 0.735, 0.737)
 weight_leisure <- mean(0.362, 0.357, 0.354)
-user_rest <- df_rest$u_id  #users in rest time dataframe 
-user_leisure <- df_leisure$u_id # users in leisure time dataframe
-# user_leisure covers user_rest, which means there are others users in user_leisure that only have leisure time 
-user_onlyhave_leisure <- setdiff(user_leisure, user_rest)
+
+df_rest_leisure <- df_clean_3 %>% filter(time_frame != "Active_time") %>% 
+  unite(unique_day, year, month, day, sep = "-") %>% 
+  group_by(u_id, GEOID, unique_day, time_frame) %>% 
+  summarise(counts = n()) %>% 
+  ungroup() %>% 
+  spread(time_frame, counts) %>% 
+  replace(., is.na(.), 0)
 
 
-# get new subset of users that have both rest time and leisure time 
-df_rest_leisure <- df_clean_3 %>% 
-  filter(u_id %in% df_rest$u_id) %>% 
-  filter(time_frame != "Active time")
-
-
-test <- df_rest_leisure %>% 
+extract_home <- function(data){
+  data %>% 
+    mutate(weighted_counts = weight_rest * Rest_time + weight_leisure * Leisure_time,
+           GEOID = as.character(GEOID)) %>% 
+    group_by(GEOID) %>% 
+    summarise(sums = sum(weighted_counts)) %>% 
+    ungroup() %>% 
+    top_n(n=1, wt=sums) %>% 
+    slice(1) %>% 
+    pull(GEOID)
+}
+home_loc <- df_rest_leisure %>% 
   group_by(u_id) %>% 
-  nest()
-
-
-# dd %>% 
-#   mutate(GEOID = as.character(GEOID)) %>% 
-#   unite(unique_day, year, month, day, sep = "-") %>% 
-#   group_by(GEOID, unique_day) %>% 
-#   summarise(counts = n()) %>% 
-#   mutate(weighted_counts = weight_rest*counts) %>% 
-#   group_by(GEOID) %>% 
-#   summarise(weighted_counts_sum = sum(weighted_counts))
-# 
-# df_clean_3 %>% filter(u_id %in% setdiff(user_leisure, user_rest)) %>% pull(., time_frame) %>% unique()
-# df_clean_3 %>% filter(u_id %in% user_rest) %>% pull(., time_frame) %>% unique()
+  nest() %>% 
+  mutate(home_loc = future_map(data, extract_home)) %>% 
+  select(-data) %>% 
+  ungroup() %>% 
+  mutate(home_loc = unlist(home_loc))
+head(home_loc)
 ```
 
 
