@@ -35,14 +35,15 @@ df_sub <- df %>%
   select(id, u_id, created_at, GEOID, text, screen_name) %>% 
   mutate(year = year(created_at), 
          month = month(created_at),
-         day = day(created_at)) 
+         day = day(created_at), 
+         GEOID = as.character(GEOID)) 
 head(df_sub)
 #initialy, there are 95285 users 
 ```
 
-```{r step1}
+```{r step1, message=FALSE, warning=FALSE}
 # determing points of regular cells and separating them from random cells
-## Regular cells-network cells: regularly visited by one person and from which the person has made calls on at least two different days a month, in our case, the cell treat as GEOID/location, the user should has sent tweets on at least two differnt days a month
+## Regular cells-network cells: regularly visited by one person and from which the person has made calls on at least two different days a month, in our case, the cell treat as GEOID/location, the user should has sent tweets on the location at least two differnt days a month
 ## Random cells- a netwok cell: from which the one respondent has made calls on only one day a month
 df_step1 <- df_sub %>% 
   group_by(u_id, GEOID, year, month, day) %>% 
@@ -51,68 +52,101 @@ df_step1 <- df_sub %>%
   mutate(n_day = n_distinct(day)) %>% 
   ungroup() 
 
-regular_cells <- df_step1 %>% filter(n_day >= 2) # left 33399 users 
+regular_cells <- df_step1 %>% filter(n_day >= 2) # the number of users decreases from 95285 to 33399  (3904743tweets)
 random_cells <- df_step1 %>% filter(n_day < 2)
 ```
 
 
-```{r step_2_too_low}
-#removal of IDs with Too High or Too low a Number of Calls Made
-# remove scared data (too low) 
+```{r step2_toolow, message=FALSE, warning=FALSE}
+#Regular cells are sorted by the number of days with calls, and if days overlap, by the number of calls. Here we sorted by the number of days with tweets, and if days overlap, by the number of tweets. 
+options(future.globals.maxSize= 1073741824)
 df_step2 <- regular_cells %>% 
-  group_by(u_id) %>% 
-  mutate(hl_count_user = n()) %>% 
-  ungroup() %>%
-  filter(hl_count_user > 10) %>% 
-  group_by(GEOID, u_id) %>%
-  mutate(hl_count_location = n()) %>% 
+  group_by(u_id, GEOID, year, month) %>% 
+  mutate(month_counts = n()) %>% 
   ungroup() %>% 
-  filter(hl_count_location > 10) 
+  group_by(u_id) %>% 
+  nest()
 
-p1 <- df_step2 %>% 
-  group_by(u_id) %>% 
-  summarise(count = n()) %>% 
-  ggplot(.) + 
-  geom_boxplot(aes(x=u_id,y=count))
-p2 <- df_step2 %>% 
-  group_by(u_id) %>% 
-  summarise(count = n()) %>% 
-  filter(count < 100) %>% 
-  ggplot(.) + 
-  geom_boxplot(aes(x=u_id,y=count))
-p3 <- df_step2 %>% 
-  group_by(u_id) %>% 
-  summarise(count = n()) %>% 
-  filter(count < 500) %>% 
-  ggplot(.) + 
-  geom_bar(aes(count))
-grid.arrange(p1, p2,  p3,                              
-             ncol = 3, nrow = 1)
+remove_lowUsers <- function(data){
+  df <- data %>% 
+    arrange(., desc(n_day), desc(month_counts)) %>% 
+    select(GEOID, n_day, month_counts) %>% 
+    unique() %>% 
+    top_n(n=1) %>% 
+    slice(1)
+  if (df$n_day < 7){
+    tibble::tibble(
+      id = NA,
+      created_at = NA,
+      GEOID = NA, 
+      text = NA, 
+      screen_name = NA,
+      year = NA, 
+      month = NA, 
+      day = NA, 
+      day_counts = NA, 
+      n_day = NA, 
+      month_counts = NA)
+  } else{
+    data
+  }
+}
+
+regular_cells <- df_step2 %>% 
+  mutate(detect = future_map(data, remove_lowUsers)) %>% 
+  select(-data) %>% 
+  ungroup() %>% 
+  unnest() %>% 
+  na.omit()  #the number of users decreases from 33399 to 10401 (3547401)
 ```
 
-
-```{r step_2_too_high}
-#potential twitter bots
-bots <- regular_cells %>% 
+```{r step2_toohigh, message=FALSE, warning=FALSE}
+# remove top 1% users 
+regular_cells <- regular_cells %>% 
   group_by(u_id) %>% 
-  summarise(count = n()) %>% 
-  filter(count > 5000)   ##check users that has more than 5000 tweets 
+  summarise(total_counts = n()) %>% 
+  ungroup() %>% 
+  arrange(., desc(total_counts)) %>% 
+  slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
+  left_join(., regular_cells)     # the number of users decreases from 10401 to 10298 (2911498)
 
-# check the user in a tweet bot detection app at: https://mikewk.shinyapps.io/botornot/
-potential_bots <- c("26266228","38553409","72076297","82637881","100008156","120647835","149017440","263529400","562979837","703914774","1833989910") # those users has high probability of bot return from the app
-
-uncertain_bots <- c("16264556","26790952","29145089","30894293","34748983","36498067","50685688","61536577","84020475","99353885","138271743","147287273","160390792","174782657","185370576","230799648","259550589","270164716","297144273","304403844","312988287","321823108","325230775","325877236","349345240","353333411","368368977","378323603","393736478","398344465","476940916","711882464") # those users has low probability of bot return from the app 
-unknown <- c("45406258", "287966483","289054915","318647970", "404843921","497192859", "612908575") # those users cannot be found in the app, so need to look into by person
-# after these, we can remove thoses potential bots (dirty data) from the dataset
-
-# remove tweeter bot (too high)
-df_step2 <- df_step2 %>% filter(!u_id %in% potential_bots) # after step 2, there are 16604 users remained. 
-```
-
-
-```{r step3}
-#determing home and work-time Anchor Points: the two regular locations that had the highest number of days with tweets are selected for the calculation of home and work-time anchor points, and the rest are moved directly to the last stages of the model, where they are called seconday anchor points.
-df_step3  
+# df_step2_2 <- regular_cells %>% 
+#   group_by(u_id) %>% 
+#   nest()
+# 
+# remove_highUsers <- function(data){
+#   df <- data %>% 
+#     arrange(., desc(month_counts)) %>% 
+#     select(GEOID, month_counts) %>% 
+#     unique() %>% 
+#     group_by(GEOID) %>% 
+#     top_n(n=1, wt= month_counts) %>% 
+#     ungroup() %>% 
+#     top_n(n=2, wt = month_counts) %>% 
+#     pull(., month_counts)
+#   if(all(df > 500)){
+#     tibble::tibble(
+#       id = NA,
+#       created_at = NA,
+#       GEOID = NA, 
+#       text = NA, 
+#       screen_name = NA,
+#       year = NA, 
+#       month = NA, 
+#       day = NA, 
+#       day_counts = NA, 
+#       n_day = NA, 
+#       month_counts = NA)
+#   } else{
+#     data
+#   }
+# }
+# regular_cells <- df_step2_2 %>% 
+#   mutate(detect=future_map(data, remove_highUsers)) %>% 
+#   select(-data) %>% 
+#   ungroup() %>% 
+#   unnest() %>% 
+#   na.omit()
 ```
 
 
