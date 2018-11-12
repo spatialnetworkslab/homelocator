@@ -109,47 +109,92 @@ regular_cells <- regular_cells %>%
   arrange(., desc(total_counts)) %>% 
   slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
   left_join(., regular_cells)     # the number of users decreases from 10401 to 10298 (2911498)
-
-# df_step2_2 <- regular_cells %>% 
-#   group_by(u_id) %>% 
-#   nest()
-# 
-# remove_highUsers <- function(data){
-#   df <- data %>% 
-#     arrange(., desc(month_counts)) %>% 
-#     select(GEOID, month_counts) %>% 
-#     unique() %>% 
-#     group_by(GEOID) %>% 
-#     top_n(n=1, wt= month_counts) %>% 
-#     ungroup() %>% 
-#     top_n(n=2, wt = month_counts) %>% 
-#     pull(., month_counts)
-#   if(all(df > 500)){
-#     tibble::tibble(
-#       id = NA,
-#       created_at = NA,
-#       GEOID = NA, 
-#       text = NA, 
-#       screen_name = NA,
-#       year = NA, 
-#       month = NA, 
-#       day = NA, 
-#       day_counts = NA, 
-#       n_day = NA, 
-#       month_counts = NA)
-#   } else{
-#     data
-#   }
-# }
-# regular_cells <- df_step2_2 %>% 
-#   mutate(detect=future_map(data, remove_highUsers)) %>% 
-#   select(-data) %>% 
-#   ungroup() %>% 
-#   unnest() %>% 
-#   na.omit()
 ```
 
+```{r step3}
+#Determing home and work-time Anchor Points: the two regular locations that had the highest number of days with tweets are selected for the calculation of home and work-time anchor points, and the rest are moved directly to the last stages of the model, where they are called seconday anchor points.
+df_step3 <- regular_cells %>% 
+  select(c(u_id, GEOID, created_at, year, month, day, day_counts, month_counts, total_counts,n_day)) %>% 
+  unite(date, year, month, day, sep = "-") %>% 
+  mutate(date = as.Date(date)) %>% 
+  group_by(u_id, GEOID) %>% 
+  summarise(n_date = n_distinct(date)) %>% 
+  arrange(., desc(n_date)) %>% 
+  top_n(n=2, wt=n_date) %>% 
+  left_join(., regular_cells) 
 
+to.times <- function(x) chron::times(paste0(x, ":00"))
+determine_anchor_type <- function(data){
+  avg_start_time <- data %>% 
+    mutate(times = chron::times(strftime(created_at,"%H:%M:%S"))) %>% 
+    unite(date, year, month, day, sep = "-") %>% 
+    mutate(date = as.Date(date)) %>% 
+    group_by(date) %>% 
+    summarise(average_time = mean(times)) %>% 
+    ungroup() %>% 
+    summarise(avg = mean(average_time)) %>% 
+    pull(., avg)
+  sd_time <- data %>% 
+    mutate(times = chron::times(strftime(created_at,"%H:%M:%S"))) %>% 
+    unite(date, year, month, day, sep = "-") %>% 
+    mutate(date = as.Date(date)) %>% 
+    group_by(date) %>% 
+    arrange(., times) %>% 
+    top_n(n=1) %>% 
+    slice(1) %>% 
+    ungroup() %>% 
+    summarise(sd_time = sd(times)) %>% 
+    pull(., sd_time)
+  if (avg_start_time > to.times("17:00") | (avg_start_time < to.times("17:00") & sd_time > 0.175)){
+    tibble::tibble(anchor_type = "home")
+    } else{
+      tibble::tibble(anchor_type = "work place")
+      }
+}
+
+anchor_results <- df_step3 %>% 
+  group_by(u_id, GEOID) %>% 
+  nest() %>% 
+  mutate(detect=future_map(data, determine_anchor_type)) %>% 
+  select(-data) %>% 
+  unnest() 
+anchor_results <- anchor_results %>% 
+  group_by(u_id) %>% 
+  mutate(anchor_type_n = n_distinct(anchor_type)) %>% 
+  ungroup()
+
+oneHome_oneWork <- anchor_results %>% 
+  filter(anchor_type_n == 2)
+twoHome <- anchor_results %>% 
+  filter(anchor_type_n == 1 & anchor_type == "home")
+twoWork <- anchor_results %>% 
+  filter(anchor_type_n == 1 & anchor_type == "work place")
+secondary_anchor_points <- anti_join(regular_cells, df_step3 %>% select(-n_date))
+```
+
+```{r step4, message=FALSE, warning=FALSE}
+#Consideration of neighboring relationships in the case of two home or two work-time anchor points 
+#
+# test <- twoHome %>% 
+#   left_join(., acs_ky %>% select(GEOID, geometry))
+# test %>% 
+#   st_sf() %>% 
+#   ggplot(.) + 
+#   geom_sf()
+# 
+# 
+# 
+# options(tigris_use_cache = TRUE, tigris_class="sf") 
+# census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
+# acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract", 
+#                   variables = c(medincome = "B19013_001"), 
+#                   geometry = T, output = "wide", year = 2016)  %>%   
+#                   st_transform(., "+init=epsg:4326")
+
+
+
+
+```
 
 
 
