@@ -55,11 +55,21 @@ df_clean_1 <- df_sub %>%
   filter(n_geoid >= 3) %>% 
   ungroup() # there are 35134 users left (36.87%)
 
-# check the user in a tweet bot detection app at: https://mikewk.shinyapps.io/botornot/
-potential_bots <- c("26266228","38553409","72076297","82637881","100008156","120647835","149017440","263529400","562979837","703914774","1833989910") # those users has high probability of bot return from the app
-# remove tweets bots 
+# remove top 1% users 
 df_clean_2 <- df_clean_1 %>% 
-  filter(!u_id %in% potential_bots) #there are 35123 users left (36.86%)
+  group_by(u_id) %>% 
+  summarise(total_counts = n()) %>% 
+  ungroup() %>% 
+  arrange(., desc(total_counts)) %>% 
+  slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
+  left_join(., df_clean_1) %>% 
+  select(-total_counts) # there are 34784 users left (36.51%)
+
+# # check the user in a tweet bot detection app at: https://mikewk.shinyapps.io/botornot/
+# potential_bots <- c("26266228","38553409","72076297","82637881","100008156","120647835","149017440","263529400","562979837","703914774","1833989910") # those users has high probability of bot return from the app
+# # remove tweets bots 
+# df_clean_2 <- df_clean_1 %>% 
+#   filter(!u_id %in% potential_bots) #there are 35123 users left (36.86%)
 ```
 
 - Tweets sent during different hours of the day by different day of week 
