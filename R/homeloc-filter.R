@@ -76,6 +76,15 @@ homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location
            hl_uniq_days > !!min_days,
            hl_period_length > !!min_period_length) 
   
+  df <- df %>% 
+    group_by(!!user) %>% 
+    summarise(hl_total_counts = n()) %>% 
+    ungroup() %>% 
+    plyr::arrange(., plyr::desc(hl_total_counts)) %>% 
+    slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
+    left_join(., df) %>% 
+    select(-hl_total_counts)
+  
   unique_users <- df %>% pull(!!user) %>% n_distinct()
   print(paste("After filtering,", unique_users, "unique users remain"))
   
