@@ -26,6 +26,7 @@ library(sf)
 library(lubridate)
 library(furrr)
 library(gridExtra)
+library(tidycensus)
 ```
 
 
@@ -174,26 +175,51 @@ secondary_anchor_points <- anti_join(regular_cells, df_step3 %>% select(-n_date)
 
 ```{r step4, message=FALSE, warning=FALSE}
 #Consideration of neighboring relationships in the case of two home or two work-time anchor points 
-#
-# test <- twoHome %>% 
-#   left_join(., acs_ky %>% select(GEOID, geometry))
-# test %>% 
-#   st_sf() %>% 
-#   ggplot(.) + 
-#   geom_sf()
-# 
-# 
-# 
-# options(tigris_use_cache = TRUE, tigris_class="sf") 
-# census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
-# acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract", 
-#                   variables = c(medincome = "B19013_001"), 
-#                   geometry = T, output = "wide", year = 2016)  %>%   
-#                   st_transform(., "+init=epsg:4326")
+options(tigris_use_cache = TRUE, tigris_class="sf")
+census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
+acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
+                  variables = c(medincome = "B19013_001"),
+                  geometry = T, output = "wide", year = 2016)  %>%
+                  st_transform(., "+init=epsg:4326") %>% 
+  select(GEOID) %>% 
+  mutate(id = 1:nrow(.))
 
+st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+neighbors <- st_queen(acs_ky)
 
+detect_neighbor <- function(data){
+  IDs <- data$id
+  id_1 <- IDs[1]
+  id_1_neighbors <- neighbors[[id_1]]
+  id_2 <- IDs[2]
+  if(id_2 %in% id_1_neighbors){
+    return("neighboring cell")
+  } else{
+    return("non-neighboring cell")
+  }
+}
 
+twoHome <- twoHome %>% 
+  left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>% 
+  arrange(., u_id) 
+twoHome_neighbor_detect <- twoHome %>% 
+  group_by(u_id) %>% 
+  nest() %>% 
+  mutate(neighboring = future_map(data, detect_neighbor) %>% unlist()) %>% 
+  select(-data) 
+twoHome <- twoHome %>% 
+  left_join(., twoHome_neighbor_detect, by = c("u_id"))
 
+twoWork <- twoWork %>% 
+  left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>% 
+  arrange(., u_id) 
+twoWork_neighbor_detect <- twoWork %>% 
+  group_by(u_id) %>% 
+  nest() %>% 
+  mutate(neighboring = future_map(data, detect_neighbor) %>% unlist()) %>% 
+  select(-data) 
+twoWork <- twoWork %>% 
+  left_join(., twoWork_neighbor_detect, by = c("u_id"))
 ```
 
 
