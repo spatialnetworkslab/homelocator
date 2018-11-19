@@ -119,10 +119,23 @@ df_step3 <- regular_cells %>%
   unite(date, year, month, day, sep = "-") %>% 
   mutate(date = as.Date(date)) %>% 
   group_by(u_id, GEOID) %>% 
-  summarise(n_date = n_distinct(date)) %>% 
-  arrange(., desc(n_date)) %>% 
-  top_n(n=2, wt=n_date) %>% 
+  summarise(n_date = n_distinct(date),
+            n_tweets = n()) %>% 
+  group_by(u_id) %>% 
+  arrange(., desc(n_date), desc(n_tweets)) %>% 
+  nest() %>% 
+  mutate(GEOID = future_map(data, get_top2GEOID)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  ungroup() %>% 
   left_join(., regular_cells) 
+
+
+get_top2GEOID <- function(data){
+  data %>% 
+    top_n(n=2, wt = n_tweets) %>% 
+    head(., n=2)
+}
 
 to.times <- function(x) chron::times(paste0(x, ":00"))
 determine_anchor_type <- function(data){
@@ -153,23 +166,46 @@ determine_anchor_type <- function(data){
       }
 }
 
-anchor_results <- df_step3 %>% 
-  group_by(u_id, GEOID) %>% 
-  nest() %>% 
-  mutate(detect=future_map(data, determine_anchor_type)) %>% 
-  select(-data) %>% 
-  unnest() 
+if(file.exists("anchor_results.csv")){
+  anchor_results <- read_csv("anchor_results.csv") %>% 
+    mutate(GEOID = as.character(GEOID))
+} else{
+  anchor_results <- df_step3 %>% 
+    group_by(u_id, GEOID) %>% 
+    nest() %>% 
+    mutate(detect=future_map(data, determine_anchor_type)) %>% 
+    select(-data) %>% 
+    unnest() %>% 
+    group_by(u_id) %>% 
+    mutate(anchor_type_n = n_distinct(anchor_type)) %>% 
+    ungroup()
+  write_csv(anchor_results, path = "anchor_results.csv")
+}
+
 anchor_results <- anchor_results %>% 
   group_by(u_id) %>% 
-  mutate(anchor_type_n = n_distinct(anchor_type)) %>% 
+  mutate(n_geoid = n_distinct(GEOID)) %>% 
   ungroup()
 
+
+oneHome <- anchor_results %>% 
+  filter(n_geoid == 1) %>% 
+  filter(anchor_type == "home")
+oneWork <- anchor_results %>% 
+  filter(n_geoid == 1) %>% 
+  filter(anchor_type == "work place")
 oneHome_oneWork <- anchor_results %>% 
+  filter(n_geoid == 2) %>% 
   filter(anchor_type_n == 2)
 twoHome <- anchor_results %>% 
-  filter(anchor_type_n == 1 & anchor_type == "home")
+  filter(n_geoid == 2) %>% 
+  filter(anchor_type_n == 1) %>% 
+  filter(anchor_type == "home")
 twoWork <- anchor_results %>% 
-  filter(anchor_type_n == 1 & anchor_type == "work place")
+  filter(n_geoid == 2) %>% 
+  filter(anchor_type_n == 1) %>% 
+  filter(anchor_type == "work place")
+
 secondary_anchor_points <- anti_join(regular_cells, df_step3 %>% select(-n_date))
 ```
 
@@ -210,6 +246,7 @@ twoHome_neighbor_detect <- twoHome %>%
 twoHome <- twoHome %>% 
   left_join(., twoHome_neighbor_detect, by = c("u_id"))
 
+
 twoWork <- twoWork %>% 
   left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>% 
   arrange(., u_id) 
@@ -220,6 +257,95 @@ twoWork_neighbor_detect <- twoWork %>%
   select(-data) 
 twoWork <- twoWork %>% 
   left_join(., twoWork_neighbor_detect, by = c("u_id"))
+
+## neighboring cells dataset
+twoHome_neighbous <- twoHome %>% 
+  filter(neighboring == "neighboring cell") %>% 
+  select(-id, -neighboring) %>% 
+  left_join(., regular_cells)
+twoWork_neighous <- twoWork %>% 
+  filter(neighboring == "non-neighboring cell") %>% 
+  select(-id, -neighboring)
+
+## in case the anchor points were located in neighboring cells, keep the most visited anchor point.
+mostVisit_anchor_detect <- function(data){
+  if(n_distinct(data$n_date) == 2){
+   data %>% 
+    top_n(n=1, wt=n_date) %>% 
+    slice(., 1) %>%
+    pull(., GEOID)
+} else{
+  data %>% 
+    top_n(n=1, wt = n_tweets) %>% 
+    slice(., 1) %>% 
+    pull(., GEOID)
+  }
+}
+twoHome_neighbous_mostVisit <- twoHome_neighbous %>% 
+  unite(date, year, month, day, sep = "-") %>% 
+  group_by(u_id, GEOID) %>% 
+  summarise(n_date = n_distinct(date),
+            n_tweets = n()) %>% 
+  group_by(u_id) %>% 
+  arrange(., desc(n_date), desc(n_tweets)) %>% 
+  nest() %>% 
+  mutate(GEOID = future_map(data, mostVisit_anchor_detect) %>% unlist()) %>% 
+  select(-data) %>% 
+  mutate(anchor_type = "home")
+
+## after that, use the earlier list of regular cells of the same respondent again, and the third regular cell will be employed.
+top3_regularCells <- regular_cells %>% 
+  filter(u_id %in% twoHome_neighbous$u_id) %>% 
+  select(c(u_id, GEOID, created_at, year, month, day, day_counts, month_counts, total_counts,n_day)) %>% 
+  unite(date, year, month, day, sep = "-") %>% 
+  mutate(date = as.Date(date)) %>% 
+  group_by(u_id, GEOID) %>% 
+  summarise(n_date = n_distinct(date),
+            n_tweets = n()) %>% 
+  group_by(u_id) %>% 
+  arrange(., desc(n_date), desc(n_tweets)) %>% 
+  nest() %>% 
+  mutate(GEOID = future_map(data, get_top3GEOID)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  ungroup() %>% 
+  left_join(., regular_cells) 
+
+get_top3GEOID <- function(data){
+  data %>% 
+    top_n(n=3, wt = n_tweets) %>% 
+    head(., n=3)
+}
+
+## re-analyze the dataset in stage 3 and try to determine the missing home or work-time anchor point
+anchor_results_reAnalyzed <- top3_regularCells %>% 
+    group_by(u_id, GEOID) %>% 
+    nest() %>% 
+    mutate(detect=future_map(data, determine_anchor_type)) %>% 
+    select(-data) %>% 
+    unnest() %>% 
+    group_by(u_id) %>% 
+    mutate(anchor_type_n = n_distinct(anchor_type)) %>% 
+    ungroup()
+
+added_workplace <- anchor_results_reAnalyzed %>% 
+  filter(anchor_type_n == 2 & anchor_type == "work place") 
+added_oneHome_oneWork<- twoHome_neighbous_mostVisit %>% 
+  filter(u_id %in% added_workplace$u_id) %>% 
+  bind_rows(., d %>% select(-anchor_type_n)) %>% 
+  mutate(anchor_type_n = 2) %>% 
+  group_by(u_id) %>% 
+  mutate(n_geoid = n_distinct(GEOID)) %>% 
+  ungroup()
+
+
+##the anchor points are not situated in neighboring cells, the two home or two work-time anchor points move on to the next stage (stage 5)
+twoHome_not_neighbous <- twoHome %>% 
+  filter(neighboring == "non-neighboring cell") %>% 
+  select(-id, -neighboring)
+twoWork_not_neighbous <- twoWork %>% 
+  filter(neighboring == "non-neighboring cell") %>% 
+  select(-id, -neighboring)
 ```
 
 
