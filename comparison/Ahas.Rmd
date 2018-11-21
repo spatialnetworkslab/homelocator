@@ -107,7 +107,7 @@ regular_cells <- regular_cells %>%
   summarise(total_counts = n()) %>% 
   ungroup() %>% 
   arrange(., desc(total_counts)) %>% 
-  slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
+  slice(round(n_distinct(.$u_id) * 0.01):n()) %>% 
   left_join(., regular_cells)     # the number of users decreases from 10401 to 10298 (2911498)
 ```
 
@@ -180,16 +180,15 @@ if(file.exists("anchor_results.csv")){
   write_csv(anchor_results, path = "anchor_results.csv")
 }
 
+#df_step3 has 10298 users 
+#first iterated result   
+oneHome <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "home") # 1238 users 
+oneWork <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "work place") # 168 users 
+oneHome_oneWork <- anchor_results %>% filter(n_geoid == 2 & anchor_type_n == 2) # 2058 users 
 
-#first iterated result 
-oneHome <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "home") 
-oneWork <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "work place") 
-oneHome_oneWork <- anchor_results %>% filter(n_geoid == 2 & anchor_type_n == 2) 
-
-twoHome <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "home")
-twoWork <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "work place")
+twoHome <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "home") # 6634 users
+twoWork <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "work place") # 200 users
 secondary_anchor_points <- anti_join(regular_cells, df_step3 %>% select(-n_date))
-
 ```
 
 ```{r step4_iterate_2, message=FALSE, warning=FALSE}
@@ -229,9 +228,9 @@ twoHome <- twoHome %>%
 
 
 ##the anchor points are not situated in neighboring cells, the two home or two work-time anchor points move on to the next stage (stage 5)
-twoHome_not_neighbous <- twoHome %>% filter(neighboring == "non-neighboring cell") %>% select(-neighboring)
+twoHome_not_neighbous <- twoHome %>% filter(neighboring == "non-neighboring cell") %>% select(-neighboring) #3247 users 
 ## neighboring cells dataset
-twoHome_neighbous <- twoHome %>% filter(neighboring == "neighboring cell") %>% select(-neighboring) %>% left_join(., regular_cells)
+twoHome_neighbous <- twoHome %>% filter(neighboring == "neighboring cell") %>% select(-neighboring) %>% left_join(., regular_cells) #3387 users 
 
 ## in case the anchor points were located in neighboring cells, keep the most visited anchor point.
 mostVisit_anchor_detect <- function(data){
@@ -270,6 +269,7 @@ removed_GEOIDs <- remove_second_GEOID(twoHome_neighbous, twoHome_Neigh_mostVisit
 
 ## remove secondary GEOID dataset and get new regular cell, repeat stage 3 procesure 
 regular_cells_2 <- anti_join(regular_cells, left_join(removed_GEOIDs, regular_cells, by = c("u_id", "GEOID")))
+
 ### second iterate 
 df_step3_2 <- regular_cells_2 %>% 
   filter(u_id %in% twoHome_neighbous$u_id) %>% 
@@ -286,7 +286,7 @@ df_step3_2 <- regular_cells_2 %>%
   select(-data) %>% 
   unnest() %>% 
   ungroup() %>% 
-  left_join(., regular_cells) 
+  left_join(., regular_cells_2) 
 
 if(file.exists("anchor_results_2.csv")){
   anchor_results_2 <- read_csv("anchor_results_2.csv") %>% 
@@ -306,9 +306,9 @@ if(file.exists("anchor_results_2.csv")){
 }
 
 ## add to dataset for each type
-oneHome <- bind_rows(oneHome, (anchor_results_2 %>% filter(n_geoid == 1) %>% filter(anchor_type == "home")))
-oneWork <- bind_rows(oneWork, (anchor_results_2 %>% filter(n_geoid == 1) %>% filter(anchor_type == "work place")))
-oneHome_oneWork <- append(oneHome_oneWork, (anchor_results_2 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
+oneHome <- bind_rows(oneHome, (anchor_results_2 %>% filter(n_geoid == 1) %>% filter(anchor_type == "home"))) 
+oneWork <- bind_rows(oneWork, (anchor_results_2 %>% filter(n_geoid == 1) %>% filter(anchor_type == "work place"))) 
+oneHome_oneWork <- bind_rows(oneHome_oneWork, (anchor_results_2 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
 
 twoHome_2 <- anchor_results_2 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "home")
 twoHome_2 <- twoHome_2 %>% 
@@ -321,8 +321,8 @@ twoHome_2 <- twoHome_2 %>%
   left_join(twoHome_2, ., by = c("u_id"))
 
 ## add to dataset 
-twoHome_not_neighbous <- bind_rows(twoHome_not_neighbous, twoHome_2 %>% filter(neighboring == "non-neighboring cell") %>% select(-neighboring))
-twoHome_neighbous <- twoHome_2 %>% filter(neighboring == "neighboring cell") %>% select(-neighboring) %>% left_join(., regular_cells)
+twoHome_not_neighbous <- bind_rows(twoHome_not_neighbous, twoHome_2 %>% filter(neighboring == "non-neighboring cell") %>% select(-neighboring)) #4207
+twoHome_neighbous <- twoHome_2 %>% filter(neighboring == "neighboring cell") %>% select(-neighboring) %>% left_join(., regular_cells_2)
 
 # third iterate 
 ## in case the anchor points were located in neighboring cells, keep the most visited anchor point.
@@ -380,7 +380,7 @@ if(file.exists("anchor_results_3.csv")){
 ## add to dataset for each type
 oneHome <- bind_rows(oneHome, (anchor_results_3 %>% filter(n_geoid == 1) %>% filter(anchor_type == "home")))
 oneWork <- bind_rows(oneWork, (anchor_results_3 %>% filter(n_geoid == 1) %>% filter(anchor_type == "work place")))
-oneHome_oneWork <- append(oneHome_oneWork, (anchor_results_3 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
+oneHome_oneWork <- bind_rows(oneHome_oneWork, (anchor_results_3 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
 
 
 twoHome_3 <- anchor_results_3 %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "home") 
@@ -466,8 +466,9 @@ if(file.exists("anchor_results_2_work.csv")){
 }
 
 ## add to dataset for each type
+oneHome <- bind_rows(oneHome, (anchor_results_2_work %>% filter(n_geoid == 1) %>% filter(anchor_type == "home")))
 oneWork <- bind_rows(oneWork, (anchor_results_2_work %>% filter(n_geoid == 1) %>% filter(anchor_type == "work place")))
-oneHome_oneWork <- append(oneHome_oneWork, (anchor_results_2_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
+oneHome_oneWork <- bind_rows(oneHome_oneWork, (anchor_results_2_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
 
 
 twoWork_2 <- anchor_results_2_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "work place")
@@ -539,8 +540,9 @@ if(file.exists("anchor_results_3_work.csv")){
 }
 
 ## add to dataset for each type
+oneHome <- bind_rows(oneHome, (anchor_results_3_work %>% filter(n_geoid == 1) %>% filter(anchor_type == "home")))
 oneWork <- bind_rows(oneWork, (anchor_results_3_work %>% filter(n_geoid == 1) %>% filter(anchor_type == "work place")))
-oneHome_oneWork <- append(oneHome_oneWork, (anchor_results_3_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
+oneHome_oneWork <- bind_rows(oneHome_oneWork, (anchor_results_3_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 2)))
 
 
 twoWork_3 <- anchor_results_3_work %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "work place")
@@ -560,6 +562,47 @@ twoWork_neighbous <- twoWork_3 %>% filter(neighboring == "neighboring cell") %>%
 ```
 
 
+```{r step5, message=FALSE, warning=FALSE}
+## now we have dataset: oneHome, oneWork, oneHome_oneWork, twoHome_not_neighbous, twoHome_neighbous, twoWork_not_neighbous, twoWork_neighbous
+## Assessment of the proportion of days spent at an anchor point 
+df_step4 <- bind_rows(
+  oneHome %>% mutate(step4_result = "one home"),
+  oneWork %>% mutate(step4_result = "one work"),
+  oneHome_oneWork %>% mutate(step4_result = "one home one work"),
+  twoHome_neighbous %>% select(c(u_id, GEOID, anchor_type, anchor_type_n, n_geoid)) %>% unique() %>% mutate(step4_result = "two home neighbous"),
+  twoHome_not_neighbous %>% mutate(step4_result = "two home not neighbous"),
+  twoWork_neighbous  %>% select(c(u_id, GEOID, anchor_type, anchor_type_n, n_geoid)) %>% unique() %>% mutate(step4_result = "two work neighbous"),
+  twoWork_not_neighbous %>% mutate(step4_result = "two work not neighbous")
+) 
+
+rm(acs_ky, anchor_results, anchor_results_2, anchor_results_2_work, anchor_results_3, anchor_results_3_work, df, neighbors, regular_cells_2, regular_cells_2_work, regular_cells_3, regular_cells_3_work, removed_GEOIDs, removed_GEOIDs_work, twoHome_Neigh_mostVisit, twoWork_Neigh_mostVisit)
+
+rm(df_step1, df_step2, df_step3, df_step3_2, df_step3_2_work, df_step3_3, df_step3_3_work, twoHome_2, twoHome_3, twoHome, twoWork, twoWork_2, twoWork_3)
+
+df_step4_2 <- df_step4 %>% 
+  left_join(., regular_cells %>% select(c(u_id, GEOID, year, month, day)), by= c("u_id", "GEOID")) %>% 
+  unite(date, year, month, day, sep = "-") %>% 
+  group_by(u_id, GEOID) %>% 
+  summarise(n_date = n_distinct(date)) %>% 
+  group_by(u_id) %>% 
+  mutate(total_date = sum(n_date)) %>% 
+  ungroup() %>% 
+  mutate(percent_date = n_date/total_date) %>% 
+  select(-c(n_date, total_date))
+
+
+multifunctional_anchors <- df_step4_2 %>% filter(percent_date > 0.75)
+secondary_anchors_from_multifun_anchors <- df_step4_2 %>% 
+  filter(u_id %in% multifunctional_anchors$u_id) %>% 
+  filter(percent_date < 0.75) 
+
+df_step5 <- df_step4 %>% 
+  select(u_id, GEOID) %>% 
+  anti_join(., (secondary_anchors_from_multifun_anchors %>% select(-percent_date))) %>% 
+  left_join(., df_step4) %>% 
+  select(c(u_id, GEOID, anchor_type, step4_result)) %>% 
+  mutate(step5_result = if_else(u_id %in% multifunctional_anchors$u_id, "multifunctional anchor", step4_result)) 
+```
 
 
 
