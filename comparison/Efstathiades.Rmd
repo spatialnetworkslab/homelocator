@@ -142,6 +142,7 @@ work_loc <- df_active %>%
   ungroup() %>% 
   mutate(work_loc = unlist(work_loc))
 head(work_loc)
+write_csv(work_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_workloc.csv")
 ```
 
 ## Home location 
@@ -178,6 +179,7 @@ home_loc <- df_rest_leisure %>%
   ungroup() %>% 
   mutate(home_loc = unlist(home_loc))
 head(home_loc)
+write_csv(home_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_homeloc.csv")
 ```
 
 
