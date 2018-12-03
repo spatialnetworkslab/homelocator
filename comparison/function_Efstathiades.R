@@ -10,7 +10,7 @@ read_data <- function(file){
       hour_of_day = hour(created_at), 
       time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest_time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active_time", "Leisure_time"))) 
   n_users <- df_sub$u_id %>% n_distinct()
-  print(paste("Initially, there are", n_users))
+  print(paste("Initially, there are", n_users, "users"))
   df_sub
 }
 
@@ -23,7 +23,7 @@ remove_tooLowUsers <- function(df){
     filter(n_geoid >= 3) %>% 
     ungroup() 
   n_user <- df_sub$u_id %>% n_distinct()
-  print(paste("After removing too low data, there are", n_user, "remained"))
+  print(paste("After removing too low data, there are", n_user, "users remained"))
   df_sub
 }
 
@@ -39,7 +39,7 @@ remove_tooHighUsers <- function(df){
     left_join(., df) %>% 
     select(-total_counts) 
   n_user <- df_sub$u_id %>% n_distinct()
-  print(paste("After removing too high data, there are", n_user, "remained"))
+  print(paste("After removing too high data, there are", n_user, "users remained"))
   df_sub
 }
 
@@ -80,7 +80,7 @@ remove_weekendAct <- function(df){
   df_sub <- df %>% 
     filter(!day_of_week %in% c("Sun", "Sat"))  
   n_user <- df_sub$u_id %>% n_distinct()
-  print(paste("After removing weekend data, there are", n_user, "remained"))
+  print(paste("After removing weekend data, there are", n_user, "users remained"))
   df_sub
 }
 
