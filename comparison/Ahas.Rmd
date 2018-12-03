@@ -1,6 +1,5 @@
 ---
 title: "Ahas Method"
-author: "Chen Qinqqing"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
@@ -27,163 +26,34 @@ library(lubridate)
 library(furrr)
 library(gridExtra)
 library(tidycensus)
-```
-
-
-```{r load_data}
-df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") 
-df <- df %>% 
-  select(id, u_id, created_at, GEOID, text, screen_name) %>% 
-  mutate(year = year(created_at), 
-         month = month(created_at),
-         day = day(created_at), 
-         GEOID = as.character(GEOID)) 
-head(df)
-#initialy, there are 95285 users 
-```
-
-```{r step1, message=FALSE, warning=FALSE}
-# determing points of regular cells and separating them from random cells
-## Regular cells-network cells: regularly visited by one person and from which the person has made calls on at least two different days a month, in our case, the cell treat as GEOID/location, the user should has sent tweets on the location at least two differnt days a month
-## Random cells- a netwok cell: from which the one respondent has made calls on only one day a month
-df_step1 <- df %>% 
-  group_by(u_id, GEOID, year, month, day) %>% 
-  mutate(day_counts = n()) %>% 
-  group_by(u_id, GEOID, year, month) %>% 
-  mutate(n_day = n_distinct(day)) %>% 
-  ungroup() 
-
-regular_cells <- df_step1 %>% filter(n_day >= 2) # the number of users decreases from 95285 to 33399  (3904743tweets)
-random_cells <- df_step1 %>% filter(n_day < 2)
-```
-
-
-```{r step2_toolow, message=FALSE, warning=FALSE}
-#Regular cells are sorted by the number of days with calls, and if days overlap, by the number of calls. Here we sorted by the number of days with tweets, and if days overlap, by the number of tweets. 
+source("function_Ahas.R")
 options(future.globals.maxSize= 1073741824)
-remove_lowUsers <- function(data){
-  df <- data %>% 
-    arrange(., desc(n_day), desc(month_counts)) %>% 
-    select(GEOID, n_day, month_counts) %>% 
-    unique() %>% 
-    top_n(n=1) %>% 
-    slice(1)
-  if (df$n_day < 7){
-    tibble::tibble(
-      id = NA,
-      created_at = NA,
-      GEOID = NA, 
-      text = NA, 
-      screen_name = NA,
-      year = NA, 
-      month = NA, 
-      day = NA, 
-      day_counts = NA, 
-      n_day = NA, 
-      month_counts = NA)
-  } else{
-    data
-  }
-}
-
-df_step2 <- regular_cells %>% 
-  group_by(u_id, GEOID, year, month) %>% 
-  mutate(month_counts = n()) %>% 
-  ungroup() %>% 
-  group_by(u_id) %>% 
-  nest()
-regular_cells <- df_step2 %>% 
-  mutate(detect = future_map(data, remove_lowUsers)) %>% 
-  select(-data) %>% 
-  ungroup() %>% 
-  unnest() %>% 
-  na.omit()  #the number of users decreases from 33399 to 10401 (3547401)
 ```
 
-```{r step2_toohigh, message=FALSE, warning=FALSE}
-# remove top 1% users 
-regular_cells <- regular_cells %>% 
-  group_by(u_id) %>% 
-  summarise(total_counts = n()) %>% 
-  ungroup() %>% 
-  arrange(., desc(total_counts)) %>% 
-  slice(round(n_distinct(.$u_id) * 0.01):n()) %>% 
-  left_join(., regular_cells)     # the number of users decreases from 10401 to 10298 (2911498)
+# Load data
+```{r load_data, message=FALSE, warning=FALSE}
+df <- read_data("lexington-with-GEOID-2012-2017.csv")
 ```
+
+# Data cleanning 
+```{r step1and2, message=FALSE, warning=FALSE}
+## Get regular cells , remove too low users, remove top 1% users 
+regular_cells <- df %>% 
+  get_RegularCells() %>% 
+  remove_toolowUsers() %>% 
+  remove_tooHighUsers()
+```
+
 
 ```{r step3, message=FALSE, warning=FALSE}
 #Determing home and work-time Anchor Points: the two regular locations that had the highest number of days with tweets are selected for the calculation of home and work-time anchor points, and the rest are moved directly to the last stages of the model, where they are called seconday anchor points.
-get_topN_GEOID <- function(data, topN){
-  data %>% 
-    top_n(n=topN, wt = n_tweets) %>% 
-    head(., n = topN)
-}
-to.times <- function(x) chron::times(paste0(x, ":00"))
-determine_anchor_type <- function(data){
-  avg_start_time <- data %>% 
-    mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-    #mutate(times = chron::times(strftime(created_at,"%H:%M:%S"))) %>% 
-    unite(date, year, month, day, sep = "-") %>% 
-    mutate(date = as.Date(date)) %>% 
-    group_by(date) %>% 
-    summarise(average_time = mean(times)) %>% 
-    ungroup() %>% 
-    summarise(avg = mean(average_time)) %>% 
-    pull(., avg)
-  sd_time <- data %>% 
-    mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-    unite(date, year, month, day, sep = "-") %>% 
-    mutate(date = as.Date(date)) %>% 
-    group_by(date) %>% 
-    arrange(., times) %>% 
-    top_n(n=1) %>% 
-    slice(1) %>% 
-    ungroup() %>% 
-    summarise(sd_time = sd(times)) %>% 
-    pull(., sd_time)
-  if (avg_start_time > to.times("17:00") | (avg_start_time < to.times("17:00") & sd_time > 0.175)){
-    tibble::tibble(anchor_type = "home")
-    } else{
-      tibble::tibble(anchor_type = "work place")
-      }
-}
-
-df_step3 <- regular_cells %>% 
-  select(c(u_id, GEOID, created_at, year, month, day, day_counts, month_counts, total_counts,n_day)) %>% 
-  unite(date, year, month, day, sep = "-") %>% 
-  mutate(date = as.Date(date)) %>% 
-  group_by(u_id, GEOID) %>% 
-  summarise(n_date = n_distinct(date),
-            n_tweets = n()) %>% 
-  group_by(u_id) %>% 
-  arrange(., desc(n_date), desc(n_tweets)) %>% 
-  nest() %>% 
-  mutate(GEOID = future_map(data, function(x) get_topN_GEOID(x, 2))) %>% 
-  select(-data) %>% 
-  unnest() %>% 
-  ungroup() %>% 
-  left_join(., regular_cells) 
-
-anchor_results <- df_step3 %>% 
-    group_by(u_id, GEOID) %>% 
-    nest() %>% 
-    mutate(detect=future_map(data, determine_anchor_type)) %>% 
-    select(-data) %>% 
-    unnest() %>% 
-    group_by(u_id) %>% 
-    mutate(anchor_type_n = n_distinct(anchor_type),
-           n_geoid = n_distinct(GEOID)) %>% 
-    ungroup()
-
-#df_step3 has 10298 users 
-#first iterated result   
-oneHome <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "home") # 1238 users 
-oneWork <- anchor_results %>% filter(n_geoid == 1 & anchor_type == "work place") # 168 users 
-oneHome_oneWork <- anchor_results %>% filter(n_geoid == 2 & anchor_type_n == 2) # 2058 users 
-
-twoHome <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "home") # 6634 users
-twoWork <- anchor_results %>% filter(n_geoid == 2) %>% filter(anchor_type_n == 1) %>% filter(anchor_type == "work place") # 200 users
-secondary_anchor_points <- anti_join(regular_cells, df_step3 %>% select(-n_date))
+results <- regular_cells %>% 
+  determine_anchor_type() %>% 
+  mutate(result_step3 = if_else(n_geoid ==1 & loc == "home", "one home", 
+                                if_else(n_geoid == 1 & loc == "work", "one work", 
+                                        if_else(n_geoid == 2 & loc == "home", "two home", 
+                                                if_else(n_geoid == 2 & loc == "work", "two work", "one home, one work"))))) %>% 
+  select(u_id, GEOID, loc, result_step3)
 ```
 
 ```{r step4_iterate_2, message=FALSE, warning=FALSE}
