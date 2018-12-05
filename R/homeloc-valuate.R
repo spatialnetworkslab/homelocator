@@ -138,7 +138,7 @@ homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", locatio
       hl_hour_of_day = lubridate::hour(!!timestamp),
       hl_week = if_else(hl_day_of_week %in% c(1,7), 1, 2),#1 for weekend, 2 for weekday
       hl_times_numeric = lubridate::hour(!!timestamp) + lubridate::minute(!!timestamp) / 60 + lubridate::second(!!timestamp) / 3600,
-      hl_daytimes = if_else(hl_times_numeric >= 9 & hl_times_numeric <= 18, 2, 1), # 1 for night time, 2 for work time
+      hl_daytimes = if_else(hl_times_numeric >= 9 & hl_times_numeric <= 18, 2, 1), # 1 for rest time, 2 for work time
       hl_morning_time = if_else(hl_times_numeric >= 6 & hl_times_numeric <= 12, 1, 2)) %>%# 1 for morning, 2 for afternoon and night
     select(-hl_times_numeric)
   
