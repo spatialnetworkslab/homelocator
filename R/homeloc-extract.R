@@ -10,9 +10,11 @@ pull_homeloc <- function(data, location = "GEOID"){
   location <- rlang::sym(location)
   
   data %>% 
-    top_n (n=1, wt = hl_score) %>%
-    slice(1) %>%
-    pull(!!location)
+    top_n (n=2, wt = hl_score) %>%
+    slice(1:2) %>%
+    pull(!!location) %>% 
+    paste0(., collapse = "; ")
+  
 }
 
 
@@ -39,6 +41,8 @@ homeloc_extract <- function(df, user = "u_id", location = "GEOID"){
     select(-data) %>% 
     ungroup()
 }
+
+
 
 
 
