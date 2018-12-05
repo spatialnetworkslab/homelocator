@@ -36,8 +36,8 @@
 #' @param min_days Min. number of unique days user was active at location
 #' @param min_hours Min. number of unique hours user was active at location
 
-homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", min_count_user = 10,
-                           min_count_location = 10, min_period_length = 10, min_days = 10, min_hours = 10, keep_intermediate_vars = T) {
+homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", min_count_user = 10, min_count_location = 10, 
+                           min_period_length = 10, min_days = 10, min_hours = 10, topUser_percent = 0.01, keep_intermediate_vars = T) {
   
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
@@ -81,7 +81,7 @@ homeloc_filter <- function(df, user = "u_id", timestamp = "created_at", location
     summarise(hl_total_counts = n()) %>% 
     ungroup() %>% 
     plyr::arrange(., plyr::desc(hl_total_counts)) %>% 
-    slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
+    slice(round(n_distinct(.$u_id)*!!topUser_percent):n()) %>% 
     left_join(., df) %>% 
     select(-hl_total_counts)
   
