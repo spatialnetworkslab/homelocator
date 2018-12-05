@@ -1,0 +1,168 @@
+---
+title: "The introduction of homelocator package"
+author: "Chen Qingqing, Ate Poorthuis"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+User's locations are important to many applications such as:
+
+  - event detection
+  - epidemic dispersion
+  - targeted advertisment
+  - news recommendation
+
+
+`homelocator` package estimates users' home location with **location** and **timestamped data** at neighborhood-level. 
+
+## Data
+To explore the basic data manipulation functions of `homelocator`, we'll use a `test_sample` dataset with columns described below: 
+
+  - `id`: which is the tweet id that hold unique identifier for each tweet 
+  - `u_id`: which is the user id that hold unique identifier for each use 
+  - `created_at`: which is timestamp column and it should be `POSIXct` class. 
+  - `GEOID`: which is location id that holds unique identifier for each location 
+
+
+```{r load_data, warning=FALSE, message=FALSE}
+devtools::load_all(".")
+df <- readr::read_csv(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) 
+dim(df)
+knitr::kable(df[1:5, ])
+```
+
+<span style="color:red">*Note:*</span> *if you use your own dataset, please make sure that you have coverted the time to your local zone!*
+
+## Clean dataset with `homeloc_filter()`
+
+`homeloc_filter()` allows you to remove users with too scarce data or users that may potentially be bots by certain preconditions
+  
+  - `min_count_user = 10`: Minimum 10 data points sent by per user  
+  - `min_count_location = 10`: Minimum 10 data points sent by per user, per location 
+  - `min_period_length = 10`: Minimum 10 days between the first and the last day user was active at location 
+  - `min_days = 10`: Minimum 10 unique days user was active at location 
+  - `min_hours = 10`: Minimum 10 hours user was active at location 
+  - `topUser_percent = 0.01`: Remove top 1% users to avoid potential bots
+
+<span style="color:red">*Note:*</span> *You can tune those treshold according to your project/research/study needed.*
+
+```{r homeloc_filter, warning=FALSE, message=FALSE}
+library(tidyverse)
+df_filtered <- df %>% homeloc_filter()
+dim(df_filtered)
+knitr::kable(df_filtered[1:5, ])
+```
+
+
+## Derive new variables from `timestamp` column with `homeloc_valuate()`
+
+`homeloc_valuate()` allows you to derive new time-related variables from `timestamp` column based on filtered dataset. 
+
+  - `hl_year`: extract `year` value from timestamp column 
+  - `hl_month`: extract `month` value from timestamp column 
+  - `hl_day`: extract `day` value from timestamp column 
+  - `hl_day_of_week`: extract `day of week` value from timestamp column 
+  - `hl_hour_of_day`: extract `hour of day` value from timestamp column 
+  - `hl_week`: extract `weekday or weekend` value from timestamp column 
+  - `hl_daytimes`: extract `work time or rest time` value from timestamp column 
+  - `hl_morning_time`: extract `morning, afternoon or night time` value from timestamp column 
+  
+```{r homeloc_valuate, warning=FALSE, message=FALSE}
+df_valuated <- df_filtered %>% homeloc_valuate()
+dim(df_valuated)
+knitr::kable(df_valuated[1:5, ])
+```
+
+## Score variables with `homeloc_score()`
+
+`homeloc_score()` allows you to give a weight and score to each variable and then sum the full score for each location, the score value is set between [0,1]
+<span style="color:red">*Note:*</span> *You can tune the weight of each variable according to your project/research/study needed.*
+
+```{r homeloc_score, warning=FALSE, message=FALSE}
+df_scored <- df_valuated %>% homeloc_score()
+dim(df_scored)
+knitr::kable(df_scored[1:5, ])
+```
+
+## Extract top two locations as users' possible home location with `homeloc_extract()`
+
+`homeloc_extract()` orders the score for each location of each user, and the top two locations with the higest scores have been extracted to be the possible home location of that user. And in the end, you will get a dataframe with two columns, one is user and another is the possible home location(s) of that user. 
+
+```{r homeloc_extract, warning=FALSE, message=FALSE}
+home_loc <- df_scored %>% homeloc_extract()
+dim(home_loc)
+knitr::kable(home_loc[1:5, ])
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
