@@ -45,10 +45,10 @@ df_sub <- df %>%
 ```{r work_location, message=FALSE, warning=FALSE}
 ## Work location 
 work_loc <- identify_workloc(df_sub)
-#write_csv(work_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_workloc.csv")
+write_csv(work_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_workloc.csv")
 ## Home location 
 home_loc <- identify_homeloc(df_sub)
-#write_csv(home_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_homeloc.csv")
+write_csv(home_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_homeloc.csv")
 ```
 
 
