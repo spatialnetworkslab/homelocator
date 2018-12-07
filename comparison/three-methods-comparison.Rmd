@@ -41,11 +41,7 @@ df_efs <- read_csv("result_efstathiades_homeloc.csv") %>%
 df_ahas <- read_csv("result_ahas.csv") 
 ```
 
-
-
-```{r neighborhoods}
-# Furthur look into twoHome 
-#Consideration of neighboring relationships in the case of two home or two work-time anchor points 
+```{r load_functions, warning=FALSE, message=FALSE}
 options(tigris_use_cache = TRUE, tigris_class="sf")
 st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
@@ -70,16 +66,12 @@ detect_neighbor <- function(data){
   df2_neighbors <- get_neighbos(df2_locIDs)
   if (df2_locIDs %in% df1_neighbors){
     return("neighboring")
-  } else if(df1_locID %in% df2_neighbors){
+  } else if(df1_locIDs %in% df2_neighbors){
     return("neighboring")
   } else{
     return("non-neighboring")
   }
 }
-```
-
-```{r qing_vs_efs}
-# get the common users' ID
 commonRes_detect <- function(df_1, df_2){
   # get common users ids 
   common_IDs <- intersect(df_1$u_id, df_2$u_id)
@@ -89,8 +81,6 @@ commonRes_detect <- function(df_1, df_2){
   print(paste("There are", same_Res %>% nrow(), "users have the same results from the two methods"))
   return(same_Res)
 }
-sameRes_efs_qq <- commonRes_detect(df_qq, df_efs)
-
 
 diffRes_detect <- function(df_1, df_2, df, acs_ky){
   # get common users ids 
@@ -124,7 +114,30 @@ diffRes_detect <- function(df_1, df_2, df, acs_ky){
   print(paste("There are", diff_df_2 %>% filter(neighbor_rel == "non-neighboring") %>% pull(u_id) %>% n_distinct(), "users' different home results are non-neighboring cells from the two methods"))
   diff_df_2
 }
+```
+
+
+```{r qing_vs_efs, message=FALSE, warning=FALSE}
+sameRes_efs_qq <- commonRes_detect(df_qq, df_efs)
 diffRes_efs_qq <- diffRes_detect(df_efs, df_qq, df, acs_ky)
+```
+
+```{r viewing_different_users, message=FALSE, warning=FALSE}
+library(tmap)
+tmap_mode("view")
+diff_users <- diffRes_efs_qq$u_id %>% unique()
+view_diffUsers <- function(df_diff, user_id){
+  df <- df_diff %>% 
+    left_join(., acs_ky) %>% 
+    st_as_sf
+  df %>% 
+    filter(u_id == user_id) %>% 
+    tm_shape() + 
+    tm_fill("n_tweets") + 
+    tm_text("homeloc", col = "black") + 
+    tm_borders()
+}
+view_diffUsers(diffRes_efs_qq, diff_users[2])
 ```
 
 ```{r qing_vs_ahas}
