@@ -1,6 +1,5 @@
 ---
 title: "Homelocator Method"
-author: "Chen Qinqqing"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
@@ -45,5 +44,6 @@ df_score <- df_valuate %>% homeloc_score()
 ```{r home_extract}
 home_loc <- df_score %>% homeloc_extract()
 head(home_loc)
+write_csv(home_loc, path = "result_qingqing.csv")
 ```
 
