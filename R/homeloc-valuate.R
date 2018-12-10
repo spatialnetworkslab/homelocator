@@ -128,7 +128,7 @@ homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", locatio
   timestamp <- rlang::sym(timestamp)
   
   initial_columns <- names(df)
-  print(paste("Start expanding new variables ..."))
+  print("Start expanding new variables ...")
   
   df <- df %>%
     mutate(hl_year = lubridate::year(!!timestamp),
@@ -144,10 +144,10 @@ homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", locatio
   
   after_expanded_columns <- names(df)
   add_columns <- paste(dplyr::setdiff(after_expanded_columns, initial_columns), collapse = ", ")
-  print(paste("Added new variables:", add_columns))
+  print(paste("Finished expanding new variables and the added new variables are:", add_columns))
   
   
-  print(paste("Start valuating variables ..."))
+  print("Start valuating variables ...")
   df %>% 
     group_by(!!user, !!location, hl_count_location, hl_uniq_hours, hl_uniq_days, hl_period_length) %>% 
     tidyr::nest() %>% 
