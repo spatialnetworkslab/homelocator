@@ -42,18 +42,48 @@ calcu_scores <- function(data, location = "GEOID", w_count_location = 0.1, w_uni
 #' 
 #' 
 #' @param df A dataframe with columns for the user id, location, timestamp
-homeloc_score <- function(df,  user = "u_id") {
+homeloc_score <- function(df,  user = "u_id", location = "GEOID", w_count_location = 0.1, w_uniq_hours = 0.1, w_uniq_days = 0.05, w_period_length =  0.05, w_percent_week = 0.2,
+                                              w_percent_satmorning = 0.2, w_percent_daytimes = 0.2, w_uniq_dayofweek = 0.05, w_uniq_month = 0.05) {
+
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
   }
+  
+  weight_sum <- sum(w_count_location, w_uniq_hours, w_uniq_days, w_period_length, w_percent_week, w_percent_satmorning,w_percent_daytimes, w_uniq_dayofweek, w_uniq_month)
+  
+  if (weight_sum != 1) {
+    stop("The sum of parameter weights is not equal to 1, please arrange your parameter weights. You can use the default parameter weights which are: w_count_location = 0.1,
+      w_uniq_hours = 0.1, w_uniq_days = 0.05, w_period_length =  0.05, w_percent_week = 0.2, w_percent_satmorning = 0.2, w_percent_daytimes = 0.2,
+      w_uniq_dayofweek = 0.05, w_uniq_month = 0.05")
+  }
+
   user <- rlang::sym(user) 
-  print(paste("Start scoring locations ..."))
+  print("Start scoring locations ...")
+  print("Parameter weights are as follows: ")
+  print(paste("w_count_location = ", w_count_location))
+  print(paste("w_uniq_hours = ", w_uniq_hours))
+  print(paste("w_uniq_days = ", w_uniq_days))
+  print(paste("w_period_length = ", w_period_length))
+  print(paste("w_percent_week = ", w_percent_week))
+  print(paste("w_percent_satmorning = ", w_percent_satmorning))
+  print(paste("w_percent_daytimes = ", w_percent_daytimes))
+  print(paste("w_uniq_dayofweek = ", w_uniq_dayofweek))
+  print(paste("w_uniq_month = ", w_uniq_month))
   
   df %>% 
     group_by(!!user) %>% 
     tidyr::nest() %>% 
-    mutate(scores = furrr::future_map(data, calcu_scores)) %>% 
+    mutate(scores = furrr::future_map(data, function(x) calcu_scores(x, w_count_location = !!w_count_location, w_uniq_hours = !!w_uniq_hours, 
+           w_uniq_days = !!w_uniq_days, w_period_length = !!w_period_length, w_percent_week = !!w_percent_week, w_percent_satmorning = !!w_percent_satmorning, 
+           w_percent_daytimes = !!w_percent_daytimes, w_uniq_dayofweek = !!w_uniq_dayofweek, w_uniq_month = !!w_uniq_month))) %>% 
     select(-data) %>%
     unnest() %>% 
     ungroup()
 }
+
+
+
+
+
+
+
