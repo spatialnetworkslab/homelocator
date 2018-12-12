@@ -20,29 +20,29 @@ get_RegularCells<- function(df){
     ungroup() %>% 
     filter(n_day_permonth >= 2)
   n_users <- df_sub$u_id %>% n_distinct()
-  print(paste("There are", n_users, "regular cells"))
+  print(paste("There are", n_users, "users remained."))
   df_sub
 }
 
 ## remove low users 
-lowUsers_detect <- function(data){
-  df <- data %>% 
+slice_top <- function(data){
+  data %>% 
     arrange(., desc(n_days), desc(n_tweets)) %>% 
     top_n(1) %>% 
-    slice(1)
-  
-  if (df$n_days < 7){
-    tibble::tibble(
-      GEOID = NA, 
-      n_days = NA, 
-      n_tweets = NA)
+    slice(1) 
+}
+
+exam_days <- function(data){
+  distinct_days <- data %>% pull(distinct_day)
+  if(any(distinct_days >= 7)){
+    return("keep")
   } else{
-    data
+    return("remove")
   }
 }
 
 remove_toolowUsers <- function(df){
-  df_sub <- df %>% 
+  df_top <- df %>% 
     unite(date, year, month, day, sep = "-") %>% 
     mutate(date = as.Date(date)) %>% 
     group_by(u_id, GEOID) %>% 
@@ -50,15 +50,28 @@ remove_toolowUsers <- function(df){
               n_tweets = n()) %>% 
     group_by(u_id) %>% 
     nest() %>% 
-    mutate(results = future_map(data, lowUsers_detect)) %>% 
+    mutate(result = future_map(data, slice_top)) %>% 
+    select(-data) %>% 
+    ungroup() %>% 
+    unnest() 
+  
+  kept_users <- df_top %>% 
+    left_join(., df, by= c("u_id", "GEOID")) %>% 
+    group_by(u_id, GEOID, year, month) %>% 
+    summarise(distinct_day = n_distinct(day)) %>% 
+    select(u_id, distinct_day) %>% 
+    group_by(u_id) %>% 
+    nest() %>% 
+    mutate(status = future_map(data, exam_days)) %>% 
     select(-data) %>% 
     ungroup() %>% 
     unnest() %>% 
-    na.omit() %>% 
-    left_join(., df, by= c("u_id", "GEOID"))
-  n_users <- df_sub$u_id %>% n_distinct()
+    filter(status == "keep") %>% 
+    pull(u_id)
+  
+  n_users <- kept_users %>% n_distinct()
   print(paste("After removing too low data, there are", n_users, "users remained"))
-  df_sub
+  df %>% filter(u_id %in% kept_users)
 }
 
 
@@ -81,38 +94,55 @@ remove_tooHighUsers <- function(df){
 get_topN_GEOID <- function(data, topN){
   data %>% 
     arrange(., desc(n_days), desc(n_tweets)) %>% 
-    top_n(n=topN, wt = n_tweets) %>% 
+    top_n(n=topN) %>% 
     head(., n = topN) 
 }
 to.times <- function(x) chron::times(paste0(x, ":00"))
 
 detect_anchorPoint <- function(data){
-  data %>% 
-    group_by(date) %>% 
-    summarise(beginTime = mean(times)) %>% 
-    ungroup() %>% 
-    summarise(avg_beginTime = mean(beginTime), 
-      sd_beginTime = sd(beginTime)) %>% 
+  data %>%
+    group_by(date) %>%
+    summarise(beginTime = mean(times)) %>%
+    ungroup() %>%
+    summarise(avg_beginTime = mean(beginTime),
+              sd_beginTime = sd(beginTime)) %>%
     mutate(loc = if_else((avg_beginTime > to.times("17:00") & sd_beginTime > 0.175), "home", if_else((avg_beginTime < to.times("17:00") & sd_beginTime <= 0.175), "work", "not sure"))) %>%
     pull(loc)
 }
 
+
+# detect_anchorPoint <- function(data){
+#   data %>% 
+#     group_by(date) %>% 
+#     summarise(beginTime = mean(times)) %>% 
+#     ungroup() %>% 
+#     summarise(avg_beginTime = mean(beginTime), 
+#       sd_beginTime = sd(beginTime)) %>% 
+#     mutate(loc = if_else((avg_beginTime < to.times("17:00") & sd_beginTime <= 0.175), "work", "home")) %>%
+#     pull(loc)
+# }
+
+
 determine_anchorType <- function(df){
   # get two regular cells/GEOID that had the highest number of days with calls 
-  df_top2 <- regular_cells %>% 
+  df_top2 <- df %>% 
+    unite(date, year, month, day, sep = "-") %>% 
+    mutate(date = as.Date(date)) %>% 
+    group_by(u_id, GEOID) %>% 
+    summarise(n_days = n_distinct(date), 
+              n_tweets = n()) %>% 
     select(c(u_id, GEOID, n_days, n_tweets)) %>% 
     unique() %>% 
     group_by(u_id) %>% 
-    arrange(., desc(n_days), desc(n_tweets)) %>% 
     nest() %>% 
     mutate(GEOID = future_map(data, function(x) get_topN_GEOID(x, 2))) %>% 
     select(-data) %>% 
-    unnest() %>% 
     ungroup() %>% 
+    unnest() %>% 
     select(-n_days, -n_tweets) %>% 
     left_join(., (df %>% select(c(u_id, GEOID, created_at))), by= c("u_id", "GEOID")) %>% 
     mutate(date = as.Date(created_at, format = "%Y-%m-%d"), 
-      times = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
+           times = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
     select(-created_at)
   
   # detect anchor type
@@ -121,9 +151,9 @@ determine_anchorType <- function(df){
     nest() %>% 
     mutate(anchor_type = future_map(data, detect_anchorPoint)) %>% 
     select(-data) %>% 
+    ungroup() %>% 
     unnest()
 }
-
 
 
 
