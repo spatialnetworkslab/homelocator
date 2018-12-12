@@ -4,9 +4,9 @@ read_data <- function(file){
   df_sub <- df %>% 
     select(id, u_id, created_at, GEOID) %>% 
     mutate(year = year(created_at), 
-      month = month(created_at),
-      day = day(created_at), 
-      GEOID = as.character(GEOID)) 
+           month = month(created_at),
+           day = day(created_at), 
+           GEOID = as.character(GEOID)) 
   n_users <- df_sub$u_id %>% n_distinct()
   print(paste("Initially, there are", n_users, "users"))
   df_sub
@@ -80,15 +80,26 @@ remove_tooHighUsers <- function(df){
 
 get_topN_GEOID <- function(data, topN){
   data %>% 
+    arrange(., desc(n_days), desc(n_tweets)) %>% 
     top_n(n=topN, wt = n_tweets) %>% 
-    head(., n = topN)
+    head(., n = topN) 
 }
-
 to.times <- function(x) chron::times(paste0(x, ":00"))
 
-determine_anchor_type <- function(df){
+detect_anchorPoint <- function(data){
+  data %>% 
+    group_by(date) %>% 
+    summarise(beginTime = mean(times)) %>% 
+    ungroup() %>% 
+    summarise(avg_beginTime = mean(beginTime), 
+      sd_beginTime = sd(beginTime)) %>% 
+    mutate(loc = if_else((avg_beginTime > to.times("17:00") & sd_beginTime > 0.175), "home", if_else((avg_beginTime < to.times("17:00") & sd_beginTime <= 0.175), "work", "not sure"))) %>%
+    pull(loc)
+}
+
+determine_anchorType <- function(df){
   # get two regular cells/GEOID that had the highest number of days with calls 
-  df_top2 <- df %>% 
+  df_top2 <- regular_cells %>% 
     select(c(u_id, GEOID, n_days, n_tweets)) %>% 
     unique() %>% 
     group_by(u_id) %>% 
@@ -99,28 +110,19 @@ determine_anchor_type <- function(df){
     unnest() %>% 
     ungroup() %>% 
     select(-n_days, -n_tweets) %>% 
-    left_join(., (df %>% select(c(u_id, GEOID, created_at))), by= c("u_id", "GEOID")) 
+    left_join(., (df %>% select(c(u_id, GEOID, created_at))), by= c("u_id", "GEOID")) %>% 
+    mutate(date = as.Date(created_at, format = "%Y-%m-%d"), 
+      times = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
+    select(-created_at)
   
   # detect anchor type
   df_top2 %>% 
-    mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times(),
-      date = as.Date(created_at, format = "%Y-%m-%d")) %>% 
-    group_by(u_id, GEOID, date) %>% 
-    summarise(average_time = mean(times)) %>% 
-    ungroup() %>% 
-    mutate(time_period = if_else(average_time > to.times("17:00"), "after_17_clock", "before_17_clock")) %>%
-    group_by(u_id, GEOID, time_period) %>%
-    summarise(sd_time = sd(average_time)) %>%
-    ungroup() %>% 
-    filter(!is.na(sd_time)) %>% 
-    mutate(loc = if_else(time_period == "after_17_clock" & sd_time > 0.175, "home", if_else(time_period == "before_17_clock" & sd_time <= 0.175, "work", "NA"))) %>% 
-    filter(loc != "NA") %>% 
-    group_by(u_id) %>% 
-    mutate(n_anchor_type = n_distinct(loc), 
-      n_geoid = n_distinct(GEOID)) %>% 
-    ungroup()
+    group_by(u_id, GEOID) %>% 
+    nest() %>% 
+    mutate(anchor_type = future_map(data, detect_anchorPoint)) %>% 
+    select(-data) %>% 
+    unnest()
 }
-
 
 
 

@@ -60,7 +60,9 @@ knitr::kable(df[1:5, ])
 
 ```{r homeloc_filter, warning=FALSE, message=FALSE}
 library(tidyverse)
-df_filtered <- df %>% homeloc_filter()
+df_filtered <- df %>% 
+  homeloc_filter(min_count_user = 10, min_count_location = 10, min_period_length = 10, min_days = 10, 
+                 min_hours = 10, topUser_percent = 0.01, keep_intermediate_vars = T)
 dim(df_filtered)
 knitr::kable(df_filtered[1:5, ])
 ```
@@ -91,9 +93,10 @@ knitr::kable(df_valuated[1:5, ])
 <span style="color:red">*Note:*</span> *You can tune the weight of each variable according to your project/research/study needed.*
 
 ```{r homeloc_score, warning=FALSE, message=FALSE}
-df_scored <- df_valuated %>% homeloc_score()
-dim(df_scored)
-knitr::kable(df_scored[1:5, ])
+df_scored <- df_valuated %>% homeloc_score(user = "u_id", location = "GEOID", 0.1, 0.1, 0.05, 0.05, 0.2, 0.2, 0.2, 0.05, 0.05)
+
+#dim(df_scored)
+#knitr::kable(df_scored[1:5, ])
 ```
 
 ## Extract top two locations as users' possible home location with `homeloc_extract()`
@@ -113,6 +116,9 @@ knitr::kable(home_loc[1:5, ])
 
 
 
+```{r}
+
+```
 
 
 
