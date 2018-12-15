@@ -16,176 +16,155 @@ get_RegularCells<- function(df){
   ## Regular cells-network cells: regularly visited by one person and from which the person has made calls on at least two different days a month, in our case, the cell treat as GEOID/location, the user should has sent tweets on the location at least two differnt days a month
   df_sub <- df %>% 
     group_by(u_id, GEOID, year, month) %>% 
-    mutate(n_day_permonth = n_distinct(day)) %>%      ######### at least how many months ??????????????????????????????????
+    mutate(n_day_permonth = n_distinct(day)) %>%      
     ungroup() %>% 
-    filter(n_day_permonth >= 2)
+    filter(n_day_permonth >= 2) 
   n_users <- df_sub$u_id %>% n_distinct()
-  print(paste("There are", n_users, "users remained."))
+  print(paste("After removing random cells, there are", n_users, "users remained."))
   df_sub
 }
 
 ## remove low users 
-slice_top <- function(data){
-  data %>% 
+detect_lowUsers <- function(data){
+  df <- data %>% 
+    select(GEOID, year, month, n_day_permonth) %>% 
+    unite(time, year, month, sep = "-") %>% 
+    unique()
+  days <- data %>% 
+    group_by(GEOID) %>% 
+    unite(date, year, month, day, sep = "-") %>% 
+    mutate(date = as.Date(date)) %>% 
+    group_by(GEOID) %>% 
+    summarise(n_days = n_distinct(date), 
+      n_tweets = n_distinct(id)) %>% 
     arrange(., desc(n_days), desc(n_tweets)) %>% 
     top_n(1) %>% 
-    slice(1) 
-}
-
-exam_days <- function(data){
-  distinct_days <- data %>% pull(distinct_day)
-  if(any(distinct_days >= 7)){
-    return("keep")
+    slice(1) %>% 
+    left_join(., df) %>% 
+    arrange(., desc(n_day_permonth)) %>% 
+    top_n(1) %>% 
+    slice(1) %>% 
+    pull(n_day_permonth)
+  if(days >= 7){
+    return(1)
   } else{
-    return("remove")
+    return(0)
   }
 }
 
-remove_toolowUsers <- function(df){
-  df_top <- df %>% 
-    unite(date, year, month, day, sep = "-") %>% 
-    mutate(date = as.Date(date)) %>% 
-    group_by(u_id, GEOID) %>% 
-    summarise(n_days = n_distinct(date), 
-              n_tweets = n()) %>% 
+remove_lowUsers <- function(df){
+  initial_users <- df$u_id %>% n_distinct()
+  removed_users <- df %>% 
     group_by(u_id) %>% 
     nest() %>% 
-    mutate(result = future_map(data, slice_top)) %>% 
+    mutate(result = future_map(data, detect_lowUsers)) %>% 
     select(-data) %>% 
-    ungroup() %>% 
-    unnest() 
-  
-  kept_users <- df_top %>% 
-    left_join(., df, by= c("u_id", "GEOID")) %>% 
-    group_by(u_id, GEOID, year, month) %>% 
-    summarise(distinct_day = n_distinct(day)) %>% 
-    select(u_id, distinct_day) %>% 
-    group_by(u_id) %>% 
-    nest() %>% 
-    mutate(status = future_map(data, exam_days)) %>% 
-    select(-data) %>% 
-    ungroup() %>% 
+    ungroup %>% 
     unnest() %>% 
-    filter(status == "keep") %>% 
+    filter(result == 0) %>% 
     pull(u_id)
-  
-  n_users <- kept_users %>% n_distinct()
-  print(paste("After removing too low data, there are", n_users, "users remained"))
-  df %>% filter(u_id %in% kept_users)
+  left_users <- initial_users - removed_users %>% n_distinct()
+  print(paste("After remonving the too low users, there are", left_users, "users remained."))
+  removed_users
 }
 
-
 # remove too high users
-remove_tooHighUsers <- function(df){
+remove_highUsers <- function(df){
   # remove top 1% users 
-  df_sub <- df %>% 
+  initial_users <- df$u_id %>% n_distinct()
+  removed_users <- df %>% 
     group_by(u_id) %>% 
     summarise(total_counts = n()) %>% 
     ungroup() %>% 
     arrange(., desc(total_counts)) %>% 
-    slice(round(n_distinct(.$u_id)*0.01):n()) %>% 
-    left_join(., df) 
-  n_user <- df_sub$u_id %>% n_distinct()
-  print(paste("After removing too high data, there are", n_user, "users remained"))
-  df_sub
+    top_n(round(n_distinct(.$u_id)*0.01)) %>% 
+    pull(u_id)
+  n_user <- initial_users - removed_users %>% n_distinct()
+  print(paste("After removing too high users, there are", n_user, "users remained."))
+  removed_users
 }
 
-
-get_topN_GEOID <- function(data, topN){
-  data %>% 
-    arrange(., desc(n_days), desc(n_tweets)) %>% 
-    top_n(n=topN) %>% 
-    head(., n = topN) 
-}
-to.times <- function(x) chron::times(paste0(x, ":00"))
-
-detect_anchorPoint <- function(data){
-  data %>%
-    group_by(date) %>%
-    summarise(beginTime = mean(times)) %>%
-    ungroup() %>%
-    summarise(avg_beginTime = mean(beginTime),
-              sd_beginTime = sd(beginTime)) %>%
-    mutate(loc = if_else((avg_beginTime > to.times("17:00") & sd_beginTime > 0.175), "home", if_else((avg_beginTime < to.times("17:00") & sd_beginTime <= 0.175), "work", "not sure"))) %>%
-    pull(loc)
-}
-
-
-# detect_anchorPoint <- function(data){
-#   data %>% 
-#     group_by(date) %>% 
-#     summarise(beginTime = mean(times)) %>% 
-#     ungroup() %>% 
-#     summarise(avg_beginTime = mean(beginTime), 
-#       sd_beginTime = sd(beginTime)) %>% 
-#     mutate(loc = if_else((avg_beginTime < to.times("17:00") & sd_beginTime <= 0.175), "work", "home")) %>%
-#     pull(loc)
-# }
-
-
-determine_anchorType <- function(df){
-  # get two regular cells/GEOID that had the highest number of days with calls 
-  df_top2 <- df %>% 
-    unite(date, year, month, day, sep = "-") %>% 
-    mutate(date = as.Date(date)) %>% 
-    group_by(u_id, GEOID) %>% 
-    summarise(n_days = n_distinct(date), 
-              n_tweets = n()) %>% 
-    select(c(u_id, GEOID, n_days, n_tweets)) %>% 
-    unique() %>% 
+# detect single anchor location type 
+detect_singleAnchor <- function(df){
+  df %>% 
     group_by(u_id) %>% 
-    nest() %>% 
-    mutate(GEOID = future_map(data, function(x) get_topN_GEOID(x, 2))) %>% 
-    select(-data) %>% 
+    mutate(n_geo = n_distinct(GEOID)) %>% 
+    filter(n_geo == 1) %>% 
+    select(-n_geo) %>% 
     ungroup() %>% 
-    unnest() %>% 
-    select(-n_days, -n_tweets) %>% 
-    left_join(., (df %>% select(c(u_id, GEOID, created_at))), by= c("u_id", "GEOID")) %>% 
-    mutate(date = as.Date(created_at, format = "%Y-%m-%d"), 
-           times = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-    select(-created_at)
-  
-  # detect anchor type
-  df_top2 %>% 
+    mutate(time = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
     group_by(u_id, GEOID) %>% 
-    nest() %>% 
-    mutate(anchor_type = future_map(data, detect_anchorPoint)) %>% 
-    select(-data) %>% 
-    ungroup() %>% 
-    unnest()
+    summarise(avg_time = mean(time), 
+      sd_time = sd(time)) %>% 
+    mutate(loc = if_else(avg_time > to.times("17:00"), "home", if_else(avg_time <= to.times("17:00") & sd_time > 0.175, "home", "work"))) %>% 
+    ungroup()
 }
 
+to.times <- function(x) chron::times(paste0(x, ":00"))
+detect_multiAnchor <- function(data){
+  data <- data %>% 
+    mutate(time = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
+    unite(date, year, month, day, sep = "-") %>% 
+    group_by(GEOID) %>% 
+    summarise(n_days = n_distinct(date), 
+      n_tweets = n(), 
+      avg_time = mean(time), 
+      sd_time = sd(time)) %>% 
+    mutate(loc = if_else(avg_time > to.times("17:00"), "home", if_else(avg_time <= to.times("17:00") & sd_time > 0.175, "home", "work"))) %>% 
+    ungroup() %>% 
+    arrange(., desc(n_days), desc(n_tweets)) %>% 
+    top_n(n = 5) %>% 
+    head(5) %>% left_join(., acs_ky)
+  
+  GEOIDs <- data$GEOID
+  locs <- data$loc
+  IDs <- data$id
+  len <- nrow(data)
+  i <- 1
+  while (i < len) {
+    if(locs[1] == locs[i+1]){
+      if(IDs[i+1] %in% neighbors[[IDs[1]]]){
+        i <- i + 1
+        if(i == len){
+          result <- tibble(
+            GEOID = c(GEOIDs[1], GEOIDs[2]),
+            loc = c(locs[1], locs[2]),
+            type = c(rep("one type, neighbor", 2)))
+          break
+        } else{next}
+      } else{
+        result <- tibble(
+          GEOID = c(GEOIDs[1], GEOIDs[i+1]),
+          loc = c(locs[1], locs[i+1]),
+          type = c(rep("one type, non neighbor", 2)))
+        break
+      }
+    } else{
+      result <- tibble(
+        GEOID = c(GEOIDs[1], GEOIDs[i+1]),
+        loc = c(locs[1], locs[i+1]),
+        type = c(rep("one home, one work", 2)))
+      break
+    }
+  }
+  return(result)
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+decide_multiAnchor <- function(data){
+  df_type <- data %>% select(GEOID, loc, type) %>% unique()
+  df_percent <- data %>% 
+    group_by(GEOID) %>% 
+    summarise(n_day = n_distinct(date)) %>% 
+    ungroup() %>% 
+    mutate(total_day = sum(n_day), 
+      percent_day = n_day/total_day) %>% 
+    select(GEOID, percent_day) 
+  percentages <- df_percent$percent_day
+  if(all(percentages <= 0.75)){
+    df_type
+  } else{
+    df_type %>% head(1) %>% mutate(type = "multifunctional")
+  }
+}
 
 
