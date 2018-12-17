@@ -1,0 +1,146 @@
+---
+title: "Three method comparison"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4  
+    number_sections: true  
+    theme: united  
+    highlight: tango  
+    toc_float: true   
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r library}
+source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/vignettes/function_results_comparison.R")
+```
+
+## Load results of three methods 
+- Hariton Efstathiades vs. Qingqing Chen
+  - There are 9834 out of 10233 (96.10%) users have the same results
+  - There are 399 out of 10233 (3.9%) users have the different results 
+    - There are 169 (42.36%) users' different results are neighboring cells 
+    - There are 230 (57.6%) users' different results are non-neighboring cells 
+    
+```{r load_census_data, message=FALSE, warning=FALSE}
+options(tigris_use_cache = TRUE, tigris_class="sf")
+census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
+st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
+  variables = c(medincome = "B19013_001"),
+  geometry = T, output = "wide", year = 2016)  %>%
+  st_transform(., "+init=epsg:4326") %>%
+  select(GEOID) %>%
+  mutate(id = 1:nrow(.))
+neighbors <- st_queen(acs_ky)
+```
+
+```{r load_sameResult_efs_qq, message=FALSE, warning=FALSE}
+sameRes_efs_qq <- readr::read_csv(system.file("extdata", "sameRes_efs_qq.csv", package = "homelocator", mustWork = TRUE)) 
+dim(sameRes_efs_qq)
+knitr::kable(sameRes_efs_qq)
+diffRes_efs_qq <- readr::read_csv(system.file("extdata", "diffRes_efs_qq.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
+dim(diffRes_efs_qq)
+knitr::kable(diffRes_efs_qq)
+```
+
+- Rein Ahas vs. Qingqing Chen
+  - There are 9022 out of 9095 (99.20%) users have the same results
+  - There are 73 out of 10233 (0.8%) users have the different results 
+    - There are 51 (69.86%) users' different results are neighboring cells 
+    - There are 22 (30.14%) users' different results are non-neighboring cells 
+    
+```{r load_results_ahas_qq, message=FALSE, warning=FALSE}
+sameRes_ahas_qq <- readr::read_csv(system.file("extdata", "sameRes_ahas_qq.csv", package = "homelocator", mustWork = TRUE)) 
+dim(sameRes_ahas_qq)
+knitr::kable(sameRes_ahas_qq)
+diffRes_ahas_qq <- readr::read_csv(system.file("extdata", "diffRes_ahas_qq.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
+dim(diffRes_ahas_qq)
+knitr::kable(diffRes_ahas_qq)
+```
+
+- Hariton Efstathiades vs. Rein Ahas
+  - There are 9025 out of 9340 (96.63%) users have the same results
+  - There are 315 out of 10233 (3.37%) users have the different results 
+    - There are 213 (67.62%) users' different results are neighboring cells 
+    - There are 102 (30.14%) users' different results are non-neighboring cells 
+    
+```{r load_results_ahas_efs, message=FALSE, warning=FALSE}
+sameRes_ahas_efs <- readr::read_csv(system.file("extdata", "sameRes_ahas_efs.csv", package = "homelocator", mustWork = TRUE)) 
+dim(sameRes_ahas_efs)
+knitr::kable(sameRes_ahas_efs)
+diffRes_ahas_efs <- readr::read_csv(system.file("extdata", "diffRes_ahas_efs.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
+dim(diffRes_ahas_efs)
+knitr::kable(diffRes_ahas_efs)
+```
+
+## Different results visualization
+- Hariton Efstathiades VS. Qingqing Chen
+  - Different results but are neighboring cells
+  
+```{r diff_efs_qq_neighbor, message=FALSE, warning=FALSE}
+tmap_mode("view")
+diff_users_efs_qq <- diffRes_efs_qq$u_id %>% unique()
+# SELECT some users to show the results
+plot1_users <- diff_users_efs_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(4, 6, 49, 38, 45, 48)) %>% 
+  pull(value)
+plot2_users <- diff_users_efs_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(1, 2, 3, 7, 13, 19)) %>% 
+  pull(value)
+view_diffUsers(diffRes_efs_qq, plot1_users)
+```
+    - Different results and are non-neighboring cells
+    
+```{r diff_efs_qq_non_neighbor, message=FALSE, warning=FALSE}
+view_diffUsers(diffRes_efs_qq, plot2_users)
+```
+
+- Rein Ahas VS. Qingqing Chen
+   - Different results but are neighboring cells
+   
+```{r ahas_qq_neighbor, message=FALSE, warning=FALSE}
+diff_users_ahas_qq <- diffRes_ahas_qq$u_id %>% unique()
+# SELECT some users to show the results
+plot3_users <- diff_users_ahas_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(3, 13, 14, 17, 29, 30)) %>% 
+  pull(value)
+plot4_users <- diff_users_ahas_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(16, 19, 22, 23, 25, 36)) %>% 
+  pull(value)
+view_diffUsers(diffRes_ahas_qq, plot3_users)
+```
+
+    - Different results and are non-neighboring cells 
+    
+```{r ahas_qq_non_neighbor, message=FALSE, warning=FALSE}
+view_diffUsers(diffRes_ahas_qq, plot4_users)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
