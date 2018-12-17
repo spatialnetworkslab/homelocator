@@ -86,5 +86,5 @@ view_diffUsers <- function(df_diff, user_id){
     tm_text("homeloc", col = "black") + 
     tm_borders() + 
     tm_view(view.legend.position = c("left", "bottom")) +
-    tm_facets(by = "u_id")
+    tm_facets(by = "u_id", ncol = 3)
 }

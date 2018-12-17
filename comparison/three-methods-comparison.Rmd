@@ -84,7 +84,7 @@ plot1_users <- diff_users_efs_qq %>%
   mutate(id = 1:nrow(.)) %>% 
   filter(id %in% c(4, 6, 49, 38, 45, 48)) %>% 
   pull(value)
-plot2_users <- diff_users_ahas_qq %>% 
+plot2_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
   filter(id %in% c(1, 2, 3, 7, 13, 19)) %>% 
