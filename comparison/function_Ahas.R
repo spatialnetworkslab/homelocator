@@ -163,7 +163,7 @@ decide_multiAnchor <- function(data){
   if(all(percentages <= 0.75)){
     df_type
   } else{
-    df_type %>% head(1) %>% mutate(type = "multifunctional")
+    df_type %>% head(1) %>% mutate(type = if_else(loc == "home", "multifunctional, main home", "multifunctional, main work"))
   }
 }
 

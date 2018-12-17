@@ -80,9 +80,8 @@ multiAnchors <- df_multi %>%
 
 results <- bind_rows(singleAnchor, multiAnchors)
 df_home <- results %>% 
-  filter(loc == "home") %>% 
-  filter(type != "multifunctional")
-write_csv(df_home, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_ahs.csv")
+  filter(loc == "home") 
+write_csv(df_home, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_ahas.csv")
 ```
 
 
