@@ -50,24 +50,32 @@ df_ahas <- read_csv("result_ahas.csv") %>%
 sameRes_efs_qq <- commonRes_detect(df_qq, df_efs)
 diffRes_efs_qq <- diffRes_detect(df_qq, df_efs, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_efs"))
+write_csv(sameRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_efs_qq.csv")
+write_csv(diffRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_efs_qq.csv")
 ```
 
 ```{r qq_vs_ahas, message=FALSE, warning=FALSE}
 sameRes_ahas_qq <- commonRes_detect(df_qq, df_ahas)
 diffRes_ahas_qq <- diffRes_detect(df_qq, df_ahas, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_ahas"))
+write_csv(sameRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_qq.csv")
+write_csv(diffRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_qq.csv")
 ```
 
 ```{r efs_vs_ahas, message=FALSE, warning=FALSE}
 sameRes_ahas_efs <- commonRes_detect(df_efs, df_ahas)
 diffRes_ahas_efs <- diffRes_detect(df_efs, df_ahas, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_efs", "home_ahas"))
+write_csv(sameRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs.csv")
+write_csv(diffRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_efs.csv")
 ```
 
 
 ```{r efs_ahas_qq, message=FALSE, warning=FALSE}
 sameRes_ahas_efs_qq <- commonRes_detect(sameRes_efs_qq, df_ahas)
 df_same_three <- plyr::join_all(list(df_qq, df_efs, df_ahas), by = c("u_id", "homeloc"), type = 'inner')
+write_csv(sameRes_ahas_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs_qq.csv")
+write_csv(df_same_three, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/df_same_three.csv")
 # diffRes_ahas_efs_qq <- diffRes_detect(sameRes_efs_qq, df_ahas, df, acs_ky)
 ```
 
@@ -84,29 +92,13 @@ plot1_users <- diff_users_efs_qq %>%
   mutate(id = 1:nrow(.)) %>% 
   filter(id %in% c(4, 6, 49, 38, 45, 48)) %>% 
   pull(value)
-plot2_users <- diff_users_ahas_qq %>% 
+plot2_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
   filter(id %in% c(1, 2, 3, 7, 13, 19)) %>% 
   pull(value)
 view_diffUsers(diffRes_efs_qq, plot1_users)
 view_diffUsers(diffRes_efs_qq, plot2_users)
-
-# view_diffUsers <- function(df_diff, user_id){
-#   df <- df_diff %>% 
-#     left_join(., acs_ky) %>% 
-#     st_as_sf
-#   df %>% 
-#     filter(u_id == user_id) %>% 
-#     tm_shape() + 
-#     tm_fill("n_tweets") + 
-#     tm_text("homeloc", col = "black") + 
-#     tm_borders() + 
-#     tm_facets(by = "u_id")
-#   # + 
-#   #   tm_legend(position = c("left", "bottom"))
-# }
-# view_diffUsers(diffRes_efs_qq, diff_users[2])
 ```
 
 ```{r view_diff_ahas_qq, message=FALSE, warning=FALSE}
