@@ -23,6 +23,7 @@ library(tidyverse)
 library(sf)
 library(tidycensus)
 library(furrr)
+source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/function_three_compare.R")
 ```
 
 ```{r load_three_results}
@@ -38,204 +39,94 @@ df_qq <- read_csv("result_qingqing.csv") %>%
 df_efs <- read_csv("result_efstathiades_homeloc.csv") %>% 
   setNames(c("u_id", "homeloc")) %>% 
   mutate(homeloc = as.character(homeloc))
-df_ahas <- read_csv("result_ahas.csv") 
-```
-
-```{r load_functions, warning=FALSE, message=FALSE}
-options(tigris_use_cache = TRUE, tigris_class="sf")
-st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
-acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
-                  variables = c(medincome = "B19013_001"),
-                  geometry = T, output = "wide", year = 2016)  %>%
-                  st_transform(., "+init=epsg:4326") %>% 
-    select(GEOID) %>% 
-    mutate(id = 1:nrow(.))
-neighbors <- st_queen(acs_ky)
-get_neighbos <- function(ids){
-  neighbor <- c()
-  for (i in ids) {
-    neighbor <- append(neighbor, neighbors[[i]]) %>% unique()
-  }
-  return(neighbor)
-}
-detect_neighbor <- function(data){
-  df1_locIDs <- data %>% filter(homeloc == "homeloc_df1") %>% pull(id)
-  df2_locIDs <-  data %>% filter(homeloc == "homeloc_df2") %>% pull(id)
-  df1_neighbors <- get_neighbos(df1_locIDs)
-  df2_neighbors <- get_neighbos(df2_locIDs)
-  if (df2_locIDs %in% df1_neighbors){
-    return("neighboring")
-  } else if(df1_locIDs %in% df2_neighbors){
-    return("neighboring")
-  } else{
-    return("non-neighboring")
-  }
-}
-commonRes_detect <- function(df_1, df_2){
-  # get common users ids 
-  common_IDs <- intersect(df_1$u_id, df_2$u_id)
-  print(paste("There are", common_IDs %>% length(), "common users from the two methods"))
-  # get the same results from the common users 
-  same_Res <- inner_join(df_1 %>% filter(u_id %in% common_IDs), df_2 %>% filter(u_id %in% common_IDs), by = c("u_id", "homeloc"))
-  print(paste("There are", same_Res %>% nrow(), "users have the same results from the two methods"))
-  return(same_Res)
-}
-
-diffRes_detect <- function(df_1, df_2, df, acs_ky){
-  # get common users ids 
-  common_IDs <- intersect(df_1$u_id, df_2$u_id)
-  sameRes <- commonRes_detect(df_1, df_2)
-  # get the different user results from the common users 
-  diffRes <- setdiff(common_IDs, sameRes$u_id)
-  print(paste("There are", diffRes %>% length(), "users have the different results from the two methods"))
-  # look into details to check whether the two results of each user are neighboring cells or not 
-  diff_df <- df_1 %>% 
-    filter(u_id %in% diffRes) %>% 
-    setNames(c("u_id", "homeloc_df1")) %>% 
-    left_join(., (df_2 %>% filter(u_id %in% diffRes) %>% setNames(c("u_id", "homeloc_df2")))) %>% 
-    gather("homeloc_df1", "homeloc_df2", key = "homeloc", value = "GEOID") %>% 
-    left_join(., df) %>%
-    mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>%
-    group_by(u_id, homeloc, GEOID) %>%
-    summarise(n_tweets = n(),
-              sd = sd(times)) %>%
-    ungroup() %>%
-    arrange(., u_id)
-  diff_df_2 <- diff_df %>%
-    left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>%
-    group_by(u_id) %>%
-    nest() %>%
-    mutate(neighbor_rel = future_map(data, detect_neighbor) %>% unlist()) %>%
-    select(-data) %>%
-    left_join(., diff_df, by = c("u_id")) %>%
-    select(c(u_id, homeloc, GEOID, n_tweets, sd, neighbor_rel))
-  print(paste("There are", diff_df_2 %>% filter(neighbor_rel == "neighboring") %>% pull(u_id) %>% n_distinct(), "users' different home results are neighboring cells from the two methods"))
-  print(paste("There are", diff_df_2 %>% filter(neighbor_rel == "non-neighboring") %>% pull(u_id) %>% n_distinct(), "users' different home results are non-neighboring cells from the two methods"))
-  diff_df_2
-}
+df_ahas <- read_csv("result_ahas.csv") %>% 
+  select(u_id, GEOID) %>% 
+  mutate(GEOID = as.character(GEOID)) %>% 
+  setNames(c("u_id", "homeloc"))
 ```
 
 
-```{r qing_vs_efs, message=FALSE, warning=FALSE}
+```{r qq_vs_efs, message=FALSE, warning=FALSE}
 sameRes_efs_qq <- commonRes_detect(df_qq, df_efs)
-diffRes_efs_qq <- diffRes_detect(df_efs, df_qq, df, acs_ky)
+diffRes_efs_qq <- diffRes_detect(df_qq, df_efs, df, acs_ky) %>% 
+  mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_efs"))
 ```
 
-```{r viewing_different_users, message=FALSE, warning=FALSE}
+```{r qq_vs_ahas, message=FALSE, warning=FALSE}
+sameRes_ahas_qq <- commonRes_detect(df_qq, df_ahas)
+diffRes_ahas_qq <- diffRes_detect(df_qq, df_ahas, df, acs_ky) %>% 
+  mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_ahas"))
+```
+
+```{r efs_vs_ahas, message=FALSE, warning=FALSE}
+sameRes_ahas_efs <- commonRes_detect(df_efs, df_ahas)
+diffRes_ahas_efs <- diffRes_detect(df_efs, df_ahas, df, acs_ky) %>% 
+  mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_efs", "home_ahas"))
+```
+
+
+```{r efs_ahas_qq, message=FALSE, warning=FALSE}
+sameRes_ahas_efs_qq <- commonRes_detect(sameRes_efs_qq, df_ahas)
+df_same_three <- plyr::join_all(list(df_qq, df_efs, df_ahas), by = c("u_id", "homeloc"), type = 'inner')
+# diffRes_ahas_efs_qq <- diffRes_detect(sameRes_efs_qq, df_ahas, df, acs_ky)
+```
+
+```{r view_diff_efs_qq, message=FALSE, warning=FALSE}
 library(tmap)
 tmap_mode("view")
-diff_users <- diffRes_efs_qq$u_id %>% unique()
-view_diffUsers <- function(df_diff, user_id){
-  df <- df_diff %>% 
-    left_join(., acs_ky) %>% 
-    st_as_sf
-  df %>% 
-    filter(u_id == user_id) %>% 
-    tm_shape() + 
-    tm_fill("n_tweets") + 
-    tm_text("homeloc", col = "black") + 
-    tm_borders()
-}
-view_diffUsers(diffRes_efs_qq, diff_users[2])
+#tmap_mode("plot")
+#ttm()
+
+diff_users_efs_qq <- diffRes_efs_qq$u_id %>% unique()
+# SELECT some users to show the results
+plot1_users <- diff_users_efs_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(4, 6, 49, 38, 45, 48)) %>% 
+  pull(value)
+plot2_users <- diff_users_ahas_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(1, 2, 3, 7, 13, 19)) %>% 
+  pull(value)
+view_diffUsers(diffRes_efs_qq, plot1_users)
+view_diffUsers(diffRes_efs_qq, plot2_users)
+
+# view_diffUsers <- function(df_diff, user_id){
+#   df <- df_diff %>% 
+#     left_join(., acs_ky) %>% 
+#     st_as_sf
+#   df %>% 
+#     filter(u_id == user_id) %>% 
+#     tm_shape() + 
+#     tm_fill("n_tweets") + 
+#     tm_text("homeloc", col = "black") + 
+#     tm_borders() + 
+#     tm_facets(by = "u_id")
+#   # + 
+#   #   tm_legend(position = c("left", "bottom"))
+# }
+# view_diffUsers(diffRes_efs_qq, diff_users[2])
 ```
 
-```{r qing_vs_ahas}
-# # get home users from ahas df 
-# df_ahas_sub <- df_ahas %>% filter(!type %in% c("multifunctional anchor", "one work","two home one work"))
-# # get the common users' ID
-# common_users_2 <- intersect(df_qing$u_id, df_ahas_sub$u_id)  #4493 common users 
-# # get the resutls of the common users from Efstathiades and ours method 
-# # same results 
-# df_ahas_sub_home <- df_ahas_sub %>% filter(anchor_type == "home") %>% 
-#   select(u_id, GEOID) %>% 
-#   setNames(c("u_id", "homeloc"))
-# result_same_2 <- inner_join( df_qing %>% filter(u_id %in% common_users_2), 
-#                              df_ahas_sub_home %>% filter(u_id %in% common_users_2), 
-#                              by = c("u_id", "homeloc"))  #2980 users have the same results from two method (66.3254% matched)
-# diff_users_2 <- setdiff(common_users_2, result_same_2$u_id) #1513 users have the different results from the two methods (33.6746% dismatched)
-# # look into the details 
-# diff_df_2 <- df_ahas_sub_home %>% 
-#   filter(u_id %in% diff_users_2) %>% 
-#   setNames(c("u_id", "homeloc_ahas")) %>% 
-#   left_join(., (df_qing %>% filter(u_id %in% diff_users_2) %>% setNames(c("u_id", "homeloc_qing")))) %>% 
-#   gather("homeloc_ahas", "homeloc_qing", key = "homeloc", value = "GEOID") %>% 
-#   left_join(., df) %>% 
-#   mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-#   group_by(u_id, homeloc, GEOID) %>% 
-#   summarise(n_tweets = n(), 
-#             sd = sd(times)) %>% 
-#   ungroup() %>% 
-#   arrange(., u_id) %>% 
-#   mutate(GEOID = as.character(GEOID))
-# 
-# diff_df_2 <- diff_df_2 %>% 
-#   left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>% 
-#   group_by(u_id) %>% 
-#   nest() %>% 
-#   mutate(neighbor_rel = future_map(data, detect_neighbor) %>% unlist()) %>% 
-#   select(-data) %>% 
-#   left_join(., diff_df_2, by = c("u_id")) %>% 
-#   select(c(u_id, homeloc, GEOID, n_tweets, sd, neighbor_rel))
-# diff_df_neighboring_2 <- diff_df_2 %>% filter(neighbor_rel == "neighboring cell")  # 699 users out of 1513 different users (0.461996)
-# diff_df_non_neighboring_2 <- diff_df_2 %>% filter(neighbor_rel == "non-neighboring cell") # 814 users out of 1513 different users (0.538004)
+```{r view_diff_ahas_qq, message=FALSE, warning=FALSE}
+diff_users_ahas_qq <- diffRes_ahas_qq$u_id %>% unique()
+# SELECT some users to show the results
+plot3_users <- diff_users_ahas_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(3, 13, 14, 17, 29, 30)) %>% 
+  pull(value)
+plot4_users <- diff_users_ahas_qq %>% 
+  as_data_frame() %>% 
+  mutate(id = 1:nrow(.)) %>% 
+  filter(id %in% c(16, 19, 22, 23, 25, 36)) %>% 
+  pull(value)
+view_diffUsers(diffRes_ahas_qq, plot3_users)
+view_diffUsers(diffRes_ahas_qq, plot4_users)
 ```
 
-```{r ahas_efs}
-# # get the common users' ID
-# common_users_efs_ahas <- intersect(df_efs_home$u_id, df_ahas_sub$u_id)  #4640 common users 
-# result_same_efs_ahas <- inner_join(df_efs_home %>% filter(u_id %in% common_users_efs_ahas), 
-#                              df_ahas_sub_home %>% filter(u_id %in% common_users_efs_ahas), 
-#                              by = c("u_id", "homeloc"))  #3044 users have the same results from two method (0.6560345 matched)
-# diff_users_efs_ahas <- setdiff(common_users_efs_ahas, result_same_efs_ahas$u_id) #1596 users have the different results from the two methods (0.3439655 dismatched)
-# 
-#  
-# diff_df_efs_ahas <- df_ahas_sub_home %>% 
-#   filter(u_id %in% diff_users_efs_ahas) %>% 
-#   setNames(c("u_id", "homeloc_ahas")) %>% 
-#   left_join(., (df_efs_home %>% filter(u_id %in% diff_users_efs_ahas) %>% setNames(c("u_id", "homeloc_efs")))) %>% 
-#   gather("homeloc_ahas", "homeloc_efs", key = "homeloc", value = "GEOID") %>% 
-#   left_join(., df) %>% 
-#   mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-#   group_by(u_id, homeloc, GEOID) %>% 
-#   summarise(n_tweets = n(), 
-#             sd = sd(times)) %>% 
-#   ungroup() %>% 
-#   arrange(., u_id) %>% 
-#   mutate(GEOID = as.character(GEOID))
-# 
-# diff_df_efs_ahas <- diff_df_efs_ahas %>% 
-#   left_join(., acs_ky %>% st_set_geometry(NULL), by = c("GEOID")) %>% 
-#   group_by(u_id) %>% 
-#   nest() %>% 
-#   mutate(neighbor_rel = future_map(data, detect_neighbor) %>% unlist()) %>% 
-#   select(-data) %>% 
-#   left_join(., diff_df_efs_ahas, by = c("u_id")) %>% 
-#   select(c(u_id, homeloc, GEOID, n_tweets, sd, neighbor_rel))
-# diff_df_neighboring_efs_ahas <- diff_df_efs_ahas %>% filter(neighbor_rel == "neighboring cell")  # 724 users out of 1596 different users (0.4536341)
-# diff_df_non_neighboring_efs_ahas <- diff_df_efs_ahas %>% filter(neighbor_rel == "non-neighboring cell") #872 users out of 1596 different users (0.5463659) 
-```
 
-```{r common_of_three}
-# common_three <- intersect(intersect(df_qing$u_id, df_ahas_sub$u_id), df_efs_home$u_id)  #3979 users 
-# same_df_three <- inner_join(inner_join(df_qing %>% filter(u_id %in% common_three), df_ahas_sub_home %>% filter(u_id %in% common_three), by = c("u_id", "homeloc")), 
-#            df_efs_home %>% filter(u_id %in% common_three), by = c("u_id", "homeloc"))  #2337 users (0.5873335)
-# diff_users_3<- setdiff(common_three, same_df_three$u_id) #1642 users (0.4126665)
-# diff_df_3 <- df_ahas_sub_home %>% 
-#   filter(u_id %in% common_three) %>% 
-#   setNames(c("u_id", "homeloc_ahas")) %>% 
-#   left_join(., (df_qing %>% filter(u_id %in% common_three) %>% setNames(c("u_id", "homeloc_qing")))) %>% 
-#   left_join(., (df_efs_home %>% filter(u_id %in% common_three) %>% setNames(c("u_id", "homeloc_efs")))) %>% 
-#   gather(homeloc_ahas:homeloc_efs, key = "homeloc", value = "GEOID") %>% 
-#   left_join(., df) %>% 
-#   mutate(times =  format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
-#   group_by(u_id, homeloc, GEOID) %>% 
-#   summarise(n_tweets = n(), 
-#             sd = sd(times)) %>% 
-#   ungroup() %>% 
-#   arrange(., u_id) %>% 
-#   mutate(GEOID = as.character(GEOID))
-```
 
 
 
