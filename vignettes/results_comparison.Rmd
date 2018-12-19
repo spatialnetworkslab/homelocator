@@ -1,24 +1,26 @@
 ---
-title: "Three method comparison"
-date: '`r format(Sys.time(), "%d %B, %Y")`'
-output: 
-  html_document:
-    toc: true 
-    toc_depth: 4  
-    number_sections: true  
-    theme: united  
-    highlight: tango  
-    toc_float: true   
-    code_folding: hide
-editor_options: 
-  chunk_output_type: inline
+title: "Three methods comparison"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
-```{r library}
+
+```{r library, echo=FALSE, message=FALSE, warning=FALSE}
+library(sf)
+library(tidycensus)
+library(dplyr)
+library(tmap)
 source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/vignettes/function_results_comparison.R")
 ```
 
@@ -29,26 +31,14 @@ source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/vignettes/function_results_
     - There are 169 (42.36%) users' different results are neighboring cells 
     - There are 230 (57.6%) users' different results are non-neighboring cells 
     
-```{r load_census_data, message=FALSE, warning=FALSE}
-options(tigris_use_cache = TRUE, tigris_class="sf")
-census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
-st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
-  variables = c(medincome = "B19013_001"),
-  geometry = T, output = "wide", year = 2016)  %>%
-  st_transform(., "+init=epsg:4326") %>%
-  select(GEOID) %>%
-  mutate(id = 1:nrow(.))
-neighbors <- st_queen(acs_ky)
-```
-
 ```{r load_sameResult_efs_qq, message=FALSE, warning=FALSE}
+devtools::load_all(".")
 sameRes_efs_qq <- readr::read_csv(system.file("extdata", "sameRes_efs_qq.csv", package = "homelocator", mustWork = TRUE)) 
 dim(sameRes_efs_qq)
-knitr::kable(sameRes_efs_qq)
+knitr::kable(sameRes_efs_qq[1:5, ])
 diffRes_efs_qq <- readr::read_csv(system.file("extdata", "diffRes_efs_qq.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
 dim(diffRes_efs_qq)
-knitr::kable(diffRes_efs_qq)
+knitr::kable(diffRes_efs_qq[1:5, ])
 ```
 
 - Rein Ahas vs. Qingqing Chen
@@ -60,10 +50,10 @@ knitr::kable(diffRes_efs_qq)
 ```{r load_results_ahas_qq, message=FALSE, warning=FALSE}
 sameRes_ahas_qq <- readr::read_csv(system.file("extdata", "sameRes_ahas_qq.csv", package = "homelocator", mustWork = TRUE)) 
 dim(sameRes_ahas_qq)
-knitr::kable(sameRes_ahas_qq)
+knitr::kable(sameRes_ahas_qq[1:5, ])
 diffRes_ahas_qq <- readr::read_csv(system.file("extdata", "diffRes_ahas_qq.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
 dim(diffRes_ahas_qq)
-knitr::kable(diffRes_ahas_qq)
+knitr::kable(diffRes_ahas_qq[1:5, ])
 ```
 
 - Hariton Efstathiades vs. Rein Ahas
@@ -75,18 +65,19 @@ knitr::kable(diffRes_ahas_qq)
 ```{r load_results_ahas_efs, message=FALSE, warning=FALSE}
 sameRes_ahas_efs <- readr::read_csv(system.file("extdata", "sameRes_ahas_efs.csv", package = "homelocator", mustWork = TRUE)) 
 dim(sameRes_ahas_efs)
-knitr::kable(sameRes_ahas_efs)
+knitr::kable(sameRes_ahas_efs[1:5, ])
 diffRes_ahas_efs <- readr::read_csv(system.file("extdata", "diffRes_ahas_efs.csv", package = "homelocator", mustWork = TRUE)) %>% mutate(GEOID = GEOID %>% as.character())
 dim(diffRes_ahas_efs)
-knitr::kable(diffRes_ahas_efs)
+knitr::kable(diffRes_ahas_efs[1:5, ])
 ```
 
+
 ## Different results visualization
-- Hariton Efstathiades VS. Qingqing Chen
-  - Different results but are neighboring cells
+### Hariton Efstathiades VS. Qingqing Chen
+Different results but are neighboring cells
   
-```{r diff_efs_qq_neighbor, message=FALSE, warning=FALSE}
-tmap_mode("view")
+```{r diff_efs_qq_neighbor, message=FALSE, warning=FALSE, fig.width = 10, fig.height = 5}
+tmap_mode("plot")
 diff_users_efs_qq <- diffRes_efs_qq$u_id %>% unique()
 # SELECT some users to show the results
 plot1_users <- diff_users_efs_qq %>% 
@@ -101,16 +92,19 @@ plot2_users <- diff_users_efs_qq %>%
   pull(value)
 view_diffUsers(diffRes_efs_qq, plot1_users)
 ```
-    - Different results and are non-neighboring cells
+
+
+Different results and are non-neighboring cells
     
-```{r diff_efs_qq_non_neighbor, message=FALSE, warning=FALSE}
+```{r diff_efs_qq_non_neighbor, message=FALSE, warning=FALSE, fig.width = 10, fig.height = 5}
 view_diffUsers(diffRes_efs_qq, plot2_users)
 ```
 
-- Rein Ahas VS. Qingqing Chen
-   - Different results but are neighboring cells
+### Rein Ahas VS. Qingqing Chen
+
+Different results but are neighboring cells
    
-```{r ahas_qq_neighbor, message=FALSE, warning=FALSE}
+```{r ahas_qq_neighbor, message=FALSE, warning=FALSE, fig.width = 10, fig.height = 5}
 diff_users_ahas_qq <- diffRes_ahas_qq$u_id %>% unique()
 # SELECT some users to show the results
 plot3_users <- diff_users_ahas_qq %>% 
@@ -126,9 +120,10 @@ plot4_users <- diff_users_ahas_qq %>%
 view_diffUsers(diffRes_ahas_qq, plot3_users)
 ```
 
-    - Different results and are non-neighboring cells 
+
+Different results and are non-neighboring cells 
     
-```{r ahas_qq_non_neighbor, message=FALSE, warning=FALSE}
+```{r ahas_qq_non_neighbor, message=FALSE, warning=FALSE, fig.width = 10, fig.height = 5}
 view_diffUsers(diffRes_ahas_qq, plot4_users)
 ```
 

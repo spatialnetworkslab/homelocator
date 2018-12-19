@@ -1,3 +1,15 @@
+options(tigris_use_cache = TRUE, tigris_class="sf")
+census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
+st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
+  variables = c(medincome = "B19013_001"),
+  geometry = T, output = "wide", year = 2016)  %>%
+  st_transform(., "+init=epsg:4326") %>%
+  dplyr::select(GEOID) %>%
+  mutate(id = 1:nrow(.))
+neighbors <- st_queen(acs_ky)
+
+
 get_neighbos <- function(ids){
   neighbor <- c()
   for (i in ids) {
@@ -54,24 +66,24 @@ diffRes_detect <- function(df_1, df_2, df, acs_ky){
     group_by(u_id) %>%
     nest() %>%
     mutate(neighbor_rel = future_map(data, detect_neighbor) %>% unlist()) %>%
-    select(-data) %>%
+    dplyr::select(-data) %>%
     left_join(., diff_df, by = c("u_id")) %>%
-    select(c(u_id, homeloc, GEOID, n_tweets, sd, neighbor_rel))
+    dplyr::select(c(u_id, homeloc, GEOID, n_tweets, sd, neighbor_rel))
   print(paste("There are", diff_df_2 %>% filter(neighbor_rel == "neighboring") %>% pull(u_id) %>% n_distinct(), "users' different home results are neighboring cells from the two methods"))
   print(paste("There are", diff_df_2 %>% filter(neighbor_rel == "non-neighboring") %>% pull(u_id) %>% n_distinct(), "users' different home results are non-neighboring cells from the two methods"))
   diff_df_2
 }
 
+tmap_options(limits = c(facets.view = 6))
 view_diffUsers <- function(df_diff, user_id){
-  df <- df_diff %>% 
+  df_diff %>% 
     left_join(., acs_ky) %>% 
-    st_as_sf
-  df %>% 
+    st_as_sf %>% 
     filter(u_id %in% user_id) %>% 
     tm_shape() + 
     tm_fill("n_tweets") + 
     tm_text("homeloc", col = "black") + 
     tm_borders() + 
-    tm_view(view.legend.position = c("left", "bottom")) +
+    #tm_view(view.legend.position = c("left", "bottom")) +
     tm_facets(by = "u_id", ncol = 3)
 }
