@@ -1,6 +1,5 @@
 ---
 title: "The introduction of homelocator package"
-author: "Chen Qingqing, Ate Poorthuis"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -92,11 +91,20 @@ knitr::kable(df_valuated[1:5, ])
 `homeloc_score()` allows you to give a weight and score to each variable and then sum the full score for each location, the score value is set between [0,1]
 <span style="color:red">*Note:*</span> *You can tune the weight of each variable according to your project/research/study needed.*
 
-```{r homeloc_score, warning=FALSE, message=FALSE}
-df_scored <- df_valuated %>% homeloc_score(user = "u_id", location = "GEOID", 0.1, 0.1, 0.05, 0.05, 0.2, 0.2, 0.2, 0.05, 0.05)
+- with default weight
 
-#dim(df_scored)
-#knitr::kable(df_scored[1:5, ])
+```{r homeloc_score_1, warning=FALSE, message=FALSE}
+df_scored <- df_valuated %>% homeloc_score()
+dim(df_scored)
+knitr::kable(df_scored[1:5, ])
+```
+
+- with tuned weight 
+```{r homeloc_score_2, warning=FALSE, message=FALSE}
+df_scored <- df_valuated %>% 
+  homeloc_score(user = "u_id", location = "GEOID", w_count_location = 0.2, w_uniq_hours = 0.1, w_uniq_days = 0.05, w_period_length = 0.05, w_percent_week = 0.1, w_percent_satmorning = 0.2, w_percent_daytimes = 0.2, w_uniq_dayofweek = 0.05, w_uniq_month = 0.05)
+dim(df_scored)
+knitr::kable(df_scored[1:5, ])
 ```
 
 ## Extract top two locations as users' possible home location with `homeloc_extract()`
@@ -109,16 +117,6 @@ dim(home_loc)
 knitr::kable(home_loc[1:5, ])
 ```
 
-
-
-
-
-
-
-
-```{r}
-
-```
 
 
 
