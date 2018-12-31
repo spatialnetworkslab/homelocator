@@ -134,7 +134,7 @@ homeloc_valuate <- function(df, user = "u_id", timestamp = "created_at", locatio
     mutate(hl_year = lubridate::year(!!timestamp),
       hl_month = lubridate::month(!!timestamp),
       hl_day = lubridate::day(!!timestamp),
-      hl_day_of_week = lubridate::wday(!!timestamp), # Sun is 1 and Sat is 7
+      hl_day_of_week = lubridate::wday(!!timestamp), # Sun is 1 and Sat is 7 
       hl_hour_of_day = lubridate::hour(!!timestamp),
       hl_week = if_else(hl_day_of_week %in% c(1,7), 1, 2),#1 for weekend, 2 for weekday
       hl_times_numeric = lubridate::hour(!!timestamp) + lubridate::minute(!!timestamp) / 60 + lubridate::second(!!timestamp) / 3600,

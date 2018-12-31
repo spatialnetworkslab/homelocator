@@ -56,6 +56,20 @@ add_column <- function(df, ...){
     mutate(!!!adds_exp_enq)
 }
 
+add_column_by_group <- function(df, group_vars, mutate_vars){
+  stopifnot(
+    is.list(group_vars),
+    is.list(mutate_vars)
+  )
+  
+  df %>% 
+    group_by(!!!group_vars) %>% 
+    mutate(!!!mutate_vars) %>% 
+    ungroup() %>% 
+    unnest() %>% 
+    group_by(u_id) %>% 
+    nest(.key = user_data)
+}
 # arrange the dataframe by (grouped) variable value 
 arrange_var_by_group <- function(df, group_var, ...){
   group_var_enq <- enquo(group_var)
@@ -80,6 +94,17 @@ remove_top_n <- function(df, top_user_percent){
     unique() %>%
     dplyr::slice(round(n_distinct(.$u_id)*!!top_user_percent_enq):n()) %>%
     left_join(., df)
+}
+
+mutate_score_by_user <- function(df, ...){
+  adds_exp_enq <- enquos(..., .named = TRUE)
+  add_column <- . %>% 
+    mutate(!!!adds_exp_enq)
+  df %>% 
+    mutate(adds = purrr::map(user_data, add_column)) %>% 
+    unnest(adds) %>% 
+    group_by(u_id) %>% 
+    nest(.key = user_data)
 }
 
 extract_home <- function(df, score_var, ...){
@@ -127,6 +152,41 @@ df_qq <- df %>%
   
 
 
+df_qq_expanded <- df_qq %>% 
+  add_column(week = if_else(day_of_week %in% c(1,7), 1, 2)) %>%  # 1 for weekend, 2 for weekday 
+  add_column(numeric_time = lubridate::hour(created_at) + lubridate::minute(created_at)/60 + lubridate::second(created_at) / 3600) %>% 
+  add_column(time_frame = if_else(numeric_time >= 9 & numeric_time <= 18, 2, 1)) %>% # 1 for rest time, 2 for work time 
+  add_column(morning_time = if_else(numeric_time >= 6 & numeric_time <= 12, 1, 2)) # 1 for morning, 2 for afternoon and night 
+
+home_qq <- df_qq_expanded %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_user(distinct_day_of_week = n_distinct(day_of_week), 
+                    distinct_month = n_distinct(month)) %>% 
+  summarise_by_groups(vars(week), 
+                      vars(counts_week = n())) %>% 
+  add_column_by_group(vars(u_id), 
+                      vars(percent_week = counts_week/sum(counts_week))) %>% 
+  summarise_by_groups(vars(time_frame), 
+                      vars(counts_time_frame = n())) %>% 
+  add_column_by_group(vars(u_id),
+                      vars(percent_time_frame = counts_time_frame/sum(counts_time_frame))) %>% 
+  mutate_score_by_user(score_counts_per_loc = 0.1 * (counts_per_loc/max(counts_per_loc))) %>% 
+  mutate_score_by_user(score_distinct_hour_per_loc = 0.1 * (distinct_hour_per_loc/24)) %>% 
+  mutate_score_by_user(score_distinct_day_per_loc = 0.1 * (distinct_day_per_loc/max(distinct_day_per_loc))) %>% 
+  mutate_score_by_user(score_time_period_per_loc = 0.1 * (time_period_per_loc/max(as.numeric(time_period_per_loc)))) %>% 
+  mutate_score_by_user(score_percent_week = 0.2 * (time_period_per_loc)) %>% 
+  mutate_score_by_user(score_percent_time_frame = 0.2 * (percent_time_frame)) %>% 
+  mutate_score_by_user(score_distinct_day_of_week = 0.1 * (distinct_day_of_week/7)) %>% 
+  mutate_score_by_user(score_distinct_month = 0.1 * (distinct_month)) %>% 
+  unnest() %>% 
+  add_column(score = rowSums(.[, c("score_counts_per_loc", "score_distinct_hour_per_loc","score_distinct_day_per_loc","score_time_period_per_loc", "score_percent_week", 
+                                             "score_percent_time_frame", "score_distinct_day_of_week", "score_distinct_month")])) %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  extract_home(score > 0, score)
+  
+  
 # ahas 
 df_ahas <- df %>% 
   summarise_by_user(counts_per_user = n(), distinct_loc_per_user = n_distinct(GEOID)) %>% 
@@ -169,9 +229,6 @@ home_ahas <- df_ahas %>%
   extract_home(score >= 1, distinct_date_per_loc, counts_per_loc)
 
 
-
-
-
 # efs 
 df_efs <- df %>% 
   summarise_by_user(counts_per_user = n(), 
@@ -204,61 +261,3 @@ home_efs <- df_efs %>%
   nest(.key = user_data) %>% 
   extract_home(score > 0, score)
   
-
-
-
-
-
-  
-
-# test[1:3, ] %>% 
-#   summarise_by_groups(vars(GEOID), 
-#                       vars(counts_per_loc = n(),
-#                            counts_hour = n_distinct(hour_of_day)))
-# 
-# test[1:3, ] %>% 
-#   summarise_by_groups(vars(GEOID, year, month), 
-#                       vars(counts_day_per_month = n_distinct(day)))
-
-#nest by user, location 
-# summarise_by_loc <- function(df, group_var, ...){
-#   group_var_enq <- enquo(group_var)
-#   adds_exp_enq <- enquos(..., .named = TRUE)
-#   #adds_exp_nm <- names(adds_exp_enq)
-#  
-#   cal_column <- . %>% 
-#     summarise(!!!adds_exp_enq)
-#   
-#   add_column <- . %>%
-#     mutate(adds = purrr::map(loc_data, cal_column)) 
-#   
-#   df %>% 
-#     mutate(user_data = purrr::map(user_data, ~.x %>% group_by(!!group_var_enq) %>% nest(.key = loc_data))) %>% 
-#     mutate(vars = purrr::map(user_data, add_column)) %>% 
-#     unnest(vars) %>% 
-#     unnest(adds)
-# }
-## testing first 3 users 
-# test[1:3, ] %>% 
-#   summarise_by_user(counts_per_user = n(), counts_loc = n_distinct(GEOID)) %>% 
-#   summarise_by_loc(GEOID, 
-#     counts_per_loc = n(), 
-#     counts_hour = n_distinct(hour_of_day), 
-#     counts_day = n_distinct(date), 
-#     counts_period = as.numeric(max(created_at) - min(created_at), "days"))
-#   
-# 
-# summarise_user <- function(df, filter_exp){
-#   filter_exp_enq <- enquo(filter_exp)
-#   filter_exp_nm <- quo_name(filter_exp_enq)
-#   
-#   df %>% 
-#     mutate(!!filter_exp_nm := map(data, function(x) summarise_var(x, counts_per_user)) %>% unlist())
-# }
-# df %>% 
-#   mutate_time(timestamp = "created_at") %>%  ##add basic
-#   nest(-u_id) %>%   ## nest by user
-#   summarise_user(counts_per_user) %>% ## add computed variable
-#   filter_var(counts_per_user > 10) ## do filtering
-#   
-
