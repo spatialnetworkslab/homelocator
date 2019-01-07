@@ -26,20 +26,25 @@ library(furrr)
 source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/function_three_compare.R")
 ```
 
-```{r load_three_results}
+```{r load_three_results, message=FALSE, warning=FALSE}
 df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") %>% 
   select(c(id, u_id, created_at, GEOID)) %>% 
   mutate(GEOID = as.character(GEOID))
 df_qq <- read_csv("result_qingqing.csv") %>% 
-  separate(homeloc, c("homeloc_1", "homeloc_2"), "; ") %>% 
+  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
   gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
   select(u_id, GEOID) %>% 
   setNames(c("u_id", "homeloc")) %>% 
   na.omit()
-df_efs <- read_csv("result_efstathiades_homeloc.csv") %>% 
+df_efs <- read_csv("result_efstathiades.csv") %>% 
+  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
+  gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
+  select(u_id, GEOID) %>% 
   setNames(c("u_id", "homeloc")) %>% 
   mutate(homeloc = as.character(homeloc))
 df_ahas <- read_csv("result_ahas.csv") %>% 
+  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
+  gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
   select(u_id, GEOID) %>% 
   mutate(GEOID = as.character(GEOID)) %>% 
   setNames(c("u_id", "homeloc"))
@@ -90,12 +95,12 @@ diff_users_efs_qq <- diffRes_efs_qq$u_id %>% unique()
 plot1_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(4, 6, 49, 38, 45, 48)) %>% 
+  filter(id %in% c(4, 9, 8, 10, 45, 24)) %>% 
   pull(value)
 plot2_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(1, 2, 3, 7, 13, 19)) %>% 
+  filter(id %in% c(5, 7, 11, 57, 13, 18)) %>% 
   pull(value)
 view_diffUsers(diffRes_efs_qq, plot1_users)
 view_diffUsers(diffRes_efs_qq, plot2_users)
@@ -107,12 +112,12 @@ diff_users_ahas_qq <- diffRes_ahas_qq$u_id %>% unique()
 plot3_users <- diff_users_ahas_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(3, 13, 14, 17, 29, 30)) %>% 
+  filter(id %in% c(3, 11, 26, 17, 29, 38)) %>% 
   pull(value)
 plot4_users <- diff_users_ahas_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(16, 19, 22, 23, 25, 36)) %>% 
+  filter(id %in% c(1, 2, 9, 13, 14, 29)) %>% 
   pull(value)
 view_diffUsers(diffRes_ahas_qq, plot3_users)
 view_diffUsers(diffRes_ahas_qq, plot4_users)

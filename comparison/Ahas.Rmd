@@ -46,7 +46,7 @@ head(df_nest)
 
 # Data filtering 
 ```{r data_filtering, message=FALSE, warning=FALSE}
-df_filtered <- df_nest %>% 
+ahas_filtered <- df_nest %>% 
   summarise_by_user(counts_per_user = n(), distinct_loc_per_user = n_distinct(GEOID)) %>% 
   summarise_by_groups(vars(GEOID), 
                       vars(counts_per_loc = n(), 
@@ -70,13 +70,13 @@ df_filtered <- df_nest %>%
   arrange_var(counts_per_user) %>% 
   remove_top_n(top_user_percent = 0.1) %>% # remove top 1% users  
   unnest()
-head(df_filtered)
+head(ahas_filtered)
 ```
 
 
 ```{r home_ahas, message=FALSE, warning=FALSE}
 time_line <- chron::times("17:00:00") %>% as.numeric()
-home_ahas <- df_filtered %>% 
+home_ahas <- ahas_filtered %>% 
   add_column(time = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
   group_by(u_id) %>% 
   nest(.key = user_data) %>% 

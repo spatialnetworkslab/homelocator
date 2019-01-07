@@ -37,7 +37,7 @@ head(df_nest)
 ```
 
 ```{r data_filtering, message=FALSE, warning=FALSE}
-df_filtered <- df_nest %>% 
+qq_filtered <- df_nest %>% 
   summarise_by_user(counts_per_user = n(), 
                     distinct_loc_per_user = n_distinct(GEOID)) %>% 
   filter_var(counts_per_user > 10) %>% 
@@ -54,11 +54,11 @@ df_filtered <- df_nest %>%
   arrange_var(counts_per_user) %>% 
   remove_top_n(top_user_percent = 0.1) %>% 
   unnest()
-head(df_filtered)
+head(qq_filtered)
 ```
 
 ```{r data_expanded, message=FALSE, warning=FALSE}
-df_expanded <- df_filtered %>% 
+qq_expanded <- qq_filtered %>% 
   add_column(week = if_else(day_of_week %in% c(1,7), 1, 2)) %>%  # 1 for weekend, 2 for weekday 
   add_column(numeric_time = lubridate::hour(created_at) + lubridate::minute(created_at)/60 + lubridate::second(created_at) / 3600) %>% 
   add_column(time_frame = if_else(numeric_time >= 9 & numeric_time <= 18, 2, 1)) %>% # 1 for rest time, 2 for work time 
@@ -66,7 +66,7 @@ df_expanded <- df_filtered %>%
 ```
 
 ```{r data_score, message=FALSE, warning=FALSE}
-df_scored <- df_expanded %>% 
+qq_scored <- qq_expanded %>% 
   group_by(u_id) %>% 
   nest(.key = user_data) %>% 
   summarise_by_user(distinct_day_of_week = n_distinct(day_of_week), 
@@ -79,6 +79,7 @@ df_scored <- df_expanded %>%
                       vars(counts_time_frame = n())) %>% 
   add_column_by_group(vars(u_id),
                       vars(percent_time_frame = counts_time_frame/sum(counts_time_frame))) %>% 
+  filter_var_by_user(time_frame == 1 & percent_time_frame >= 0.5) %>% 
   calcu_score_by_user(score_counts_per_loc = 0.1 * (counts_per_loc/max(counts_per_loc))) %>% 
   calcu_score_by_user(score_distinct_hour_per_loc = 0.1 * (distinct_hour_per_loc/24)) %>% 
   calcu_score_by_user(score_distinct_day_per_loc = 0.1 * (distinct_day_per_loc/max(distinct_day_per_loc))) %>% 
@@ -89,15 +90,15 @@ df_scored <- df_expanded %>%
   calcu_score_by_user(score_distinct_month = 0.1 * (distinct_month)) %>% 
   unnest() %>% 
   add_column(score = rowSums(.[, c("score_counts_per_loc", "score_distinct_hour_per_loc","score_distinct_day_per_loc","score_time_period_per_loc", "score_percent_week", 
-                                             "score_percent_time_frame", "score_distinct_day_of_week", "score_distinct_month")]))
+                                             "score_percent_time_frame", "score_distinct_day_of_week", "score_distinct_month")])) 
 ```
 
 ```{r home_extract, message=FALSE, warning=FALSE}
-home_qq <- df_scored %>% 
-  group_by(u_id) %>% 
-  nest(.key = user_data) %>% 
+home_qq <- qq_scored %>%
+  group_by(u_id) %>%
+  nest(.key = user_data) %>%
   extract_home(score > 0, score)
-head(df_home)
+head(home_qq)
 write_csv(home_qq, path = "result_qingqing.csv")
 ```
 
