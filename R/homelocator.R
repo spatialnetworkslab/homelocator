@@ -82,6 +82,17 @@ filter_var <- function(df, filter_exp){
     filter(!!filter_exp_enq)
 }
 
+filter_var_by_user <- function(df, ...){
+ 
+  filter_exp_enq <- enquos(...)
+  
+  to_filter <- . %>% 
+    filter(!!!filter_exp_enq)
+  
+  df %>% 
+    mutate(result = purrr::map(user_data, to_filter)) 
+}
+
 #' arrange 
 #' arrange order by certain variable 
 #' @param df A nested dataframe 
@@ -187,12 +198,15 @@ extract_home <- function(df, score_var, ...){
   arrange_vars_enq <- enquos(...)
   
   get_loc <- . %>%
+    .[!duplicated(.$GEOID), ] %>% 
     dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
+    unique() %>%
     top_n(5) %>%
     filter(!!score_var_enq) %>%
-    slice(1) %>%
-    pull(GEOID)
-
+    slice(1:2) %>%
+    pull(GEOID) %>%
+    paste(., collapse = "; ")
+  
   df %>%
     mutate(home = purrr::map(user_data, get_loc)) %>%
     select(-user_data) %>%
