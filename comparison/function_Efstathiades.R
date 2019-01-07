@@ -8,7 +8,8 @@ read_data <- function(file){
       day = day(created_at),
       day_of_week = lubridate::wday(created_at, label = TRUE, abbr = TRUE),
       hour_of_day = hour(created_at), 
-      time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest_time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active_time", "Leisure_time"))) 
+      time_frame = if_else(hour_of_day >=2 & hour_of_day <8, "Rest_time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active_time", "Leisure_time"))))))
+   
   n_users <- df_sub$u_id %>% n_distinct()
   print(paste("Initially, there are", n_users, "users"))
   df_sub

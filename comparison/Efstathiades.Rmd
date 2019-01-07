@@ -25,36 +25,65 @@ library(sf)
 library(lubridate)
 library(furrr)
 library(gridExtra)
-source("function_Efstathiades.R")
+library(homelocator)
 ```
 
 # Load data
 ```{r load_data, message=FALSE, warning=FALSE}
-df <- read_data("lexington-with-GEOID-2012-2017.csv")
+df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") %>% 
+  select(c(id, u_id, GEOID, created_at)) 
+
+df <- df %>% 
+  derive_timestamp(created_at)
+
+# nest data 
+df_nest <- df %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data)
+head(df_nest)
 ```
 
 # Date cleanning 
 ```{r data_cleanning, message=FALSE, warning=FALSE}
-df_sub <- df %>% 
-  remove_tooLowUsers() %>% 
-  remove_tooHighUsers() %>% 
-  remove_weekendAct()
+df_efs <- df_nest %>% 
+  summarise_by_user(counts_per_user = n(), 
+                    distinct_loc_per_user = n_distinct(GEOID)) %>% 
+  filter_var(distinct_loc_per_user > 3) %>% # remove lower user 
+  arrange_var(counts_per_user) %>% 
+  remove_top_n(top_user_percent = 0.01) %>% # remove top 1% user 
+  unnest() %>% 
+  filter_var(!day_of_week %in% c(1, 7)) # remove weekend data 
 ```
 
 # Key location identification model 
 ```{r work_location, message=FALSE, warning=FALSE}
-## Work location 
-work_loc <- identify_workloc(df_sub)
-write_csv(work_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_workloc.csv")
-## Home location 
-home_loc <- identify_homeloc(df_sub)
-write_csv(home_loc, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades_homeloc.csv")
+weight_rest <- mean(0.744, 0.735, 0.737)
+weight_leisure <- mean(0.362, 0.357, 0.354)
+
+home_efs <- df_efs %>% 
+  add_column(time_frame = if_else(hour_of_day >= 2 & hour_of_day < 8, "Rest_time", if_else(hour_of_day >= 8 & hour_of_day < 19, "Active_time", "Leisure_time"))) %>% 
+  filter_var(time_frame != "Active_time") %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_groups(vars(GEOID, date, time_frame), 
+                      vars(counts_per_day = n())) %>% 
+  spread(time_frame, counts_per_day) %>% 
+  replace(., is.na(.), 0) %>% 
+  add_column(weighted_counts = weight_rest * Rest_time + weight_leisure * Leisure_time) %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_groups(vars(GEOID), 
+                      vars(score = sum(weighted_counts))) %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  extract_home(score > 0, score)
+write_csv(home_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_efstathiades.csv")
 ```
 
 
 - Tweets sent during different hours of the day by different day of week 
 ```{r tweets_visual_overtime, message=FALSE, warning=FALSE}
-visualize_data(df)
+#visualize_data(df)
 ```
 
 

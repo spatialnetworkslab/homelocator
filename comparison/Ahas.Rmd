@@ -26,62 +26,72 @@ library(lubridate)
 library(furrr)
 library(gridExtra)
 library(tidycensus)
-source("function_Ahas.R")
-options(future.globals.maxSize= 1073741824)
+library(homelocator)
 ```
 
 # Load data
 ```{r load_data, message=FALSE, warning=FALSE}
-df <- read_data("lexington-with-GEOID-2012-2017.csv")
-options(tigris_use_cache = TRUE, tigris_class="sf")
-st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
-acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
-                  variables = c(medincome = "B19013_001"),
-                  geometry = T, output = "wide", year = 2016)  %>%
-                  st_transform(., "+init=epsg:4326") %>% 
-    select(GEOID) %>% 
-    mutate(id = 1:nrow(.))
-neighbors <- st_queen(acs_ky)
+df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") %>% 
+  select(c(id, u_id, GEOID, created_at)) 
+
+df <- df %>% 
+  derive_timestamp(created_at)
+
+# nest data 
+df_nest <- df %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data)
+head(df_nest)
 ```
 
-# Data cleanning 
-```{r step1and2, message=FALSE, warning=FALSE}
-## Get regular cells , remove too low users, remove top 1% users 
-regular_cells <- df %>% 
-  get_RegularCells() %>% # keep regular cells 
-  filter(!u_id %in% remove_lowUsers(.)) %>% # remove too low users 
-  filter(!u_id %in% remove_highUsers(.))  # remove too high uers
-```
-
-
-```{r step3, message=FALSE, warning=FALSE}
-#Determing home and work-time Anchor Points: the two regular locations that had the highest number of days with tweets are selected for the calculation of home and work-time anchor points, and the rest are moved directly to the last stages of the model, where they are called seconday anchor points.
-singleAnchor <- regular_cells %>% 
-  detect_singleAnchor() %>% 
-  select(u_id, GEOID, loc) %>% 
-  mutate(type = rep("one type, single anchor", nrow(.)))
-
-df_multi <- regular_cells %>% filter(!u_id %in% singleAnchor$u_id)
-multiAnchors <- df_multi %>% 
+# Data filtering 
+```{r data_filtering, message=FALSE, warning=FALSE}
+df_filtered <- df_nest %>% 
+  summarise_by_user(counts_per_user = n(), distinct_loc_per_user = n_distinct(GEOID)) %>% 
+  summarise_by_groups(vars(GEOID), 
+                      vars(counts_per_loc = n(), 
+                           distinct_date_per_loc = n_distinct(date))) %>% 
+  arrange_var_by_group(u_id, counts_per_loc, distinct_date_per_loc) %>% 
+  top_n(., 1, counts_per_loc) %>%  # get top one loc
+  unnest(grouped_data) %>% 
+  group_by(u_id, counts_per_user) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_groups(vars(GEOID, year, month), 
+                      vars(distinct_day_per_month = n_distinct(day))) %>% 
+  filter_var(distinct_day_per_month > 7) %>% # top one loc must has at least 7 distinct day 
+  select(u_id, counts_per_user) %>% 
+  unique() %>% 
+  left_join(., df) %>% 
   group_by(u_id) %>% 
-  nest() %>% 
-  mutate(results = future_map(data, detect_multiAnchor)) %>% 
-  select(-data) %>% 
-  unnest() %>% 
-  left_join(., df_multi) %>% 
-  unite(date, year, month, day, sep = "-") %>% 
-  select(-id, -created_at, -n_day_permonth) %>% 
-  group_by(u_id) %>% 
-  nest() %>% 
-  mutate(results = future_map(data, decide_multiAnchor)) %>% 
-  select(-data) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_groups(vars(GEOID, year, month, counts_per_user), 
+                      vars(distinct_day_per_month = n_distinct(day))) %>% 
+  filter_var(distinct_day_per_month > 2) %>% # each loc must has at least 2 distinct day 
+  arrange_var(counts_per_user) %>% 
+  remove_top_n(top_user_percent = 0.1) %>% # remove top 1% users  
   unnest()
+head(df_filtered)
+```
 
-results <- bind_rows(singleAnchor, multiAnchors)
-df_home <- results %>% 
-  filter(loc == "home") 
-write_csv(df_home, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_ahas.csv")
+
+```{r home_ahas, message=FALSE, warning=FALSE}
+time_line <- chron::times("17:00:00") %>% as.numeric()
+home_ahas <- df_filtered %>% 
+  add_column(time = format(created_at, format="%H:%M:%S") %>% chron::times()) %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  summarise_by_groups(vars(GEOID),
+                      vars(distinct_date_per_loc = n_distinct(date),
+                           counts_per_loc = n(),
+                           avg_time = mean(time),
+                           sd_time = sd(time))) %>% 
+  add_column(score_avg_time = if_else(avg_time > time_line, 1, 0)) %>% 
+  add_column(score_sd_time = if_else(sd_time > 0.175, 1, 0)) %>% 
+  add_column(score = rowSums(.[, c("score_avg_time", "score_sd_time")])) %>% 
+  group_by(u_id) %>% 
+  nest(.key = user_data) %>% 
+  extract_home(score >= 1, distinct_date_per_loc, counts_per_loc)
+write_csv(home_ahas, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/result_ahas.csv")
 ```
 
 

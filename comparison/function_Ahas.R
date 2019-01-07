@@ -36,7 +36,7 @@ detect_lowUsers <- function(data){
     mutate(date = as.Date(date)) %>% 
     group_by(GEOID) %>% 
     summarise(n_days = n_distinct(date), 
-      n_tweets = n_distinct(id)) %>% 
+              n_tweets = n_distinct(id)) %>% 
     arrange(., desc(n_days), desc(n_tweets)) %>% 
     top_n(1) %>% 
     slice(1) %>% 
