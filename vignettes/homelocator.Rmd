@@ -50,7 +50,7 @@ library(readr)
 ## Load test dataset 
 
 ```{r warning=FALSE}
-df <- read_csv(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) %>% 
+df <- read_csv(system.file("extdata", "test_sample_new.csv", package = "homelocator", mustWork = TRUE)) %>% 
   select(-id) %>% 
   mutate(u_id = as.character(u_id),
          GEOID = as.character(GEOID)) %>% 
