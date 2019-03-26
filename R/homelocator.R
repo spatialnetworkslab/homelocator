@@ -23,16 +23,22 @@
 #' 
 #' Add basic variables derive from timestamp 
 #' @param df A dataframe with columns for the user id, location, timestamp
-#' @param time_var Name of timestamp column. Should be POSIXct
+#' @param timestamp Name of timestamp column. Should be POSIXct
 #' 
 #' 
 derive_timestamp <- function(df, timestamp){
   timestamp_enq <- rlang::enquo(timestamp)
   
-  if (!is(df %>% pull(!!timestamp_enq), "POSIXct")) {
-    stop("Timestamp is not of class POSIXct")
+  if (!is.data.frame(df)) {
+    stop("Error: Dataset is not a dataframe")
   }
-
+  
+  if (!is(df %>% pull(!!timestamp_enq), "POSIXct")) {
+    stop("Error: Timestamp is not of class POSIXct")
+  }
+  
+  cat("Deriving basic needed variables from timestamp column of the dataset...")
+  
   df %>% 
     mutate(year = lubridate::year(!!timestamp_enq),
            month = lubridate::month(!!timestamp_enq),
@@ -43,18 +49,48 @@ derive_timestamp <- function(df, timestamp){
 }
 
 
+#' Nest dataframe 
+#' 
+#' Nest dataframe by variable 
+#' @param df A dataframe 
+#' @param group_var variable to be grouped by 
+nest_dataframe <- function(df, group_var) {
+  if (!is.data.frame(df)) {
+    stop("Error: Dataset is not a dataframe")
+  }
+  
+  expr <- enquo(group_var)
+  
+  cat(paste("Nesting the dataset by", quo_name(expr), "..."))
+
+  nested_name <- paste0(quo_name(expr), "_data")
+  
+  df %>%
+    group_by(!!expr) %>%
+    nest(.key = !!nested_name) 
+}
+
+
 #' Computed variables
 #' 
 #' Add needed variables as you want 
 #' @param df A nested dataframe grouped by user
-summarise_by_user <- function(df, ...){
+summarise_variable <- function(df, ...){
+  
+  if(!is.list(df[,2]))
+    stop("Error: Dataset is not nested!")
+  
   adds_exp_enq <- enquos(..., .named = TRUE)
+  nested_data <- names(df)[2]
+  
   add_column <- . %>% 
     summarise(!!!adds_exp_enq)
-  df %>% 
-    mutate(adds = purrr::map(user_data, add_column)) %>% 
+  
+  df %>%
+    mutate(adds = purrr::map(df[[nested_data]], add_column)) %>%
     unnest(adds)
 }
+
 
 summarise_by_groups <- function(df, group_vars, summary_vars){
   stopifnot(
