@@ -9,8 +9,6 @@ arrange_var <- function(df, ...){
 }
 
 
-
-
 #' arrange 
 #' arrange order by certain variable 
 #' @param df A nested dataframe 

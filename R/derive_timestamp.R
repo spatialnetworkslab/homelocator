@@ -20,9 +20,9 @@ derive_timestamp <- function(df, timestamp){
   
   df %>% 
     mutate(year = lubridate::year(!!timestamp_enq),
-      month = lubridate::month(!!timestamp_enq),
-      day = lubridate::day(!!timestamp_enq), 
-      day_of_week = lubridate::wday(!!timestamp_enq),
-      hour_of_day = lubridate::hour(!!timestamp_enq), 
-      date = as.Date(!!timestamp_enq))
+           month = lubridate::month(!!timestamp_enq),
+           day = lubridate::day(!!timestamp_enq), 
+           day_of_week = lubridate::wday(!!timestamp_enq),
+           hour_of_day = lubridate::hour(!!timestamp_enq), 
+           date = as.Date(!!timestamp_enq))
 }
