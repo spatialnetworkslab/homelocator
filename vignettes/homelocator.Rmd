@@ -1,12 +1,12 @@
 ---
 title: "Introduction of homelocator package"
 author: "Chen Qingqing"
-date: "`r Sys.Date()`"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
@@ -50,7 +50,7 @@ library(readr)
 ## Load test dataset 
 
 ```{r warning=FALSE}
-df <- read_csv(system.file("extdata", "test_sample_2.csv", package = "homelocator", mustWork = TRUE)) %>% 
+df <- read_csv(system.file("extdata", "test_sample.csv", package = "homelocator", mustWork = TRUE)) %>% 
   select(-id) %>% 
   mutate(u_id = as.character(u_id),
          GEOID = as.character(GEOID)) %>% 
