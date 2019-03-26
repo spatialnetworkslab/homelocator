@@ -74,8 +74,8 @@ nest_dataframe <- function(df, group_var) {
 #' Computed variables
 #' 
 #' Add needed variables as you want 
-#' @param df A nested dataframe grouped by user
-summarise_variable <- function(df, ...){
+#' @param df A nested dataframe 
+summarise_var <- function(df, ...){
   
   if(!is.list(df[,2]))
     stop("Error: Dataset is not nested!")
@@ -91,24 +91,36 @@ summarise_variable <- function(df, ...){
     unnest(adds)
 }
 
-
-summarise_by_groups <- function(df, group_vars, summary_vars){
+#' Computed variables by group
+#' 
+#' Add needed variables by group 
+#' @param df A nested dataframe 
+summarise_groupVar <- function(df, group_vars, summary_vars){
+  
   stopifnot(
     is.list(group_vars),
     is.list(summary_vars)
   )
+  
   cal_column <- . %>% 
     summarise(!!!summary_vars)
+  
   add_column <- . %>% 
-    mutate(adds = purrr::map(grouped_data, cal_column))
+    mutate(adds = purrr::map(data, cal_column))
+  
+  nested_data <- names(df)[2]
+  
+  # double nest 
+  df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% group_by(!!!group_vars) %>% nest())
+  
   df %>% 
-    mutate(user_data = purrr::map(user_data, ~.x %>% group_by(!!!group_vars) %>% nest(.key = grouped_data))) %>% 
-    mutate(vars = purrr::map(user_data, add_column)) %>% 
+    mutate(vars = purrr::map(df[[nested_data]], add_column)) %>% 
     unnest(vars) %>% 
     unnest(adds)
 }
 
-#' filter 
+
+#' Filter 
 #' Keep only users that meet certain preconditions
 #' @param df A nested dataframe grouped by user 
 #' @param filter_exp A certain condition to meet 
