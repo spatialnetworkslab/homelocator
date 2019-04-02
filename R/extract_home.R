@@ -6,7 +6,7 @@
 extract_home <- function(df, score_var, ...){
   score_var_enq <- enquo(score_var)
   arrange_vars_enq <- enquos(...)
-  nested_data <- names(df)[2]
+  nested_data <- names(df[,grepl("data", names(df))])
   
   get_loc <- . %>%
     .[!duplicated(.$GEOID), ] %>% 

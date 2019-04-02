@@ -18,7 +18,7 @@ filter_nest <- function(df, ...){
   
   filter_exp_enq <- enquos(...)
   
-  nested_data <- names(df)[2]
+  nested_data <- names(df[,grepl("data", names(df))])
   
   to_filter <- . %>% 
     filter(!!!filter_exp_enq)

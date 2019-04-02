@@ -18,3 +18,30 @@ nest_dataframe <- function(df, group_var) {
     group_by(!!expr) %>%
     nest(.key = !!nested_name) 
 }
+
+
+
+nest_multigroups <- function(df, group_vars) {
+  if (!is.data.frame(df)) {
+    stop("Error: Dataset is not a dataframe")
+  }
+  
+  stopifnot(
+    is.list(group_vars)
+  )
+  
+  cat(paste("Nesting ..."))
+  
+  
+  df %>%
+    group_by(!!!group_vars) %>%
+    nest() 
+}
+
+
+
+
+
+
+
+
