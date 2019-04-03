@@ -11,6 +11,19 @@ neighbors <- st_queen(acs_ky)
 
 
 
+read_result <- function(file){
+  read_csv(file) %>% 
+    separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
+    gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
+    select(u_id, GEOID) %>% 
+    mutate(u_id = as.character(u_id)) %>% 
+    setNames(c("u_id", "homeloc")) %>% 
+    na.omit()
+}
+
+
+
+
 get_neighbos <- function(ids){
   neighbor <- c()
   for (i in ids) {
@@ -78,7 +91,7 @@ diffRes_detect <- function(df_1, df_2, df, acs_ky){
 view_diffUsers <- function(df_diff, user_id){
   df <- df_diff %>% 
     left_join(., acs_ky) %>% 
-    st_as_sf
+    st_as_sf()
   df %>% 
     filter(u_id %in% user_id) %>% 
     tm_shape() + 
@@ -86,5 +99,6 @@ view_diffUsers <- function(df_diff, user_id){
     tm_text("homeloc", col = "black") + 
     tm_borders() + 
     tm_view(view.legend.position = c("left", "bottom")) +
-    tm_facets(by = "u_id", ncol = 3)
+    tm_facets(by = "u_id", ncol = 3) 
+    
 }

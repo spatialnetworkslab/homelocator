@@ -18,36 +18,28 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-```{r library}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(sf)
 library(tidycensus)
 library(furrr)
-source("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/comparison/function_three_compare.R")
+source(here::here("comparison/function_three_compare.R"))
 ```
 
 ```{r load_three_results, message=FALSE, warning=FALSE}
-df <- read_csv("/Users/qingqing/Dropbox/SUTD/Ate/homelocator/data/lexington-with-GEOID-2012-2017.csv") %>% 
-  select(c(id, u_id, created_at, GEOID)) %>% 
-  mutate(GEOID = as.character(GEOID))
-df_qq <- read_csv("result_qingqing.csv") %>% 
-  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
-  gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
-  select(u_id, GEOID) %>% 
-  setNames(c("u_id", "homeloc")) %>% 
-  na.omit()
-df_efs <- read_csv("result_efstathiades.csv") %>% 
-  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
-  gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
-  select(u_id, GEOID) %>% 
-  setNames(c("u_id", "homeloc")) %>% 
-  mutate(homeloc = as.character(homeloc))
-df_ahas <- read_csv("result_ahas.csv") %>% 
-  separate(home, c("homeloc_1", "homeloc_2"), "; ") %>% 
-  gather(homeloc, GEOID, c(homeloc_1, homeloc_2)) %>% 
-  select(u_id, GEOID) %>% 
-  mutate(GEOID = as.character(GEOID)) %>% 
-  setNames(c("u_id", "homeloc"))
+if (file.exists(here::here("data/lexington2012_2017.rds"))) {
+   df <- readRDS(here::here("data/lexington2012_2017.rds"))
+ } else {
+   df <- read_csv(here::here("data/lexington-with-GEOID-2012-2017.csv")) %>% 
+     select(c(u_id, GEOID, created_at)) %>% 
+     mutate(u_id = as.character(u_id),
+            GEOID = as.character(GEOID))
+   saveRDS(df, here::here("data/lexington2012_2017.rds"))  # save to rds 
+ }
+
+df_qq <- read_result("result_qingqing.csv")
+df_efs <- read_result("result_efstathiades.csv") 
+df_ahas <- read_result("result_ahas.csv") 
 ```
 
 
@@ -55,32 +47,32 @@ df_ahas <- read_csv("result_ahas.csv") %>%
 sameRes_efs_qq <- commonRes_detect(df_qq, df_efs)
 diffRes_efs_qq <- diffRes_detect(df_qq, df_efs, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_efs"))
-write_csv(sameRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_efs_qq.csv")
-write_csv(diffRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_efs_qq.csv")
+# write_csv(sameRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_efs_qq.csv")
+# write_csv(diffRes_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_efs_qq.csv")
 ```
 
 ```{r qq_vs_ahas, message=FALSE, warning=FALSE}
 sameRes_ahas_qq <- commonRes_detect(df_qq, df_ahas)
 diffRes_ahas_qq <- diffRes_detect(df_qq, df_ahas, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_qq", "home_ahas"))
-write_csv(sameRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_qq.csv")
-write_csv(diffRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_qq.csv")
+# write_csv(sameRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_qq.csv")
+# write_csv(diffRes_ahas_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_qq.csv")
 ```
 
 ```{r efs_vs_ahas, message=FALSE, warning=FALSE}
 sameRes_ahas_efs <- commonRes_detect(df_efs, df_ahas)
 diffRes_ahas_efs <- diffRes_detect(df_efs, df_ahas, df, acs_ky) %>% 
   mutate(homeloc = if_else(homeloc == "homeloc_df1", "home_efs", "home_ahas"))
-write_csv(sameRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs.csv")
-write_csv(diffRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_efs.csv")
+# write_csv(sameRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs.csv")
+# write_csv(diffRes_ahas_efs, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/diffRes_ahas_efs.csv")
 ```
 
 
 ```{r efs_ahas_qq, message=FALSE, warning=FALSE}
 sameRes_ahas_efs_qq <- commonRes_detect(sameRes_efs_qq, df_ahas)
 df_same_three <- plyr::join_all(list(df_qq, df_efs, df_ahas), by = c("u_id", "homeloc"), type = 'inner')
-write_csv(sameRes_ahas_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs_qq.csv")
-write_csv(df_same_three, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/df_same_three.csv")
+# write_csv(sameRes_ahas_efs_qq, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/sameRes_ahas_efs_qq.csv")
+# write_csv(df_same_three, path = "/Users/qingqing/Dropbox/SUTD/Ate/homelocator/inst/extdata/df_same_three.csv")
 # diffRes_ahas_efs_qq <- diffRes_detect(sameRes_efs_qq, df_ahas, df, acs_ky)
 ```
 
@@ -95,14 +87,19 @@ diff_users_efs_qq <- diffRes_efs_qq$u_id %>% unique()
 plot1_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(4, 9, 8, 10, 45, 24)) %>% 
+  filter(id %in% c(1, 8, 33, 37, 41, 42)) %>% 
+  #filter(id %in% c(4, 9, 8, 10, 45, 24)) %>% 
   pull(value)
+
 plot2_users <- diff_users_efs_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(5, 7, 11, 57, 13, 18)) %>% 
+  filter(id %in% c(5, 7, 9, 11, 17, 23)) %>% 
   pull(value)
+
+## neighbouring  
 view_diffUsers(diffRes_efs_qq, plot1_users)
+## non-neighbouring 
 view_diffUsers(diffRes_efs_qq, plot2_users)
 ```
 
@@ -112,14 +109,17 @@ diff_users_ahas_qq <- diffRes_ahas_qq$u_id %>% unique()
 plot3_users <- diff_users_ahas_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(3, 11, 26, 17, 29, 38)) %>% 
+  filter(id %in% c(2, 5, 8, 12, 13, 17)) %>% 
   pull(value)
+
 plot4_users <- diff_users_ahas_qq %>% 
   as_data_frame() %>% 
   mutate(id = 1:nrow(.)) %>% 
-  filter(id %in% c(1, 2, 9, 13, 14, 29)) %>% 
+  filter(id %in% c(1, 6, 7, 9, 15, 19)) %>% 
   pull(value)
+## neighbor 
 view_diffUsers(diffRes_ahas_qq, plot3_users)
+## non-neighbor 
 view_diffUsers(diffRes_ahas_qq, plot4_users)
 ```
 
