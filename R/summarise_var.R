@@ -22,7 +22,8 @@ summarise_var <- function(df, ...){
 #' 
 #' Add needed variables by group 
 #' @param df A nested dataframe 
-
+#' @param group_vars Variables be grouped 
+#' @param summary_vars Variables to be added 
 summarise_groupVar <- function(df, group_vars, summary_vars){
   
   stopifnot(
