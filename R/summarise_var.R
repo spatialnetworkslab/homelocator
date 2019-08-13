@@ -9,13 +9,27 @@ summarise_var <- function(df, ...){
   
   adds_exp_enq <- enquos(..., .named = TRUE)
   nested_data <- names(df[,grepl("data", names(df))])
+  user_data <- df[[nested_data]]
+  ori_cols <- names(df)
   
-  add_column <- . %>% 
-    summarise(!!!adds_exp_enq)
+  # define reading function which includes the progress bar
+  summarise_with_progress <- function(data){
+    pb$tick()$print()
+    add_column <- data %>% 
+      summarise(!!!adds_exp_enq)
+  }
+  #create the progress bar
+  pb <- dplyr::progress_estimated(length(user_data))
+  message(paste(emo::ji("hammer_and_wrench"), "Summarising..."))
   
-  df %>%
-    mutate(adds = purrr::map(df[[nested_data]], add_column)) %>%
+  output <- df %>%
+    mutate(adds = purrr::map(df[[nested_data]], ~summarise_with_progress(.))) %>%
     unnest(adds)
+  new_cols <- names(output)
+  added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "New added variables to each user:", added_cols))
+  output
 }
 
 #' Computed variables by group
@@ -34,17 +48,19 @@ summarise_groupVar <- function(df, group_vars, summary_vars){
   
   cal_column <- . %>% 
     summarise(!!!summary_vars)
-  
+
   add_column <- . %>% 
-    mutate(adds = purrr::map(data, cal_column))
-  
+    mutate(adds = purrr::map(data, cal_column)) %>% 
+    unnest(adds)
+
   nested_data <- names(df[,grepl("data", names(df))])
   
   # double nest 
   df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% group_by(!!!group_vars) %>% nest())
   
   df %>%
-    mutate(vars = purrr::map(df[[nested_data]], add_column)) %>%
-    unnest(vars) %>%
-    unnest(adds)
+    mutate(!!nested_data := purrr::map(df[[nested_data]], add_column)) 
+  # %>%
+  #   unnest(vars) %>%
+  #   unnest(adds)
 }
