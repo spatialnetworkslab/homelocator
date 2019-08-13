@@ -32,9 +32,9 @@ validate_dataset <- function(df, user = "u_id", timestamp = "created_at", locati
   }
   
   unique_users <- df %>% pull(!!user) %>% n_distinct()
-  message(paste(emo::ji("tada"), emo::ji("tada"), emo::ji("tada"), "Congratulations!! Your dataset has passed validation."))
-  message(paste(emo::ji("bust_in_silhouette"), emo::ji("bust_in_silhouette"), emo::ji("bust_in_silhouette"), "There are", unique_users, "unique users in your dataset. And now you can start your journey finding their home location(s)!"))
-  message(paste(emo::ji("clap"), emo::ji("clap"), emo::ji("clap"), "Good luck!"))
+  message(paste(emo::ji("tada"), "Congratulations!! Your dataset has passed validation."))
+  message(paste(emo::ji("bust_in_silhouette"), "There are", unique_users, "unique users in your dataset. And now you can start your journey finding their home location(s)!"))
+  message(paste(emo::ji("clap"), "Good luck!"))
   
   if (keep_other_vars) {
     df
