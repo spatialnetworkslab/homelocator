@@ -7,9 +7,9 @@
 #' @param counts Number of data points per user
 #' @param top_user_percent The percentage of top user you want to remove 
 
-remove_bots <- function(df, user = "u_id", counts = "counts_per_user", top_user_percent){
+remove_bots <- function(df, user = "u_id", counts = "n_tweets", top_u_percent = 0.01){
   
-  top_user_percent_enq <- enquo(top_user_percent)
+  top_u_percent_enq <- enquo(top_u_percent)
   
   if (!rlang::has_name(df, user)) {
     stop("User column does not exist")
@@ -21,12 +21,18 @@ remove_bots <- function(df, user = "u_id", counts = "counts_per_user", top_user_
   user <- rlang::sym(user) 
   counts <- rlang::sym(counts)
   
-  num_user <- df %>% pull(!!user) %>% dplyr::n_distinct()
+  n_users <- df %>% pull(!!user) %>% dplyr::n_distinct()
+  message(paste(emo::ji("hammer_and_wrench"), "Removing top 1% active users..."))
   
-  df %>% 
+  suppressMessages(output <- df %>% 
     dplyr::select(!!user, !!counts) %>%
+    arrange(desc(!!counts)) %>% 
     unique() %>%
-    dplyr::slice(round(num_user*!!top_user_percent_enq):n()) %>%
-    left_join(., df) %>% 
-    unnest()
+    dplyr::slice(round(n_users*!!top_u_percent_enq):n()) %>%
+    left_join(., df))
+  
+  left_users <- output %>% pull(!!user) %>% n_distinct()
+  n_rm <- n_users - left_users
+  message(paste(emo::ji("white_check_mark"), "Remove", n_rm, "active users, and there are", left_users, "users left."))
+  output
 }
