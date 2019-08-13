@@ -35,10 +35,26 @@ filter_nest <- function(df, ...){
   filter_exp_enq <- enquos(...)
   
   nested_data <- names(df[,grepl("data", names(df))])
+  user_data <- df[[nested_data]]
   
-  to_filter <- . %>% 
-    filter(!!!filter_exp_enq)
+  filter_with_progress <- function(data){
+    pb$tick()$print()
+    to_filter <- data %>% 
+      filter(!!!filter_exp_enq)
+  }
   
+  
+  pb <- dplyr::progress_estimated(length(user_data))
+  message(paste(emo::ji("hammer_and_wrench"), "Filtering"))
   df %>% 
-    mutate(result = purrr::map(df[[nested_data]], to_filter)) 
+    mutate(!!nested_data := purrr::map(df[[nested_data]], ~filter_with_progress(.))) 
 }
+
+
+
+
+
+
+
+
+
