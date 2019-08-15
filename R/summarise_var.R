@@ -28,7 +28,7 @@ summarise_var <- function(df, ...){
   new_cols <- names(output)
   added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
   message("\n")
-  message(paste(emo::ji("white_check_mark"), "New added variables to each user:", added_cols))
+  message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
 }
 
@@ -52,15 +52,22 @@ summarise_groupVar <- function(df, group_vars, summary_vars){
   add_column <- . %>% 
     mutate(adds = purrr::map(data, cal_column)) %>% 
     unnest(adds)
-
+  
   nested_data <- names(df[,grepl("data", names(df))])
   
   # double nest 
   df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% group_by(!!!group_vars) %>% nest())
   
-  df %>%
+  output <- df %>%
     mutate(!!nested_data := purrr::map(df[[nested_data]], add_column)) 
+  col_na <- output[[nested_data]][[1]] %>% names()
+  add_cols <- col_na[3:length(col_na)]
+  message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
+  output
   # %>%
   #   unnest(vars) %>%
   #   unnest(adds)
 }
+
+
+
