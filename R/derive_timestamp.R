@@ -66,7 +66,7 @@ derive_timestamp <- function(df, timestamp){
   message(paste(emo::ji("hammer_and_wrench"), "Deriving new variables from timestamp to each user..."))
   output <- df %>%
     mutate(!!nested_data := purrr::map(df[[nested_data]], ~derive_with_progress(.)))
-  message(paste("\n", emo::ji("white_check_mark"), "New added variables to each user: year, month, day, wday, hour, date."))
+  message(paste("\n", emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, date."))
   output
 }
 
