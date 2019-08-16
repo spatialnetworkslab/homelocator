@@ -64,7 +64,7 @@ add_var_pct <- function(df, var){
   pb <- dplyr::progress_estimated(length(user_data))
   message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
   output <- df %>% 
-    dplyr::bind_cols(do.call(rbind, purrr::map(df[[nested_data]], ~add_with_progress(.))))
+    dplyr::bind_cols(do.call(dplyr::bind_rows, purrr::map(df[[nested_data]], ~add_with_progress(.))))
   
   ori_cols <- names(df)
   new_cols <- names(output)
