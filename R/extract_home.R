@@ -14,9 +14,9 @@ extract_home <- function(df, keep_score = F, ...){
       dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
       unique() %>%
       slice(1:2) %>%
-      dplyr::select(-c(!!!arrange_vars_enq)) 
-    loc_name <- names(get_loc)
-    locs <- get_loc[["loc_name"]] %>% 
+      dplyr::select(-c(!!!arrange_vars_enq)) %>% 
+      setNames(c("home")) %>% 
+      pull(home) %>% 
       paste(., collapse = "; ")
   }
   #create the progress bar
