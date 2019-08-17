@@ -8,7 +8,7 @@
 #' 
 #' 
 
-validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "GEOID", keep_other_vars = F){
+validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = F){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
