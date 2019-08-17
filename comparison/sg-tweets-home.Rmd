@@ -1,0 +1,113 @@
+---
+title: 'SG Tweets: Home Location'
+author: "Chen Qinqqing"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4  
+    number_sections: true  
+    theme: united  
+    highlight: tango  
+    toc_float: true   
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r load_library, message=FALSE, warning=FALSE}
+library(homelocator)
+library(dplyr)
+library(tidyverse)
+library(readr)
+```
+
+Load original dataset
+```{r}
+tweets <- readRDS(here::here("data/tweets_gridID.rds"))
+```
+
+
+Validatae the dataset 
+```{r load_data, warning=FALSE, message=TRUE}
+df <- validate_dataset(tweets, user = "u_id", timestamp = "created_at", location = "grid_id")
+```
+
+```{r}
+head(df)
+```
+
+
+Nest dataset by user 
+```{r}
+df_nest <- nest_by_sglGp(df, group_var = u_id)
+```
+
+Derive basic needed variables from timestamp
+```{r}
+df_nest <- derive_timestamp(df_nest, timestamp = created_at)
+```
+
+```{r}
+head(df_nest)
+df_nest$u_id_data[[1]]
+```
+
+Keep users that meet certain preconditions
+
+```{r}
+df_filtered <- df_nest %>% 
+  summarise_var(n_tweets = n(), 
+                n_locs = n_distinct(grid_id)) %>% 
+  remove_bots(user = "u_id", counts = "n_tweets", top_u_percent = 0.01) %>% ## remove top 1% active users 
+  filter_var(n_tweets > 10 & n_locs > 10) %>% 
+  summarise_groupVar(vars(grid_id), 
+                     vars(n_tweets_loc = n(), 
+                          n_hours_loc = n_distinct(hour), 
+                          n_days_loc = n_distinct(date), 
+                          period_loc = as.numeric(max(created_at) - min(created_at), "days"))) %>% 
+  filter_in_nest(n_tweets_loc > 10 & n_hours_loc > 10 & n_days_loc > 10 & period_loc > 10) # can separate to multiple lines 
+```
+
+```{r}
+head(df_filtered)
+```
+
+```{r}
+df_expanded <- df_filtered %>% 
+  add_col_in_nest(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday")) %>% # 1 for weekend, 2 for weekday 
+  add_col_in_nest(numT = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600) %>%
+  add_col_in_nest(rest_or_work = if_else(numT >= 9 & numT <= 18, "work", "rest")) %>% # 1 for rest time, 2 for work time 
+  add_col_in_nest(early_or_late = if_else(numT >= 6 & numT <= 12, "morning", "noon_night")) # 1 for early morning, 2 for late afternoon and night 
+```
+
+
+```{r}
+df_score <- df_expanded %>% 
+  summarise_var(n_wdays_loc = n_distinct(wday),
+                n_months_loc = n_distinct(month)) %>% 
+  add_var_pct(wd_or_wk) %>% 
+  add_var_pct(rest_or_work) %>% 
+  add_var_pct(early_or_late) %>% 
+  filter_var(rest >= 0.5)  %>% 
+  score_var(group_var = u_id, keep_original_vars = F,
+            s_rest = 0.2 * (rest),
+            s_weekend = 0.2 * (weekend),
+            s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
+            s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
+            s_period_loc = 0.1 * (period_loc/max(period_loc)),
+            s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
+            s_n_months_loc = 0.1 * (n_months_loc/12),
+            s_n_hours_loc = 0.1 * (n_hours_loc/24)) %>% 
+  sum_score(user = "u_id", location = "grid_id", s_rest, s_weekend, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hours_loc)
+
+```
+
+```{r home_extract, message=FALSE, warning=FALSE}
+df_home <- df_score %>% extract_home(score, keep_score = F)
+```
+
