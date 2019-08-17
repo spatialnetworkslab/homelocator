@@ -3,25 +3,43 @@
 #' Extract most likely home location of each user 
 #' @param df A nested dataframe by user 
 #' @param score_var A scored variable 
-extract_home <- function(df, score_var, ...){
-  score_var_enq <- enquo(score_var)
-  arrange_vars_enq <- enquos(...)
+extract_home <- function(df, keep_score = F, ...){
+
+  arrange_vars_enq <- enquos(..., .named = TRUE)
   nested_data <- names(df[,grepl("data", names(df))])
   
-  get_loc <- . %>%
-    .[!duplicated(.$GEOID), ] %>% 
-    dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
-    unique() %>%
-    top_n(5) %>%
-    filter(!!score_var_enq) %>%
-    slice(1:2) %>%
-    pull(GEOID) %>%
-    paste(., collapse = "; ")
+  get_loc_with_progress <- function(data){
+    pb$tick()$print()
+    get_loc <- data %>%
+      dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
+      unique() %>%
+      slice(1:2) %>%
+      dplyr::select(-c(!!!arrange_vars_enq)) 
+    loc_name <- names(get_loc)
+    locs <- get_loc[["loc_name"]] %>% 
+      paste(., collapse = "; ")
+  }
+  #create the progress bar
+  pb <- dplyr::progress_estimated(nrow(df))
+  message(paste(emo::ji("hammer_and_wrench"), "Identifying homes..."))
   
-  df %>%
-    mutate(home = purrr::map(df[[nested_data]], get_loc)) %>%
-    select(-nested_data) %>%
-    unnest(home)
+  if(keep_score){
+    output <- df %>%
+      mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
+      unnest(home) 
+    n_user <- nrow(output)
+    message(paste0("\n", emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
+    output
+  } else{
+    output <- df %>%
+      mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
+      dplyr::select(-nested_data) %>%
+      unnest(home)
+    n_user <- nrow(output)
+    message("\n")
+    message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
+    output
+  }
 }
 
 
