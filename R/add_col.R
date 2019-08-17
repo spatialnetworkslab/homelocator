@@ -36,6 +36,7 @@ add_col_in_nest <- function(df, ...){
   ori_cols <- df[[nested_data]][[1]] %>% names()
   new_cols <- output[[nested_data]][[1]] %>% names()
   added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
 }
@@ -69,6 +70,7 @@ add_var_pct <- function(df, var){
   ori_cols <- names(df)
   new_cols <- names(output)
   added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
 }

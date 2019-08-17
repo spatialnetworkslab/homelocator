@@ -36,7 +36,7 @@ nest_by_mulGps <- function(df, group_vars) {
     is.list(group_vars)
   )
   
-  message(past(emo::ji("hammer_and_wrench"), "Nesting dataset by multiple groups..."))
+  message(paste(emo::ji("hammer_and_wrench"), "Nesting dataset by multiple groups..."))
 
   df %>%
     group_by(!!!group_vars) %>%

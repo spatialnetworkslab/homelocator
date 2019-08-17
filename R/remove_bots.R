@@ -33,6 +33,7 @@ remove_bots <- function(df, user = "u_id", counts = "n_tweets", top_u_percent = 
   
   left_users <- output %>% pull(!!user) %>% n_distinct()
   n_rm <- n_users - left_users
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Remove", n_rm, "active users, and there are", left_users, "users left."))
   output
 }

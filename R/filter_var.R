@@ -20,6 +20,7 @@ filter_var <- function(df, filter_exp, user = "u_id"){
   
   left_users <- output %>% pull(!!user) %>% n_distinct()
   n_rm <- n_users - left_users
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
   output
 }
@@ -53,6 +54,7 @@ filter_in_nest <- function(df, ...){
     unnest()
   left_users <- output[1] %>% dplyr::n_distinct()
   n_rm <- n_users - left_users
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
   output
 }
