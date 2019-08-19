@@ -4,7 +4,7 @@
 \alias{extract_home}
 \title{extract location}
 \usage{
-extract_home(df, score_var, ...)
+extract_home(df, keep_score = F, ...)
 }
 \arguments{
 \item{df}{A nested dataframe by user}

@@ -8,6 +8,10 @@ summarise_groupVar(df, group_vars, summary_vars)
 }
 \arguments{
 \item{df}{A nested dataframe}
+
+\item{group_vars}{Variables be grouped}
+
+\item{summary_vars}{Variables to be added}
 }
 \description{
 Add needed variables by group

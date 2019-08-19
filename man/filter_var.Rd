@@ -5,12 +5,14 @@
 \title{Filter 
 Keep only users that meet certain preconditions}
 \usage{
-filter_var(df, filter_exp)
+filter_var(df, filter_exp, user = "u_id")
 }
 \arguments{
 \item{df}{A nested dataframe grouped by user}
 
 \item{filter_exp}{A certain condition to meet}
+
+\item{user}{Name of column that holds unique identifier for each user}
 }
 \description{
 Filter 

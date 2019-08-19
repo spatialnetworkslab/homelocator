@@ -2,15 +2,13 @@
 % Please edit documentation in R/derive_timestamp.R
 \name{derive_timestamp}
 \alias{derive_timestamp}
-\title{Basic variables}
+\title{Derive new variables}
 \usage{
 derive_timestamp(df, timestamp)
 }
 \arguments{
-\item{df}{A dataframe with columns for the user id, location, timestamp}
-
-\item{timestamp}{Name of timestamp column. Should be POSIXct}
+\item{df}{A nested dataframe}
 }
 \description{
-Add basic variables derive from timestamp
+Add basic needed variables derived from timestamp
 }

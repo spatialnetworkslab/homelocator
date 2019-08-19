@@ -4,8 +4,8 @@
 \alias{remove_bots}
 \title{remove bots}
 \usage{
-remove_bots(df, user = "u_id", counts = "counts_per_user",
-  top_user_percent)
+remove_bots(df, user = "u_id", counts = "n_tweets",
+  top_u_percent = 0.01)
 }
 \arguments{
 \item{df}{A dataframe with columns for the user id, counts point per user}
