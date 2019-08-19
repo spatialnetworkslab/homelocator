@@ -25,7 +25,7 @@ derive_timestamp <- function(df, timestamp){
              day = lubridate::day(!!timestamp_enq), 
              wday = lubridate::wday(!!timestamp_enq), #day of week
              hour = lubridate::hour(!!timestamp_enq), #hour of day
-             date = as.Date(!!timestamp_enq))
+             ymd = as.Date(!!timestamp_enq))
   }
   
   #create the progress bar
@@ -33,8 +33,8 @@ derive_timestamp <- function(df, timestamp){
   message(paste(emo::ji("hammer_and_wrench"), "Deriving new variables from timestamp to each user..."))
   output <- df %>%
     mutate(!!nested_data := purrr::map(df[[nested_data]], ~derive_with_progress(.)))
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, date."))
+  # message("\n")
+  message(paste("\n", emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, ymd."))
   output
 }
 
