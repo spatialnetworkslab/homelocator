@@ -42,6 +42,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r warning=FALSE, message=FALSE}
 devtools::load_all(".")
+library(homelocator)
 library(tidyverse)
 library(dplyr)
 library(readr)
