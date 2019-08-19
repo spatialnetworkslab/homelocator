@@ -1,5 +1,5 @@
 .onAttach <- function(libname, pkgname){
-  packageStartupMessage("Welcome to my package")
+  packageStartupMessage("Welcome to homelocator package!")
 }
 
 .onLoad <- function(libname, pkgname){
@@ -7,9 +7,9 @@
   op.devtools <- list(
     devtools.path = "~/R-dev",
     devtools.install.args = "",
-    devtools.name = "your name goes here",
-    devtools.desc.author = 'person("First","Second", "first.last@example.com", role = c("aut","cre"))',
-    devtools.desc.license = "What license is it under?",
+    devtools.name = "Chen Qingqing",
+    devtools.desc.author = 'person("Chen","Qingqing", "qingqing_chen@sutd.edu.sg", role = c("aut","cre"))',
+    devtools.desc.license = "MIT + file LICENSE",
     devtools.desc.suggests = NULL,
     devtools.desc = list()
   )
@@ -17,10 +17,6 @@
   if(any(toset)) options(op.devtools[toset])
   invisible()
 }
-
-
-#'
-NULL
 
 
 
