@@ -27,8 +27,8 @@ summarise_var <- function(df, ...){
     unnest(adds)
   new_cols <- names(output)
   added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
+  # message("\n")
+  message(paste("\n", emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
 }
 
@@ -39,6 +39,8 @@ summarise_var <- function(df, ...){
 #' @param group_vars Variables be grouped 
 #' @param summary_vars Variables to be added 
 summarise_groupVar <- function(df, group_vars, summary_vars){
+  
+  if(nrow(df)==0) stop(paste(emo::ji("bomb"), "No user left, tune your treshold and try again."))
   
   stopifnot(
     is.list(group_vars),
@@ -60,11 +62,20 @@ summarise_groupVar <- function(df, group_vars, summary_vars){
   
   output <- df %>%
       mutate(!!nested_data := purrr::map(df[[nested_data]], add_column)) 
-    col_na <- output[[nested_data]][[1]] %>% names()
-    add_cols <- col_na[3:length(col_na)]
-    message("\n")
-    message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
-    output
+  col_na <- output[[nested_data]][[1]] %>% names()
+  add_cols <- col_na[3:length(col_na)]
+  message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
+  output
+  
+  # if(nrow(output) != 0){
+  #   col_na <- output[[nested_data]][[1]] %>% names()
+  #   add_cols <- col_na[3:length(col_na)]
+  #   # message("\n")
+  #   message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
+  # }else{
+  #   message(paste(emo::ji("exclamation_mark"), "No user left!"))
+  # }
+  #   output
 }
 
 
