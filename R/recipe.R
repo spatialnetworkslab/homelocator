@@ -128,6 +128,26 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
       slice(1:show_n_home) %>% 
       summarise(home =  paste(!!location_exp, collapse = "; "))
   }
+  
+  if(recipe == "simple"){
+    cleaned_df_byuser <- df_nest %>%
+      summarise_var(n_tweets = n(),
+        n_locs = n_distinct(!!location_exp)) %>%
+      remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) %>%
+      filter_var(n_tweets > 10 & n_locs > 10)
+    
+    cleaned_df_byloc <- cleaned_df_byuser %>% 
+      summarise_groupVar(vars(!!location_exp),
+                         vars(n_tweets_loc = n())) %>% 
+      filter_in_nest(n_tweets_loc > 10)
+    
+    cleaned_df_byloc %>% 
+      group_by(!!user_exp, !!location_exp) %>% 
+      arrange(desc(n_tweets_loc)) %>% 
+      group_by(!!user_exp) %>% 
+      slice(1:show_n_home) %>% 
+      summarise(home =  paste(!!location_exp, collapse = "; "))
+  }
 }
 
 
