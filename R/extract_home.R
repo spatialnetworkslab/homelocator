@@ -5,7 +5,7 @@
 #' @param show_n_home Number of homes to be shown 
 #' @param keep_score Choice to keep score or not 
 #' 
-extract_home_by_var <- function(df, ..., show_n_home = 1, keep_score = F){
+extract_home <- function(df, ..., show_n_home = 1, keep_score = F){
 
   arrange_vars_enq <- enquos(..., .named = TRUE)
   nested_data <- names(df[,grepl("data", names(df))])
