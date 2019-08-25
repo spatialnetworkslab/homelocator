@@ -5,7 +5,7 @@
 #' @param group_var Variable to be grouped 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
-#' 
+#' @param keep_original_vars Choice to keep original variables or not
 #' 
 score_var <- function(df, group_var, user = "u_id", location = "grid_id", keep_original_vars = F, ...){
   expr <- enquo(group_var)
