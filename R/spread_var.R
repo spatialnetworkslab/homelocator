@@ -2,6 +2,8 @@
 #' 
 #' Spread variables to tidy dataframe
 #' @param df A dataframe 
+#' @param key_var Key variable to be spreaded 
+#' @param value_var Value variable to be spreaded
 spread2_in_nest <- function(df, key_var, value_var){
   
   key_var_enq <- enquo(key_var)
