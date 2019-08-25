@@ -31,14 +31,13 @@ filter_var <- function(df, filter_exp, user = "u_id"){
 #' Keep only users that meet certain preconditions
 #' @param df A nested dataframe grouped by user 
 #' 
-#' 
 filter_in_nest <- function(df, ...){
   
   filter_exp_enq <- enquos(...)
   nested_data <- names(df[,grepl("data", names(df))])
   user_data <- df[[nested_data]]
   
-  
+  #filter
   filter_with_progress <- function(data){
     pb$tick()$print()
     to_filter <- data %>% 
@@ -48,10 +47,13 @@ filter_in_nest <- function(df, ...){
   n_users <- df[1] %>% dplyr::n_distinct()
   message(paste(emo::ji("locked"), "There are", n_users, "users at this moment."))
   message(paste(emo::ji("hammer_and_wrench"), "Filtering...")) 
+  
   pb <- dplyr::progress_estimated(length(user_data))
+  #map filter on nested data
   output <- df %>% 
     mutate(!!nested_data := purrr::map(df[[nested_data]], ~filter_with_progress(.))) %>% 
     unnest()
+  
   left_users <- output[1] %>% dplyr::n_distinct()
   n_rm <- n_users - left_users
   message("\n")
