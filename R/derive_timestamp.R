@@ -2,10 +2,12 @@
 #' 
 #' Add basic needed variables derived from timestamp 
 #' @param df A nested dataframe 
+#' @param timestamp Name of timestamp column. Should be POSIXct
 derive_timestamp <- function(df, timestamp){
   
   nested_data <- names(df[,grepl("data", names(df))])
-  timestamp_enq <- rlang::enquo(timestamp)
+  timestamp_enq <- rlang::sym(timestamp)
+  # timestamp_enq <- rlang::enquo(timestamp)
   user_data <- df[[nested_data]]
   
   
