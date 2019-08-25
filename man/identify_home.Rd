@@ -5,7 +5,7 @@
 \title{one-button identify home location}
 \usage{
 identify_home(df, user = "u_id", timestamp = "created_at",
-  location = "grid_id", recipe = "homelocator")
+  location = "grid_id", recipe = "homelocator", show_n_home = 1)
 }
 \arguments{
 \item{df}{A dataframe with columns for the user id, location, timestamp}
@@ -17,7 +17,9 @@ identify_home(df, user = "u_id", timestamp = "created_at",
 \item{location}{Name of column that holds unique identifier for each location}
 
 \item{recipe}{Different methods to identify home locations}
+
+\item{show_n_home}{Number of potential homes to be shown}
 }
 \description{
-TIdentify home location with chose recipe
+Identify home location with chose recipe
 }

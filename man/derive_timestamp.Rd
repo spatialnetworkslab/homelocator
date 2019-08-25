@@ -8,6 +8,8 @@ derive_timestamp(df, timestamp)
 }
 \arguments{
 \item{df}{A nested dataframe}
+
+\item{timestamp}{Name of timestamp column. Should be POSIXct}
 }
 \description{
 Add basic needed variables derived from timestamp

@@ -9,7 +9,7 @@ nest_by_sglGp(df, group_var)
 \arguments{
 \item{df}{A dataframe}
 
-\item{group_var}{variable to be grouped}
+\item{group_var}{Variable to be grouped}
 }
 \description{
 Nest dataframe by variable

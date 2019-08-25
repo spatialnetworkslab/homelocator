@@ -15,6 +15,8 @@ validate_dataset(df, user = "u_id", timestamp = "created_at",
 \item{timestamp}{Name of timestamp column. Should be POSIXct}
 
 \item{location}{Name of column that holds unique identifier for each location}
+
+\item{keep_other_vars}{Choice to keep variables or not}
 }
 \description{
 To make sure the used dataset contains all three necessary variables: user, location and timestamp

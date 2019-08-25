@@ -15,6 +15,8 @@ score_var(df, group_var, user = "u_id", location = "grid_id",
 \item{user}{Name of column that holds unique identifier for each user}
 
 \item{location}{Name of column that holds unique identifier for each location}
+
+\item{keep_original_vars}{Choice to keep original variables or not}
 }
 \description{
 Add score of each variables

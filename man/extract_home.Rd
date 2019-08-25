@@ -4,12 +4,14 @@
 \alias{extract_home}
 \title{extract location}
 \usage{
-extract_home(df, keep_score = F, ...)
+extract_home(df, ..., show_n_home = 1, keep_score = F)
 }
 \arguments{
 \item{df}{A nested dataframe by user}
 
-\item{score_var}{A scored variable}
+\item{show_n_home}{Number of homes to be shown}
+
+\item{keep_score}{Choice to keep score or not}
 }
 \description{
 Extract most likely home location of each user
