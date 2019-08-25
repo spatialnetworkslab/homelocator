@@ -66,16 +66,6 @@ summarise_groupVar <- function(df, group_vars, summary_vars){
   add_cols <- col_na[3:length(col_na)]
   message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
   output
-  
-  # if(nrow(output) != 0){
-  #   col_na <- output[[nested_data]][[1]] %>% names()
-  #   add_cols <- col_na[3:length(col_na)]
-  #   # message("\n")
-  #   message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
-  # }else{
-  #   message(paste(emo::ji("exclamation_mark"), "No user left!"))
-  # }
-  #   output
 }
 
 
