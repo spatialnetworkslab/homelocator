@@ -56,9 +56,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
       sum_score(user = user, location = location,
                 s_rest, s_weekend, s_wkmorning, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hours_loc)
     df_score %>% extract_home(score, keep_score = F, show_n_home = show_n_home)
-  }
-
-  if(recipe == "OSN"){#online social network
+  } else if(recipe == "OSN"){#online social network
     df_moved_bots <- df_nest %>%
       summarise_var(n_tweets = n(),
                     n_locs = n_distinct(!!location_exp)) %>%
@@ -84,9 +82,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
                          vars(score = sum(w_counts))) 
       
     extract_home(df_score, score, keep_score = F, show_n_home = show_n_home)
-  }
-  
-  if(recipe == "MPD"){ #mobile positioning data
+  } else if(recipe == "MPD"){ #mobile positioning data
     regular_cells <- df_nest %>% 
       summarise_groupVar(vars(!!location_exp, year, month),
                          vars(n_days_month_loc = n_distinct(ymd))) %>% 
@@ -127,12 +123,10 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
       group_by(!!user_exp) %>% 
       slice(1:show_n_home) %>% 
       summarise(home =  paste(!!location_exp, collapse = "; "))
-  }
-  
-  if(recipe == "simple"){
+  } else if(recipe == "simple"){
     cleaned_df_byuser <- df_nest %>%
       summarise_var(n_tweets = n(),
-        n_locs = n_distinct(!!location_exp)) %>%
+                    n_locs = n_distinct(!!location_exp)) %>%
       remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
     
