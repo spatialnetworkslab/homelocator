@@ -97,12 +97,12 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
     
     most5popular_regulars <- regular_append %>% 
       arrange_in_nest(group_var = "grid_id", n_days_loc, n_tweets_loc) %>% 
-      top_n_in_nest(., n = 5, wt = n_tweets_loc)
+      top_n_in_nest(., n = 3, wt = n_tweets_loc)
     
     regular_filtered <- most5popular_regulars %>% 
       unnest() %>% 
       filter_in_nest(n_days_month_loc >= 7) %>% # remove respondents who have made tweets less than 7 days a month in 2 most frequently visited network cells 
-      nest_by_sglGp(group_var = "u_id") %>% 
+      nest_by_sglGp(., group_var = user) %>% 
       summarise_groupVar(vars(year, month),
                          vars(n_tweets_month = n())) %>% 
       filter_in_nest(n_tweets_month <= 500) %>% # remove respondents who have made more than 500 tweets a month in 2 most frequently visited network cells 
