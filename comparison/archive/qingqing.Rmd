@@ -37,7 +37,6 @@ if (file.exists(here::here("data/lexington2012_2017.rds"))) {
  }
 
 df <- derive_timestamp(df, created_at)
-
 # nest data 
 df_nest <- nest_dataframe(df, u_id)
 head(df_nest)

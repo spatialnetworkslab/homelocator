@@ -1,12 +1,12 @@
 options(tigris_use_cache = TRUE, tigris_class="sf")
 st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
-acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
-  variables = c(medincome = "B19013_001"),
-  geometry = T, output = "wide", year = 2016)  %>%
-  st_transform(., "+init=epsg:4326") %>% 
-  select(GEOID) %>% 
-  mutate(id = 1:nrow(.))
+# census_api_key("2fcf1623c436882ad5e62a47280ab732d815e363")
+# acs_ky <- tidycensus::get_acs(state = "KY", geography = "tract",
+#   variables = c(medincome = "B19013_001"),
+#   geometry = T, output = "wide", year = 2016)  %>%
+#   st_transform(., "+init=epsg:4326") %>% 
+#   select(GEOID) %>% 
+#   mutate(id = 1:nrow(.))
 neighbors <- st_queen(acs_ky)
 
 

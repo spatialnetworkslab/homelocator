@@ -1,0 +1,258 @@
+---
+title: "Introduction of homelocator package"
+author: "Chen Qingqing"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Load package 
+
+```{r warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(tidyverse)
+library(readr)
+library(RColorBrewer)
+library(sf)
+library(tmap)
+library(tmaptools)
+library(ggpubr)
+```
+
+
+
+```{r extract_home, message=FALSE, warning=FALSE}
+
+df_home_5 <- readRDS(file = "data/df_home.rda")
+head(df_home_5)
+```
+
+```{r load data}
+
+grid_300 <- readRDS(file = "data/grid_300.rda")
+grid_300 <- grid_300[[1]]
+
+tweeter <- readRDS(file = "data/tweeters_with_300m_grid.rds")
+
+df_subzone <- read_sf("data/Shp/MP14_SUBZONE_NO_SEA_PL.shp") %>% 
+  st_transform(., "+init=epsg:3414") %>% 
+  group_by(PLN_AREA_N) %>% 
+  dplyr::summarise(., count= n()) %>% 
+  select(-count) 
+
+grid <- st_make_grid(df_subzone, cellsize = c(300,300), square = FALSE) %>% st_sf(grid_id = 1:length(.))  # create grid with cellsize
+
+```
+
+```{r}
+
+df_home_clean <- function(df){
+
+  df %>% 
+  separate(home,c("grid_id","grid_id2"),sep = ";") %>% 
+  mutate(grid_id= as.numeric(grid_id), grid_id2= as.numeric(grid_id2)) %>% 
+  select(-grid_id2) %>% 
+  group_by(grid_id) %>%
+  dplyr::summarise(count= n()) %>% 
+  filter(!grid_id==0) %>% 
+  left_join(tweeter,by= "grid_id") %>% 
+  mutate(ratio=count/n)%>%  
+  st_sf() 
+
+}
+
+```
+
+```{r home location plot}
+
+homeloc_plot <- function(df){
+
+tm_shape(df_subzone)+
+  tm_polygons(col = "grey", alpha = 0.2, border.col = "white")+
+  tm_shape(df_home_clean(df) %>% filter(count>5)) +
+  tm_fill("count",palette=brewer.pal("BuPu",n = 5),
+          n=5,style = "fisher",
+          legend.hist=TRUE,
+          title="Tweet User")+
+  tm_layout(frame = FALSE,
+          legend.title.size = 0.8,
+           legend.text.size = 0.5,
+           legend.outside = TRUE, 
+           legend.outside.position = c("right","bottom"),
+          main.title = 'Home Location',
+           main.title.size = 1)
+}
+```
+
+```{r plot ratio}
+
+plot_ratio <- function(df) {
+  
+tm_shape(df_subzone)+
+  tm_polygons(col = "grey", alpha = 0.2, border.col = "white")+
+  tm_shape(df_home_clean(df)%>% filter(count>5)) +
+  tm_fill("ratio",palette=brewer.pal("BuPu",n = 5),
+          n=5,style = "sd",
+          #labels=c("~0.25 Least Diverse", "~0.36", "~0.43", "~0.495",">0.495 Most Diverse"),
+          legend.hist=TRUE,
+          title="Tweet User")+
+  tm_layout(frame = FALSE,
+          legend.title.size = 0.8,
+           legend.text.size = 0.5,
+           legend.outside = TRUE, 
+           legend.outside.position = c("right","bottom"),
+          main.title = 'Home Location / Tweets Density Ratio',
+           main.title.size = 1)
+}
+
+```
+
+```{r analysis two homelocations}
+
+centroid_lat_lon <- function(data) {
+  data %>% 
+    st_transform(crs = 3414) %>% 
+    st_centroid() %>% 
+    st_transform(crs = 4326) %>% 
+    pull(geometry)
+}
+
+
+plot_homeloc_diff <- function(df){
+
+home_diff <- df %>% 
+  separate(home,c("grid_id","grid_id2"),sep = ";") %>% 
+  mutate(grid_id= as.numeric(grid_id), grid_id2= as.numeric(grid_id2)) %>%  filter(!grid_id=="NA"&!grid_id==0 & !grid_id2==0) %>% 
+  left_join( grid_300,by = "grid_id") %>% 
+  select(-counts) %>% 
+  setNames(c("u_id","grid_id_1","grid_id","grid_id_geometry")) %>% 
+  left_join(grid_300,by = "grid_id") %>% 
+  select(-counts) %>% 
+  setNames(c("u_id","grid_id_1","grid_id_2","geometry_1","geometry_2")) %>%
+  st_sf() %>% 
+  na.omit() %>%
+select(u_id,geometry_1,geometry_2) %>% 
+  mutate(home1_centroid = geometry_1 %>% st_sf() %>% centroid_lat_lon,
+         home2_centroid = geometry_2 %>% st_sf() %>% centroid_lat_lon) %>%
+  #rowwise() %>% 
+  #mutate(home2_centroid = geometry_2 %>% st_sf() %>% centroid_lat_lon) %>% 
+  #rowwise() %>% 
+  select(u_id,home1_centroid,home2_centroid) %>% 
+  st_drop_geometry() %>% 
+  st_sf() %>% 
+  rowwise() %>% 
+    mutate(line = st_combine(c(home1_centroid, home2_centroid)) %>% st_cast("LINESTRING")) %>% 
+  select(-home1_centroid,-home2_centroid) %>% 
+   st_as_sf(crs =3414)%>% 
+  rowwise() %>% 
+  mutate(distance= (st_length(line) %>% as.numeric())*10000)%>%
+  select(u_id,distance) %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round,0) %>% 
+  group_by(distance) %>% 
+  add_tally() 
+
+ggplot(home_diff, aes(x=distance)) + 
+ geom_histogram(binwidth=350,fill="grey")+
+ stat_bin(binwidth=350, geom="text", colour="black", size=3.5, aes(label=..count..), vjust=-0.3)+
+  ggtitle("Home Location 1 and 2 distance")
+
+}
+
+```
+
+```{r extract_home, message=FALSE, warning=FALSE}
+df_home_5 <- readRDS(file = "data/df_home.rda")
+df_5 <- homeloc_plot(df_home_5)
+
+df_5
+```
+
+
+```{r extract_home, message=FALSE, warning=FALSE}
+df_home_10 <- readRDS(file = "data/df_home_10.rds")
+
+df_10 <- homeloc_plot(df_home_10)
+df_10
+```
+
+```{r}
+df_home_20<- readRDS(file = "data/df_home_20r.rds")
+
+df_20 <- homeloc_plot(df_home_20)
+df_20
+```
+```{r}
+r_5 <- plot_ratio(df_home_5)
+r_5
+```
+
+
+
+```{r}
+r_10 <- plot_ratio(df_home_10)
+r_10
+```
+```{r}
+r_20 <- plot_ratio(df_home_20)
+r_20
+```
+```{r}
+diff_5 <- plot_homeloc_diff(df_home_5)
+diff_5
+```
+
+
+```{r}
+diff_10 <- plot_homeloc_diff(df_home_10)
+diff_10
+```
+```{r}
+diff_20 <- plot_homeloc_diff(df_home_20)
+diff_20
+```
+
+```{r}
+
+tweeter <- tweets_g300 %>% 
+  st_drop_geometry() %>% 
+  group_by(u_id,grid_id) %>% 
+  tally() %>% 
+  select(-n) %>% 
+  group_by(grid_id) %>% 
+  tally() %>% 
+  left_join(grid)
+  
+
+tweeter_density <- 
+tm_shape(df_subzone)+
+  tm_polygons(col = "grey", alpha = 0.2, border.col = "white")+
+  tm_shape(tweeter %>% filter (n>10) %>% st_sf()) +
+  tm_fill("n",palette=brewer.pal("BuPu",n = 5),
+          n=5,style = "fisher",
+          #labels=c("~0.25 Least Diverse", "~0.36", "~0.43", "~0.495",">0.495 Most Diverse"),
+          legend.hist=TRUE,
+          title="Tweet User")+
+  tm_layout(frame = FALSE,
+          legend.title.size = 0.8,
+           legend.text.size = 0.5,
+           legend.outside = TRUE, 
+           legend.outside.position = c("right","bottom"),
+          main.title = 'Twitter User Density',
+           main.title.size = 1)
+
+tweeter_density
+```
+
+
