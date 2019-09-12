@@ -32,7 +32,7 @@ library(RColorBrewer)
 library(ggpubr)
 ```
 
-Load dataset
+# Load dataset
 ```{r}
 tweets <- readRDS(here::here("data/tweets_gridID.rds"))
 df_subzone = read_sf(here::here("data/Shp/MP14_SUBZONE_NO_SEA_PL.shp")) %>% st_transform(., "+init=epsg:3414")
@@ -81,8 +81,7 @@ if (file.exists(here::here("data/hm_smp.csv"))){
   write_csv(hm_frq, path = here::here("data/result_smp.csv"))
 }
 
-hm_full <- bind_rows(hm_hlc, hm_osn, hm_mpd, hm_frq) %>% 
-  left_join(., grids, by = c("home" = "grid_id")) 
+hm_full <- bind_rows(hm_hlc, hm_osn, hm_mpd, hm_frq) %>% left_join(., grids, by = c("home" = "grid_id")) 
 ```
 
 # Overview home results Odds Ratio
@@ -133,24 +132,6 @@ OR_hm_frq <- hm_frq %>%
 OR_hm_full <- rbind(OR_hm_hlc, OR_hm_mpd, OR_hm_osn, OR_hm_frq) %>% 
   st_as_sf() %>% 
   mutate(method = factor(method, levels = c("OSN", "MPD", "HLC", "FREQ")))
-
-tm_shape(df_subzone)+
-  tm_polygons(col = "grey", alpha = 0.2, border.col = "white") +
-  tm_shape(OR_hm_full) +
-  tm_fill("OR", palette = color8,
-          n = 8, style = "fisher",
-          legend.hist = TRUE,
-          title = "Odds Ratio") +
-  tm_layout(
-    legend.outside = F,
-    legend.position = c("right", "bottom"),
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5) + 
-   tm_facets(by = "method", ncol = 2, nrow = 2)
-
-
-
 
 ma1 <- tm_shape(grids) +
   tm_borders(col = "grey") +
@@ -216,94 +197,27 @@ ma4 <- tm_shape(grids) +
             legend.hist.width = 0.3,
             legend.hist.size = 0.5)
 tmap_arrange(ma1, ma2, ma3, ma4, nrow = 2, ncol = 2)
-
 ```
 
 
-<!-- ## distance, take HLC as reference  -->
-<!-- ```{r} -->
-<!-- users_hlc <- hm_hlc$u_id -->
-<!-- users_osn <- hm_osn$u_id -->
-<!-- users_frq <- hm_frq$u_id -->
-<!-- users_mpd <- hm_mpd$u_id -->
-
-<!-- same_users <- intersect(intersect(intersect(users_hlc, users_osn), users_frq), users_mpd) -->
-
-<!-- df_same <- hm_full %>% filter(u_id %in% same_users) %>%  -->
-<!--   st_as_sf() %>% st_centroid() -->
-
-<!-- #users that be able to determine their homes by all four methods  -->
-<!-- n_same_users <- df_same$u_id %>% n_distinct() -->
-<!-- percent_same_users <- n_same_users/all_users_sg -->
-
-
-<!-- df_hm_reference <- df_same %>% filter(name == "HLC") -->
-<!-- geom_hlc <- st_geometry(df_hm_reference) -->
-<!-- geom_osn <- st_geometry(df_same %>% filter(name == "OSN")) -->
-<!-- geom_frq <- st_geometry(df_same %>% filter(name == "FREQ")) -->
-<!-- geom_mpd <- st_geometry(df_same %>% filter(name == "MPD")) -->
-
-
-<!-- df_distance <- df_hm_reference %>%  -->
-<!--   st_set_geometry(NULL) %>%  -->
-<!--   select(-name) %>%  -->
-<!--   mutate(OSN = st_distance(geom_hlc, geom_osn, by_element = T) %>% as.integer(), -->
-<!--          FREQ = st_distance(geom_hlc, geom_frq, by_element = T) %>% as.integer(), -->
-<!--          MPD = st_distance(geom_hlc, geom_mpd, by_element = T) %>% as.integer(), -->
-<!--     ) -->
-
-
-<!-- df_dist_range <- df_distance %>%  -->
-<!--   gather(., key = "method", value = "distance", -u_id, -home) %>%  -->
-<!--   mutate(dist_range = case_when( -->
-<!--     distance %in% seq(0, 0, 1)   ~ "0 km", -->
-<!--     distance %in% seq(1, 1000, 1) ~ "1 km", -->
-<!--     distance %in% seq(1001, 2000, 1) ~ "2 km", -->
-<!--     distance %in% seq(2001, 3000, 1) ~ "3 km", -->
-<!--     distance %in% seq(3001, 4000, 1) ~ "4 km", -->
-<!--     distance %in% seq(4001, 5000, 1) ~ "5 km", -->
-<!--     distance  %in% seq(5001, 6000, 1) ~ "6 km", -->
-<!--     distance  %in% seq(6001, 7000, 1) ~ "7 km", -->
-<!--     distance  %in% seq(7001, 8000, 1) ~ "8 km", -->
-<!--     distance  %in% seq(8001, 9000, 1) ~ "9 km", -->
-<!--     distance  %in% seq(9001, 10000, 1) ~ "10 km", -->
-<!--     distance %in% seq(10001, max(.$distance), 1) ~ ">10 km" -->
-<!--   )) %>%  -->
-<!--   group_by(method, dist_range) %>%  -->
-<!--   summarise(n_users = n_distinct(u_id)) %>%  -->
-<!--   group_by(method) %>%  -->
-<!--   mutate(n_users_pct = round((n_users/sum(n_users)), 4)*100, -->
-<!--          dist_range = factor(dist_range, levels = c(">10 km", "10 km", "9 km", "8 km", "7 km", "6 km", "5 km", "4 km", "3 km", "2 km", "1 km", "0 km"))) %>%  -->
-<!--   ungroup() %>%  -->
-<!--   mutate(method = factor(method, levels = c("OSN", "MPD", "FREQ"))) -->
-
-
-<!-- ggplot(df_dist_range, aes(x = dist_range, y = n_users_pct, fill = method)) + -->
-<!--   geom_bar(stat="identity") + -->
-<!--   geom_text(aes(label=n_users_pct), hjust=0.5, vjust=-0.7, size=3, color = "black", angle = 270) +  -->
-<!--   #geom_text(aes(label=), vjust=-0.3, size=3.5) +  -->
-<!--   facet_wrap(~method) +  -->
-<!--   labs( -->
-<!--     x = "Different distance compared to HCL results (m)", -->
-<!--     y = "Percentage of users (%)", -->
-<!--     fill = "Approaches" -->
-<!--   ) +  -->
-<!--   theme( -->
-<!--     legend.position = "bottom", -->
-<!--     # Remove panel border -->
-<!--   panel.border = element_blank(),   -->
-<!--   # Remove panel grid lines -->
-<!--   panel.grid.major = element_blank(), -->
-<!--   panel.grid.minor = element_blank(), -->
-<!--   # Remove panel background -->
-<!--   panel.background = element_blank(), -->
-<!--     axis.line = element_line(colour = "grey") -->
-<!--   ) +  -->
-<!--   coord_flip()  -->
-<!-- ``` -->
-
-
+# Percentage of users for different number of homes from common users 
 ```{r}
+users_hlc <- hm_hlc$u_id
+users_osn <- hm_osn$u_id
+users_frq <- hm_frq$u_id
+users_mpd <- hm_mpd$u_id
+
+same_users <- intersect(intersect(intersect(users_hlc, users_osn), users_frq), users_mpd)
+
+df_same <- hm_full %>% 
+  filter(u_id %in% same_users) %>%
+  st_as_sf() %>% st_centroid()
+
+#users that be able to determine their homes by all four methods
+n_same_users <- df_same$u_id %>% n_distinct()
+percent_same_users <- n_same_users/all_users_sg
+
+
 df_n_homes <- hm_full %>% 
   select(c(u_id, home, name)) %>% 
   filter(u_id %in% same_users) %>% 
@@ -315,7 +229,8 @@ df_n_homes$n_hm %>% table() %>% prop.table() %>% round(., 4)
 ```
 
 # Different results
-# One home - 4 results are same 
+
+## One home - 4 results are same 
 ```{r}
 one_home <- df_n_homes %>% 
   filter(n_hm == 1) %>% 
@@ -323,13 +238,213 @@ one_home <- df_n_homes %>%
   left_join(., hm_full) %>% 
   select(-c(n_hm, name)) %>% 
   unique() %>% 
-  st_as_sf
+  st_as_sf()
 
-tm_shape(df_subzone) + 
-  tm_borders() + 
-  tm_shape(one_home) + 
-  tm_polygons(col = "lightblue") + 
-  tm_text(text = "method", size = 0.5)
+# tm_shape(df_subzone) +
+#   tm_borders() +
+#   tm_shape(one_home) +
+#   tm_polygons(col = "lightblue") +
+#   tm_text(text = "method", size = 0.5)
+```
+
+
+
+### Common users character 
+```{r}
+user_1hm <- one_home$u_id %>% unique()
+user_1hm_tweets <- tweets %>% filter(u_id %in% user_1hm)
+## contour map 
+# onehm_coords <- user_1hm_tweets %>% 
+#   st_transform(4326) %>% 
+#   st_coordinates() %>% 
+#   as.data.frame() %>% 
+#   setNames(c("lon", "lat"))
+# ggplot(zone_4326) + 
+#   geom_sf(fill = "grey", alpha = 0.2) + 
+#   geom_density2d(data = onehm_coords, aes(x = lon, y = lat)) +
+#    stat_density2d(data = onehm_coords, aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
+#                   size = 0.01, bins = 16, geom = 'polygon') +
+#    scale_fill_gradient(low = "green", high = "red") +
+#    scale_alpha(range = c(0.00, 0.5), guide = FALSE) +
+#   labs(x = "Lon", y = "Lat", 
+#        title = "Tweets density") + 
+#   theme(
+#     legend.position = "bottom",
+#     panel.border = element_blank(),  
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.background = element_blank(),
+#     axis.line = element_line(colour = "grey")
+#   )
+dens_tweets <- user_1hm_tweets %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(grid_id) %>% 
+  summarise(n_tweets = n()) %>% 
+  mutate(norm_n_tweets = (n_tweets - min(n_tweets))/(max(n_tweets)-min(n_tweets))) %>% 
+  inner_join(., grids) %>% 
+  st_as_sf()
+dens_users <- user_1hm_tweets %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(grid_id) %>%
+  summarise(n_users = n_distinct(u_id)) %>% 
+  mutate(norm_n_users = (n_users - min(n_users))/(max(n_users)-min(n_users))) %>% 
+  inner_join(., grids) %>% 
+  st_as_sf() 
+dens_home_users <- one_home %>% 
+  st_set_geometry(NULL) %>% 
+  select(c(u_id, home)) %>% 
+  unique() %>% 
+  group_by(home) %>% 
+  summarise(n_users_home = n_distinct(u_id)) %>% 
+  mutate(norm_n_users_home = (n_users_home - min(n_users_home))/(max(n_users_home)-min(n_users_home))) %>%
+  left_join(., grids, by = c("home" = "grid_id")) %>% 
+  st_as_sf() 
+```
+
+
+
+```{r}
+pop2015 <- read_sf(here::here("data/pop2015/PLAN_BDY_DWELLING_TYPE_2015.shp")) %>% 
+  st_transform(., "+init=epsg:3414") 
+zone_4326 <- df_subzone %>% st_transform(4326) 
+zone_grids <- df_subzone %>% st_join(., grids)
+
+# pop2015_lon_lat <- pop2015 %>% 
+#   st_transform(4326) %>% 
+#   st_centroid() %>% 
+#   st_coordinates() %>% 
+#   as.data.frame() %>% 
+#   setNames(c("lon", "lat"))
+# pop2015_coords <- pop2015 %>%
+#   st_set_geometry(NULL) %>% 
+#   select(c(PLN_AREA_N, TOTAL)) %>% 
+#   cbind(., pop2015_lon_lat)
+# grid_u <- tweets %>% 
+#   st_set_geometry(NULL) %>% 
+#   group_by(grid_id) %>% 
+#   summarise(n_users = n_distinct(u_id)) %>% 
+#   left_join(., grids) %>% 
+#   st_as_sf()
+```
+
+```{r}
+## tweets distribution
+h1_p1 <- tm_shape(grids) + 
+  tm_borders(col = "grey") + 
+  tm_shape(dens_tweets) +
+  tm_fill("norm_n_tweets", palette = color8,
+          n = 8, style = "fisher", 
+          legend.hist = TRUE,
+          title = "Normalized Tweets"
+          ) +
+  tm_layout(
+            title = "Distribution of Tweets",
+            title.position = c("left", "top"),
+            title.size = 0.8,
+            legend.outside = F,
+            legend.position = c("right", "bottom"),
+            legend.title.size  = 0.8,
+            legend.hist.height = 0.1,
+            legend.hist.width = 0.3,
+            legend.hist.size = 0.5)
+## twitter users distribution
+h1_p2 <- tm_shape(grids) + 
+  tm_borders(col = "grey") + 
+  tm_shape(dens_users) + 
+  tm_fill("norm_n_users", palette = color8,
+          n = 8, style = "fisher", 
+          legend.hist = TRUE,
+          title = "Normalized Users"
+          ) +
+  tm_layout(
+            title = "Distribution of Twitter Users",
+            title.position = c("left", "top"),
+    title.size = 0.8,
+            legend.outside = F,
+            legend.position = c("right", "bottom"),
+            legend.title.size  = 0.8,
+            legend.hist.height = 0.1,
+            legend.hist.width = 0.3,
+            legend.hist.size = 0.5)
+## Inferred home/residents distribution
+h1_p3 <-tm_shape(grids) + 
+  tm_borders(col = "grey") + 
+  tm_shape(dens_home_users) + 
+  tm_fill("norm_n_users_home", palette = color8,
+          n = 8, style = "fisher", 
+          legend.hist = TRUE,
+          title = "Normalized Users"
+          ) +
+  tm_layout(
+            title = "Identified Residents",
+            title.position = c("left", "top"),
+    title.size = 0.8,
+            legend.outside = F,
+            legend.position = c("right", "bottom"),
+            legend.title.size  = 0.8, 
+            legend.hist.height = 0.1,
+            legend.hist.width = 0.3,
+            legend.hist.size = 0.5)
+
+## real residents distribution
+raw_pop <- tm_shape(df_subzone) + 
+  tm_borders(col = "grey20") + 
+  tm_shape(pop2015) + 
+  tm_fill("TOTAL", palette = color8,
+          n = 8, style = "fisher", 
+          legend.hist = TRUE,
+          title = "Number of Residents"
+          ) +
+  tm_layout(
+            title = "Singapore Residents in 2015",
+            title.position = c("left", "top"), 
+     title.size = 0.8,
+            legend.outside = F,
+            legend.position = c("right", "bottom"),
+            legend.title.size  = 0.8,
+            legend.hist.height = 0.1,
+            legend.hist.width = 0.3,
+            legend.hist.size = 0.5)
+
+library(grid)
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(nrow = 2, ncol = 2)))
+print(h1_p1, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+print(h1_p2, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+print(raw_pop, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+print(h1_p3, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+```
+
+### real and inferred residents correlation 
+```{r}
+inferred_resids <- pop2015 %>% 
+  select(c(PLN_AREA_N, TOTAL)) %>% 
+  st_join(., one_home) %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(PLN_AREA_N) %>% 
+  summarise(n = n())
+actual_resides <- pop2015 %>% 
+  st_set_geometry(NULL) %>% 
+  select(c(PLN_AREA_N, TOTAL))
+
+residents <- left_join(inferred_resids, actual_resides) %>% 
+  mutate(norm_n = n/sum(n),
+         norm_total = TOTAL/sum(TOTAL))
+# ggplot(residents, aes(norm_n, norm_total)) +
+#   geom_point() + 
+#   geom_smooth(method="lm") + 
+#   ggrepel::geom_text_repel(aes(label=PLN_AREA_N), size = 2.5) +
+#   theme(panel.background=element_rect(fill = "white", colour = "black")) + 
+#   labs(x = "Normalized inferred residents",
+#        y = "Normalized actual residents")
+ggscatter(residents, x = "norm_n", y = "norm_total",
+  add = "reg.line") +
+  stat_cor(label.y = 0.065) +
+  stat_regline_equation(label.y = 0.07) + 
+  ggrepel::geom_text_repel(aes(label=PLN_AREA_N), size = 2.5) +
+  theme(panel.background=element_rect(fill = "white", colour = "black")) + 
+  labs(x = "Normalized number of inferred residents",
+       y = "Normalized number of actual residents")
 ```
 
 
@@ -514,398 +629,6 @@ tmap_arrange(p2_1, p2_2, p2_3,
 
 ```
 
-<!-- # buffer  -->
-<!-- ```{r} -->
-<!-- tt <- df_wk_or_sf %>%  -->
-<!--   filter(grid_id == 1040) %>%  -->
-<!--   st_centroid() -->
-
-<!-- km <- as_units("km") -->
-<!-- r250 <- set_units(0.25, km) %>% set_units(m) -->
-<!-- grid_buffer <- st_buffer(tt, r250) -->
-
-
-
-<!-- tm_shape(df_wk_or_sf %>% filter(grid_id == 1040)) +  -->
-<!--   tm_polygons() +  -->
-<!--   tm_shape(tt) + -->
-<!--   tm_dots(size = 0.3, col = "red") +  -->
-<!--   tm_shape(grid_buffer) +  -->
-<!--   tm_borders() -->
-<!-- ``` -->
-
-# Common users character 
-```{r}
-user_1hm <- one_home$u_id %>% unique()
-user_1hm_tweets <- tweets %>% filter(u_id %in% user_1hm)
-
-onehm_coords <- user_1hm_tweets %>% 
-  st_transform(4326) %>% 
-  st_coordinates() %>% 
-  as.data.frame() %>% 
-  setNames(c("lon", "lat"))
-  
-ggplot(zone_4326) + 
-  geom_sf(fill = "grey", alpha = 0.2) + 
-  geom_density2d(data = onehm_coords, aes(x = lon, y = lat)) +
-   stat_density2d(data = onehm_coords, aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
-                  size = 0.01, bins = 16, geom = 'polygon') +
-   scale_fill_gradient(low = "green", high = "red") +
-   scale_alpha(range = c(0.00, 0.5), guide = FALSE) +
-  labs(x = "Lon", y = "Lat", 
-       title = "Tweets density") + 
-  theme(
-    legend.position = "bottom",
-    panel.border = element_blank(),  
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.line = element_line(colour = "grey")
-  )
-dens_tweets <- user_1hm_tweets %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(grid_id) %>% 
-  summarise(n_tweets = n()) %>% 
-  mutate(norm_n_tweets = (n_tweets - min(n_tweets))/(max(n_tweets)-min(n_tweets))) %>% 
-  inner_join(., grids) %>% 
-  st_as_sf()
-dens_users <- user_1hm_tweets %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(grid_id) %>%
-  summarise(n_users = n_distinct(u_id)) %>% 
-  mutate(norm_n_users = (n_users - min(n_users))/(max(n_users)-min(n_users))) %>% 
-  inner_join(., grids) %>% 
-  st_as_sf() 
-dens_home_users <- one_home %>% 
-  st_set_geometry(NULL) %>% 
-  select(c(u_id, home)) %>% 
-  unique() %>% 
-  group_by(home) %>% 
-  summarise(n_users_home = n_distinct(u_id)) %>% 
-  mutate(norm_n_users_home = (n_users_home - min(n_users_home))/(max(n_users_home)-min(n_users_home))) %>%
-  left_join(., grids, by = c("home" = "grid_id")) %>% 
-  st_as_sf() 
-
-# dens_home_wk <- user_1hm_tweets %>% 
-#   transmute(wday = wday(created_at)) %>% 
-#   mutate(wk = if_else(wday %in% c(1, 7), 1, 0))
-```
-
-```{r}
-h1_p1 <- tm_shape(grids) + 
-  tm_borders(col = "grey") + 
-  tm_shape(dens_tweets ) +
-  tm_fill("norm_n_tweets", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Normalized Tweets"
-          ) +
-  tm_layout(
-            title = "Distribution of Tweets",
-            title.position = c("left", "top"),
-            title.size = 0.8,
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8,
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-
-h1_p2 <- tm_shape(grids) + 
-  tm_borders(col = "grey") + 
-  tm_shape(dens_users) + 
-  tm_fill("norm_n_users", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Normalized Users"
-          ) +
-  tm_layout(
-            title = "Distribution of Twitter Users",
-            title.position = c("left", "top"),
-    title.size = 0.8,
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8,
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-
-h1_p3 <-tm_shape(grids) + 
-  tm_borders(col = "grey") + 
-  tm_shape(dens_home_users) + 
-  tm_fill("norm_n_users_home", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Normalized Users"
-          ) +
-  tm_layout(
-            title = "Identified Residents",
-            title.position = c("left", "top"),
-    title.size = 0.8,
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8, 
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-
-
-raw_pop <- tm_shape(df_subzone) + 
-  tm_borders(col = "grey20") + 
-  tm_shape(pop2015) + 
-  tm_fill("TOTAL", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Number of Residents"
-          ) +
-  tm_layout(
-            title = "Singapore Residents in 2015",
-            title.position = c("left", "top"), 
-     title.size = 0.8,
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8,
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-
-
-inferred_resids <- pop2015 %>% 
-  select(c(PLN_AREA_N, TOTAL)) %>% 
-  st_join(., one_home) %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(PLN_AREA_N) %>% 
-  summarise(n = n())
-actual_resides <- pop2015 %>% 
-  st_set_geometry(NULL) %>% 
-  select(c(PLN_AREA_N, TOTAL))
-
-residents <- left_join(inferred_resids, actual_resides) %>% 
-  mutate(norm_n = n/sum(n),
-         norm_total = TOTAL/sum(TOTAL))
-ggplot(residents, aes(norm_n, norm_total)) +
-  geom_point() + 
-  geom_smooth(method="lm") + 
-  ggrepel::geom_text_repel(aes(label=PLN_AREA_N), size = 2.5) +
-  theme(panel.background=element_rect(fill = "white", colour = "black")) + 
-  labs(x = "Normalized inferred residents",
-       y = "Normalized actual residents")
-
-
-
-ggscatter(residents, x = "norm_n", y = "norm_total",
-  add = "reg.line") +
-  stat_cor(label.y = 0.065) +
-  stat_regline_equation(label.y = 0.07) + 
-  ggrepel::geom_text_repel(aes(label=PLN_AREA_N), size = 2.5) +
-  theme(panel.background=element_rect(fill = "white", colour = "black")) + 
-  labs(x = "Normalized number of inferred residents",
-       y = "Normalized number of actual residents")
-
-
-library(grid)
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(nrow = 2, ncol = 2)))
-print(h1_p1, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-print(h1_p2, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(raw_pop, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-print(h1_p3, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
-```
-
-
-
-# Population in Singapore
-```{r}
-tweets_lon_lat <- tweets %>%
-  st_transform(4326) %>% 
-  st_coordinates() %>% 
-  as.data.frame() %>% 
-  setNames(c("lon", "lat")) 
-
-
-df_tweets <- tweets %>% 
-  st_set_geometry(NULL) %>% 
-  select(c(u_id, id, created_at, grid_id))
-
-tweets_with_coords <- cbind(df_tweets, tweets_lon_lat)
-# saveRDS(tweets_with_coords, file = here::here("data/tweets_with_coords.rds"))
-
-test <- tweets_with_coords %>% sample_n(3000)
-ggplot(data = test) + 
-  geom_density2d(aes(x = lon, y = lat), size = 0.5) + 
-  stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
-                   bins = 16, geom = "polygon") + 
-  scale_fill_gradient(low = "green", high = "red") + 
-  scale_alpha(range = c(0, 0.5), guide = FALSE) +
-  theme(
-    legend.position = "bottom",
-    panel.border = element_blank(),  
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.line = element_line(colour = "grey")
-  )
-
-
-# #ggmap 
-# Sg_lon_lat <- geocode(c("Singapore"))
-# sg_map <- get_map(location = Sg_lon_lat, zoom = 11, color = "bw")
-# ggmap(sg_map, extent = "normal", maprange=FALSE) %+% test + aes(x = lon, y = lat)
-# 
-# p_tweets_density <- ggplot(zone_4326) + 
-#   geom_sf() + 
-#   geom_density2d(data = tweets_with_coords, aes(x = lon, y = lat)) +
-#    stat_density2d(data = tweets_with_coords, aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
-#                   size = 0.01, bins = 16, geom = 'polygon') +
-#    scale_fill_gradient(low = "green", high = "red") +
-#    scale_alpha(range = c(0.00, 0.5), guide = FALSE) +
-#   labs(x = "Lon", y = "Lat", 
-#        title = "Tweets density in Singapore from 2012 to 2015") + 
-#   theme(
-#     legend.position = "bottom",
-#     panel.border = element_blank(),  
-#     panel.grid.major = element_blank(),
-#     panel.grid.minor = element_blank(),
-#     panel.background = element_blank(),
-#     axis.line = element_line(colour = "grey")
-#   )
-# 
-# tweets_with_coords <- readRDS(file = here::here("data/tweets_with_coords.rds"))
-# users_with_coords <- readRDS(file = here::here("data/users_with_coords.rds"))
-# 
-# grids_coords <- grids %>% 
-#   st_transform(4326) %>% 
-#   st_centroid() %>% 
-#   st_coordinates() %>% 
-#   as.data.frame() %>% 
-#   setNames(c("lon", "lat")) 
-# 
-# grids_2 <- grids %>% st_set_geometry(NULL) %>% bind_cols(grids_coords)
-# 
-# t <- tweets_with_coords %>% 
-#   select(c(u_id, grid_id)) %>% 
-#   unique() %>% left_join(grids_2)
-
-###------------------------------------------------------------
-df_zone <- df_subzone %>% st_join(., grids) %>% 
-  select(c(PLN_AREA_N, REGION_N, grid_id))
-
-t_users <- tweets_with_coords %>% 
-  select(c(u_id, grid_id)) %>% 
-  unique() %>% 
-  left_join(df_zone)
-
-dens_users <- t_users %>% 
-  group_by(PLN_AREA_N) %>% 
-  summarise(n_users = n_distinct(u_id)) 
-  
-populations <- tweets %>%
-  st_set_geometry(NULL) %>% 
-  group_by(grid_id) %>% 
-  summarise(n_tweets = n(),
-            n_users = n_distinct(u_id)) %>% 
-  left_join(., grids) %>% 
-  st_as_sf() %>% 
-  st_centroid()
-  
-populations_coords <- populations %>% 
-    st_transform(4326) %>% 
-    st_coordinates() %>% 
-    as.data.frame() 
-
-popul_coords <- populations %>% 
-  st_set_geometry(NULL) %>% 
-  cbind(populations_coords) %>% 
-  setNames(c("grid_id", "n_tweets", "n_users", "lon", "lat")) 
-
-
-
-ggplot(data = popul_coords, aes(lon, lat)) + 
-    geom_density2d(aes(x = lon, y = lat), size = 0.5) +
-    stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
-                   bins = 16, geom = "polygon") + 
-    scale_fill_gradient(low = "green", high = "red") +
-    scale_alpha(range = c(0, 0.5), guide = FALSE) + 
-    geom_point(aes(col = landuse_type)) 
-
-```
-
-
-
-```{r}
-pop2015 <- read_sf(here::here("data/pop2015/PLAN_BDY_DWELLING_TYPE_2015.shp")) %>% 
-  st_transform(., "+init=epsg:3414") 
-zone_4326 <- df_subzone %>% st_transform(4326) 
-
-zone_grids <- df_subzone %>% st_join(., grids)
-
-
-
-d <- pop2015 %>% 
-  st_transform(4326) %>% 
-  st_centroid() %>% 
-    st_coordinates() %>% 
-    as.data.frame() %>% 
-  setNames(c("lon", "lat"))
-pop2015_coords <- pop2015 %>%
-  st_set_geometry(NULL) %>% 
-  select(c(PLN_AREA_N, TOTAL)) %>% 
-  cbind(., d)
- 
-
-grid_u <- tweets %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(grid_id) %>% 
-  summarise(n_users = n_distinct(u_id)) %>% 
-  left_join(., grids) %>% 
-  st_as_sf()
-
-
-tm_shape(df_subzone) + 
-  tm_borders(col = "grey20") + 
-  tm_shape(grid_u) + 
-  tm_fill("n_users", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Number of Residents"
-          ) +
-  tm_layout(
-            title = "Singapore Residents by Planing Area in 2015",
-            title.position = c("left", "top"),
-    title.size = 0.8,
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8,
-            legend.hist.height = 0.1,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-
-raw_pop <- tm_shape(df_subzone) + 
-  tm_borders(col = "grey20") + 
-  tm_shape(pop2015) + 
-  tm_fill("TOTAL", palette = color8,
-          n = 8, style = "fisher", 
-          legend.hist = TRUE,
-          title = "Number of Residents"
-          ) +
-  tm_layout(
-            title = "Singapore Residents by Planing Area in 2015",
-            title.position = c("left", "top"), 
-            legend.outside = F,
-            legend.position = c("right", "bottom"),
-            legend.title.size  = 0.8,
-            legend.hist.height = 0.2,
-            legend.hist.width = 0.3,
-            legend.hist.size = 0.5)
-tmap_mode("view")
-tm_shape(df_subzone) + 
-  tm_borders(col = "grey20") + 
-  tm_shape(df_subzone) + 
-  tm_text(text = "PLN_AREA_N", size = 0.3)
-
-```
-
-
 
 # Distribution of users in different number of tweets groups
 ```{r}
@@ -969,7 +692,7 @@ ggarrange(raw_bar, comm_bar,
 ```
 
 
-#compare 4 algos
+# Compare 4 algorithms
 ```{r}
 library(RColorBrewer)
 rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
@@ -1027,7 +750,7 @@ t_4_algs %>%
 
 
 ```{r}
-tt <- t_4_algs_value %>% 
+t_4_algs_value_group <- t_4_algs_value %>% 
   mutate(ranges = case_when(
           n_tweets %in% seq(0, 100, 1)   ~ "(0,100]",
           n_tweets %in% seq(101, 200, 1) ~ "(100,200]",
@@ -1045,12 +768,11 @@ tt <- t_4_algs_value %>%
           n_tweets %in% seq(1300, max(.$n_tweets), 1) ~ "> 1300"
   )) %>% 
   group_by(name, ranges) %>% 
-  summarise(n = n())
-
-ttt <- tt %>% 
+  summarise(n = n()) %>% 
   group_by(name) %>% 
   mutate(norm_n = round((n/sum(n)), 2) * 100)
-p <- ttt %>% 
+
+p_4alogrithms <- t_4_algs_value_group %>% 
   ungroup() %>% 
   ggplot(., aes(x = ranges, y = norm_n)) + 
   geom_bar(stat = "identity", aes(fill = name)) + 
@@ -1070,7 +792,167 @@ p <- ttt %>%
   )
 
 ggarrange(raw_bar, comm_bar, 
-          p, stable.p, 
+          p_4alogrithms, stable.p, 
           ncol = 2, nrow = 2)
 ```
 
+
+<!-- # buffer  -->
+<!-- ```{r} -->
+<!-- tt <- df_wk_or_sf %>%  -->
+<!--   filter(grid_id == 1040) %>%  -->
+<!--   st_centroid() -->
+
+<!-- km <- as_units("km") -->
+<!-- r250 <- set_units(0.25, km) %>% set_units(m) -->
+<!-- grid_buffer <- st_buffer(tt, r250) -->
+
+
+
+<!-- tm_shape(df_wk_or_sf %>% filter(grid_id == 1040)) +  -->
+<!--   tm_polygons() +  -->
+<!--   tm_shape(tt) + -->
+<!--   tm_dots(size = 0.3, col = "red") +  -->
+<!--   tm_shape(grid_buffer) +  -->
+<!--   tm_borders() -->
+<!-- ``` -->
+
+```{r}
+# # Population in Singapore
+# tweets_lon_lat <- tweets %>%
+#   st_transform(4326) %>% 
+#   st_coordinates() %>% 
+#   as.data.frame() %>% 
+#   setNames(c("lon", "lat")) 
+# df_tweets <- tweets %>% 
+#   st_set_geometry(NULL) %>% 
+#   select(c(u_id, id, created_at, grid_id))
+# 
+# tweets_with_coords <- cbind(df_tweets, tweets_lon_lat)
+# # saveRDS(tweets_with_coords, file = here::here("data/tweets_with_coords.rds"))
+# 
+# test <- tweets_with_coords %>% sample_n(3000)
+# ggplot(data = test) + 
+#   geom_density2d(aes(x = lon, y = lat), size = 0.5) + 
+#   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
+#                    bins = 16, geom = "polygon") + 
+#   scale_fill_gradient(low = "green", high = "red") + 
+#   scale_alpha(range = c(0, 0.5), guide = FALSE) +
+#   theme(
+#     legend.position = "bottom",
+#     panel.border = element_blank(),  
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.background = element_blank(),
+#     axis.line = element_line(colour = "grey")
+#   )
+# ###------------------------------------------------------------
+# df_zone <- df_subzone %>% st_join(., grids) %>% 
+#   select(c(PLN_AREA_N, REGION_N, grid_id))
+# 
+# t_users <- tweets_with_coords %>% 
+#   select(c(u_id, grid_id)) %>% 
+#   unique() %>% 
+#   left_join(df_zone)
+# 
+# dens_users <- t_users %>% 
+#   group_by(PLN_AREA_N) %>% 
+#   summarise(n_users = n_distinct(u_id)) 
+#   
+# populations <- tweets %>%
+#   st_set_geometry(NULL) %>% 
+#   group_by(grid_id) %>% 
+#   summarise(n_tweets = n(),
+#             n_users = n_distinct(u_id)) %>% 
+#   left_join(., grids) %>% 
+#   st_as_sf() %>% 
+#   st_centroid()
+#   
+# populations_coords <- populations %>% 
+#     st_transform(4326) %>% 
+#     st_coordinates() %>% 
+#     as.data.frame() 
+# 
+# popul_coords <- populations %>% 
+#   st_set_geometry(NULL) %>% 
+#   cbind(populations_coords) %>% 
+#   setNames(c("grid_id", "n_tweets", "n_users", "lon", "lat")) 
+# 
+# 
+# 
+# ggplot(data = popul_coords, aes(lon, lat)) + 
+#     geom_density2d(aes(x = lon, y = lat), size = 0.5) +
+#     stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
+#                    bins = 16, geom = "polygon") + 
+#     scale_fill_gradient(low = "green", high = "red") +
+#     scale_alpha(range = c(0, 0.5), guide = FALSE) + 
+#     geom_point(aes(col = landuse_type)) 
+```
+
+
+<!-- ## distance, take HLC as reference  -->
+```{r}
+# <!-- df_hm_reference <- df_same %>% filter(name == "HLC") -->
+# <!-- geom_hlc <- st_geometry(df_hm_reference) -->
+# <!-- geom_osn <- st_geometry(df_same %>% filter(name == "OSN")) -->
+# <!-- geom_frq <- st_geometry(df_same %>% filter(name == "FREQ")) -->
+# <!-- geom_mpd <- st_geometry(df_same %>% filter(name == "MPD")) -->
+# 
+# 
+# <!-- df_distance <- df_hm_reference %>%  -->
+# <!--   st_set_geometry(NULL) %>%  -->
+# <!--   select(-name) %>%  -->
+# <!--   mutate(OSN = st_distance(geom_hlc, geom_osn, by_element = T) %>% as.integer(), -->
+# <!--          FREQ = st_distance(geom_hlc, geom_frq, by_element = T) %>% as.integer(), -->
+# <!--          MPD = st_distance(geom_hlc, geom_mpd, by_element = T) %>% as.integer(), -->
+# <!--     ) -->
+# 
+# 
+# <!-- df_dist_range <- df_distance %>%  -->
+# <!--   gather(., key = "method", value = "distance", -u_id, -home) %>%  -->
+# <!--   mutate(dist_range = case_when( -->
+# <!--     distance %in% seq(0, 0, 1)   ~ "0 km", -->
+# <!--     distance %in% seq(1, 1000, 1) ~ "1 km", -->
+# <!--     distance %in% seq(1001, 2000, 1) ~ "2 km", -->
+# <!--     distance %in% seq(2001, 3000, 1) ~ "3 km", -->
+# <!--     distance %in% seq(3001, 4000, 1) ~ "4 km", -->
+# <!--     distance %in% seq(4001, 5000, 1) ~ "5 km", -->
+# <!--     distance  %in% seq(5001, 6000, 1) ~ "6 km", -->
+# <!--     distance  %in% seq(6001, 7000, 1) ~ "7 km", -->
+# <!--     distance  %in% seq(7001, 8000, 1) ~ "8 km", -->
+# <!--     distance  %in% seq(8001, 9000, 1) ~ "9 km", -->
+# <!--     distance  %in% seq(9001, 10000, 1) ~ "10 km", -->
+# <!--     distance %in% seq(10001, max(.$distance), 1) ~ ">10 km" -->
+# <!--   )) %>%  -->
+# <!--   group_by(method, dist_range) %>%  -->
+# <!--   summarise(n_users = n_distinct(u_id)) %>%  -->
+# <!--   group_by(method) %>%  -->
+# <!--   mutate(n_users_pct = round((n_users/sum(n_users)), 4)*100, -->
+# <!--          dist_range = factor(dist_range, levels = c(">10 km", "10 km", "9 km", "8 km", "7 km", "6 km", "5 km", "4 km", "3 km", "2 km", "1 km", "0 km"))) %>%  -->
+# <!--   ungroup() %>%  -->
+# <!--   mutate(method = factor(method, levels = c("OSN", "MPD", "FREQ"))) -->
+# 
+# 
+# <!-- ggplot(df_dist_range, aes(x = dist_range, y = n_users_pct, fill = method)) + -->
+# <!--   geom_bar(stat="identity") + -->
+# <!--   geom_text(aes(label=n_users_pct), hjust=0.5, vjust=-0.7, size=3, color = "black", angle = 270) +  -->
+# <!--   #geom_text(aes(label=), vjust=-0.3, size=3.5) +  -->
+# <!--   facet_wrap(~method) +  -->
+# <!--   labs( -->
+# <!--     x = "Different distance compared to HCL results (m)", -->
+# <!--     y = "Percentage of users (%)", -->
+# <!--     fill = "Approaches" -->
+# <!--   ) +  -->
+# <!--   theme( -->
+# <!--     legend.position = "bottom", -->
+# <!--     # Remove panel border -->
+# <!--   panel.border = element_blank(),   -->
+# <!--   # Remove panel grid lines -->
+# <!--   panel.grid.major = element_blank(), -->
+# <!--   panel.grid.minor = element_blank(), -->
+# <!--   # Remove panel background -->
+# <!--   panel.background = element_blank(), -->
+# <!--     axis.line = element_line(colour = "grey") -->
+# <!--   ) +  -->
+# <!--   coord_flip()  -->
+# <!-- ``` -->
