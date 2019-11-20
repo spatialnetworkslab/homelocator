@@ -13,9 +13,9 @@ nest_by_sglGp <- function(df, group_var) {
   nested_name <- paste0(quo_name(expr), "_data")
   df %>%
     group_by(!!expr) %>%
-    nest(.key = !!nested_name) 
+    nest(.key = nested_name) 
+    # nest(.key = !!nested_name) 
 }
-
 
 #' Nest dataframe 
 #' 

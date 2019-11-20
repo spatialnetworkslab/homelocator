@@ -3,13 +3,12 @@
 #' Add basic needed variables derived from timestamp 
 #' @param df A nested dataframe 
 #' @param timestamp Name of timestamp column. Should be POSIXct
-derive_timestamp <- function(df, timestamp){
-  
+derive_timestamp <- function(df, timestamp, time_zone = "Asia/Singapore"){
+  df <- df %>% ungroup()
   nested_data <- names(df[,grepl("data", names(df))])
   timestamp_enq <- rlang::sym(timestamp)
   # timestamp_enq <- rlang::enquo(timestamp)
   user_data <- df[[nested_data]]
-  
   
   if(!is.list(df[,grepl("data", names(df))]))
     stop("Error: Dataset is not nested!")
@@ -18,18 +17,18 @@ derive_timestamp <- function(df, timestamp){
     stop("Error: Timestamp is not of class POSIXct")
   }
   
-  # define reading function which includes the progress bar
+  #define reading function which includes the progress bar
   derive_with_progress <- function(data){
     pb$tick()$print()
-    derive_column <- data %>% 
+    derive_column <- data %>%
       mutate(year = lubridate::year(!!timestamp_enq),
              month = lubridate::month(!!timestamp_enq),
-             day = lubridate::day(!!timestamp_enq), 
+             day = lubridate::day(!!timestamp_enq),
              wday = lubridate::wday(!!timestamp_enq), #day of week
              hour = lubridate::hour(!!timestamp_enq), #hour of day
-             ymd = as.Date(!!timestamp_enq))
+             ymd = as.Date(!!timestamp_enq, tz = time_zone))
   }
-  
+
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
   message(paste(emo::ji("hammer_and_wrench"), "Deriving new variables from timestamp to each user..."))
@@ -39,7 +38,6 @@ derive_timestamp <- function(df, timestamp){
   message(paste("\n", emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, ymd."))
   output
 }
-
 
 
 

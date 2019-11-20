@@ -24,7 +24,7 @@ score_var <- function(df, group_var, user = "u_id", location = "grid_id", keep_o
   
   df_nest <- df %>%
     group_by(!!expr) %>%
-    nest(.key = !!nested_name) 
+    nest(.key = nested_name) 
   
   user_data <- df_nest[[nested_name]]
   
@@ -65,6 +65,8 @@ score_var <- function(df, group_var, user = "u_id", location = "grid_id", keep_o
     output
   }
 }
+
+
 #' sum scored variables 
 #' 
 #' Sum up scored variables 

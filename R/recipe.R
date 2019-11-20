@@ -12,6 +12,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
   timestamp_exp <- rlang::sym(timestamp)
   location_exp <- rlang::sym(location)
   
+
   df_valid <- validate_dataset(df, user = user, timestamp = timestamp, location = location)
   df_nest <- nest_by_sglGp(df_valid, group_var = user) %>% derive_timestamp(., timestamp = timestamp)
   if(recipe == "homelocator"){
@@ -38,9 +39,9 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
                     n_months_loc = n_distinct(month)) %>%
       add_var_pct(wd_or_wk) %>%
       add_var_pct(rest_or_work) %>%
-      add_var_pct(wkmorning_or_not) %>% 
+      add_var_pct(wkmorning_or_not) %>%
       replace(., is.na(.), 0)
-    
+   
     df_score <- df_expanded  %>%
       score_var(group_var = !!user_exp,
                 keep_original_vars = F,
@@ -88,7 +89,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
                          vars(n_days_month_loc = n_distinct(ymd))) %>% 
       filter_in_nest(n_days_month_loc >= 2) %>% # at least two tweets at different days a month 
       unnest() 
-    regular_nest <- nest_by_sglGp(regular_cells, group_var = "u_id")
+    regular_nest <- nest_by_sglGp(regular_cells, group_var = user)
     
     regular_append <- regular_nest %>% 
       summarise_groupVar(vars(!!location_exp),
@@ -96,7 +97,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
                          n_days_loc = n_distinct(ymd)))
     
     most5popular_regulars <- regular_append %>% 
-      arrange_in_nest(group_var = "grid_id", n_days_loc, n_tweets_loc) %>% 
+      arrange_in_nest(group_var = location, n_days_loc, n_tweets_loc) %>% 
       top_n_in_nest(., n = 3, wt = n_tweets_loc)
     
     regular_filtered <- most5popular_regulars %>% 
@@ -123,7 +124,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
       group_by(!!user_exp) %>% 
       slice(1:show_n_home) %>% 
       summarise(home =  paste(!!location_exp, collapse = "; "))
-  } else if(recipe == "simple"){
+  } else if(recipe == "FREQ"){
     cleaned_df_byuser <- df_nest %>%
       summarise_var(n_tweets = n(),
                     n_locs = n_distinct(!!location_exp)) %>%

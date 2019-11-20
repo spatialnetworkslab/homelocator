@@ -14,7 +14,7 @@ add_col <- function(df, ...){
 #' Add variables as you want/needed 
 #' @param df A dataframe 
 add_col_in_nest <- function(df, ...){
-  
+  df <- df %>% ungroup()
   adds_exp_enq <- enquos(..., .named = TRUE)
   nested_data <- names(df[,grepl("data$", names(df))])
   user_data <- df[[nested_data]]

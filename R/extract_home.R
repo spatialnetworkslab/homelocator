@@ -6,13 +6,14 @@
 #' @param keep_score Choice to keep score or not 
 #' 
 extract_home <- function(df, ..., show_n_home = 1, keep_score = F){
-
+  df <- df %>% ungroup()
   arrange_vars_enq <- enquos(..., .named = TRUE)
   nested_data <- names(df[,grepl("data", names(df))])
   
   get_loc_with_progress <- function(data){
     pb$tick()$print()
     get_loc <- data %>%
+      ungroup() %>% 
       dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
       unique() %>%
       slice(1:show_n_home) %>%

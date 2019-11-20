@@ -3,7 +3,7 @@
 #' Add needed variables as you want 
 #' @param df A nested dataframe 
 summarise_var <- function(df, ...){
-
+  df <- df %>% ungroup()
   if(!is.list(df[,grepl("data", names(df))]))
     stop("Error: Dataset is not nested!")
   
@@ -39,7 +39,7 @@ summarise_var <- function(df, ...){
 #' @param group_vars Variables be grouped 
 #' @param summary_vars Variables to be added 
 summarise_groupVar <- function(df, group_vars, summary_vars){
-  
+  df <- df %>% ungroup()
   if(nrow(df)==0) stop(paste(emo::ji("bomb"), "No user left, tune your treshold and try again."))
   
   stopifnot(
