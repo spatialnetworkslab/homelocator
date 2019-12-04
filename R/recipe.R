@@ -7,59 +7,72 @@
 #' @param location Name of column that holds unique identifier for each location
 #' @param recipe Different methods to identify home locations
 #' @param show_n_home Number of potential homes to be shown
-identify_home <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "homelocator", show_n_home = 1){
+identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_home = 1){
   user_exp <- rlang::sym(user)
   timestamp_exp <- rlang::sym(timestamp)
   location_exp <- rlang::sym(location)
-  
-
+  ## Validate the input dataset 
   df_valid <- validate_dataset(df, user = user, timestamp = timestamp, location = location)
-  df_nest <- nest_by_sglGp(df_valid, group_var = user) %>% derive_timestamp(., timestamp = timestamp)
-  if(recipe == "homelocator"){
-    cleaned_df_byuser <- df_nest %>%
-      summarise_var(n_tweets = n(),
-                    n_locs = n_distinct(!!location_exp)) %>%
-      remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) %>%
+  ## Nest the dataset to each user
+  df_nest <- nest_cols(df_valid, c({{location_exp}}, {{timestamp_exp}})) 
+  ## Derive time related variables from timestamp
+  df_enrich <- enrich_timestamp(df_nest, timestamp = timestamp)
+  if(recipe == "HLC"){
+    #pre-condition set on users 
+    cleaned_df_byuser <- df_enrich %>%
+      summ_in_nest(n_tweets = n(),
+                   n_locs = n_distinct({{location_exp}})) %>%
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
     
-    cleaned_df_byloc <- cleaned_df_byuser %>%
-      summarise_groupVar(vars(!!location_exp),
-                         vars(n_tweets_loc = n(),
-                              n_hours_loc = n_distinct(hour),
-                              n_days_loc = n_distinct(ymd),
-                              period_loc = as.numeric(max(!!timestamp_exp) - min(!!timestamp_exp), "days"))) %>%
-      filter_in_nest(n_tweets_loc > 10 & n_hours_loc > 10 & n_days_loc > 10 & period_loc > 10)
+    #pre-condition set on locations     
+    data_cols_nm <- cleaned_df_byuser$data[[1]] %>% names()
+    nest_cols_nm <- data_cols_nm[-which(data_cols_nm == location)]
     
-    df_expanded <- cleaned_df_byloc %>%
+    cleaned_df_byloc <- cleaned_df_byuser %>%
+      grpSumm_in_nest(., nest_cols = nest_cols_nm, 
+                      vars(n_tweets_loc = n(),
+                           n_hrs_loc = n_distinct(hour),
+                           n_days_loc = n_distinct(ymd),
+                           period_loc = as.numeric(max({{timestamp_exp}}) - min({{timestamp_exp}}), "days"))) %>% 
+      unnest_cols(data) %>% 
+      filter_var(n_tweets_loc > 10 & n_hrs_loc > 10 & n_days_loc > 10 & period_loc > 10)
+    
+    ## create new variables 
+    df_expanded <- cleaned_df_byloc %>% 
       add_col_in_nest(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday")) %>%
-      add_col_in_nest(numT = lubridate::hour(!!timestamp_exp) + lubridate::minute(!!timestamp_exp) / 60 + lubridate::second(!!timestamp_exp) / 3600) %>%
-      add_col_in_nest(rest_or_work = if_else(numT >= 9 & numT <= 18, "work", "rest")) %>%
-      add_col_in_nest(wkmorning_or_not = if_else(numT >= 6 & numT <= 12 & wd_or_wk == "weekend", "wkmorning", "not_wkmorning")) %>% 
-      summarise_var(n_wdays_loc = n_distinct(wday),
-                    n_months_loc = n_distinct(month)) %>%
-      add_var_pct(wd_or_wk) %>%
-      add_var_pct(rest_or_work) %>%
-      add_var_pct(wkmorning_or_not) %>%
+      add_col_in_nest(numTime = lubridate::hour({{timestamp_exp}}) + lubridate::minute({{timestamp_exp}}) / 60 + lubridate::second({{timestamp_exp}}) / 3600) %>%
+      add_col_in_nest(rest_or_work = if_else(numTime >= 9 & numTime <= 18, "work", "rest")) %>%
+      add_col_in_nest(wk_am = if_else(numTime >= 6 & numTime <= 12 & wd_or_wk == "weekend", "wk_am", "none_wk_am")) %>% 
+      summ_in_nest(n_wdays_loc = n_distinct(wday),
+                   n_months_loc = n_distinct(month)) %>% 
+      add_var_pec(wd_or_wk) %>%
+      add_var_pec(rest_or_work) %>%
+      add_var_pec(wk_am) %>%
       replace(., is.na(.), 0)
-   
-    df_score <- df_expanded  %>%
-      score_var(group_var = !!user_exp,
-                keep_original_vars = F,
-                s_rest = 0.2 * (rest),
-                s_weekend = 0.1 * (weekend),
-                s_wkmorning = 0.1 * (wkmorning),
+    ## assign weight to variables and sum variables
+    df_score_var <- df_expanded  %>%
+      score_var(user = user, location = location, keep_ori_vars = F,
                 s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
+                s_n_hrs_loc = 0.1 * (n_hrs_loc/24),
                 s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
                 s_period_loc = 0.1 * (period_loc/max(period_loc)),
                 s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
                 s_n_months_loc = 0.1 * (n_months_loc/12),
-                s_n_hours_loc = 0.1 * (n_hours_loc/24)) %>%
-      sum_score(user = user, location = location,
-                s_rest, s_weekend, s_wkmorning, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hours_loc)
-    df_score %>% extract_home(score, keep_score = F, show_n_home = show_n_home)
+                s_weekend = 0.1 * (weekend),
+                s_rest = 0.2 * (rest),
+                s_wk_am = 0.1 * (wk_am)) 
+    
+    df_sum_score <- df_score_var %>% 
+      sum_score(user = user, location = location, 
+                s_rest, s_weekend, s_wk_am, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hrs_loc)
+    
+    home_loc <- df_sum_score %>% extract_loc(vars(score), show_n_home = show_n_home, keep_score = F)
+    home_loc
+
   } else if(recipe == "OSN"){#online social network
     df_moved_bots <- df_nest %>%
-      summarise_var(n_tweets = n(),
+      summ_in_nest(n_tweets = n(),
                     n_locs = n_distinct(!!location_exp)) %>%
       remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) 
     
@@ -113,7 +126,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
     regular_score <- regular_filtered %>% 
       add_col(time = format(!!timestamp_exp, format="%H:%M:%S") %>% chron::times() %>% as.numeric()) %>% 
       nest_by_mulGps(vars(!!user_exp, !!location_exp)) %>% 
-      summarise_var(avg_time = mean(time),
+      summ_in_nest(avg_time = mean(time),
                     sd_time = sd(time)) %>% 
       add_col(s_avg_time = if_else(avg_time > time_line, 1, 0)) %>% 
       add_col(s_sd_time = if_else(sd_time > 0.175, 1, 0)) %>% 
@@ -126,7 +139,7 @@ identify_home <- function(df, user = "u_id", timestamp = "created_at", location 
       summarise(home =  paste(!!location_exp, collapse = "; "))
   } else if(recipe == "FREQ"){
     cleaned_df_byuser <- df_nest %>%
-      summarise_var(n_tweets = n(),
+      summ_in_nest(n_tweets = n(),
                     n_locs = n_distinct(!!location_exp)) %>%
       remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
