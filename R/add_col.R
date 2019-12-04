@@ -31,11 +31,12 @@ add_col_in_nest <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
   
   output <- df %>%
-    mutate(!!nested_data := purrr::map(df[[nested_data]], ~add_with_progress(.))) 
+    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~add_with_progress(.))) 
   
   ori_cols <- df[[nested_data]][[1]] %>% names()
   new_cols <- output[[nested_data]][[1]] %>% names()
   added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
+ 
   message("\n")
   message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
@@ -46,7 +47,7 @@ add_col_in_nest <- function(df, ...){
 #' Add variables as you want/needed 
 #' @param df A dataframe 
 #' @param var Variable to be calculated 
-add_var_pct <- function(df, var){
+add_var_pec <- function(df, var){
   var_expr <- enquo(var)
   nested_data <- names(df[,grepl("data", names(df))])
   user_data <- df[[nested_data]]
@@ -81,7 +82,7 @@ add_var_pct <- function(df, var){
 #' @param group_var The variable to be grouped 
 #' @param mutate_vars The variables you want to add to the dataframe
 
-add_groupCol <- function(df, group_vars, mutate_vars){
+add_col_in_nest_byGRP <- function(df, group_vars, mutate_vars){
   
   stopifnot(
     is.list(group_vars),
@@ -91,12 +92,8 @@ add_groupCol <- function(df, group_vars, mutate_vars){
   df %>%
     group_by(!!!group_vars) %>%
     mutate(!!!mutate_vars) %>%
-    ungroup() %>% 
-    unnest() 
+    ungroup() 
+  # %>% 
+  #   unnest() 
 }
-
-
-
-
-
 
