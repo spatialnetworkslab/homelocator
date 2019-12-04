@@ -5,22 +5,27 @@
 #' @param show_n_home Number of homes to be shown 
 #' @param keep_score Choice to keep score or not 
 #' 
-extract_home <- function(df, ..., show_n_home = 1, keep_score = F){
-  df <- df %>% ungroup()
-  arrange_vars_enq <- enquos(..., .named = TRUE)
+extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show_n_home = 1, keep_score = F){
+  if (!rlang::has_name(df, user)) {
+    stop(paste(emo::ji("bomb"), "User column does not exist!"))
+  }
+  
+  user <- rlang::sym(user) 
+  location <- rlang::sym(location)
   nested_data <- names(df[,grepl("data", names(df))])
   
   get_loc_with_progress <- function(data){
     pb$tick()$print()
     get_loc <- data %>%
-      ungroup() %>% 
-      dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
-      unique() %>%
+      dplyr::arrange(desc(!!!score_var)) %>% 
+      # dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
       slice(1:show_n_home) %>%
-      dplyr::select(-c(!!!arrange_vars_enq)) %>% 
-      setNames(c("home")) %>% 
-      pull(home) %>% 
-      paste(., collapse = "; ")
+      pull({{location}}) 
+    if(show_n_home == 1){
+      get_loc
+    } else{
+      paste(get_loc, collapse = "; ")
+    }
   }
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
@@ -31,7 +36,7 @@ extract_home <- function(df, ..., show_n_home = 1, keep_score = F){
     output <- df %>%
       mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
       unnest(home) 
-    n_user <- nrow(output)
+    n_user <- output %>% pull(!!user) %>% n_distinct()
     message("\n")
     message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
   } else{
@@ -39,7 +44,7 @@ extract_home <- function(df, ..., show_n_home = 1, keep_score = F){
       mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
       dplyr::select(-nested_data) %>%
       unnest(home)
-    n_user <- nrow(output)
+    n_user <- output %>% pull(!!user) %>% n_distinct()
     message("\n")
     message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
   }
