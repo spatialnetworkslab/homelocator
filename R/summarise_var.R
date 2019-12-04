@@ -39,7 +39,7 @@ summ_in_nest <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param nest_cols Variables to be nested 
 #' @param summary_vars Summarise expression
-summ_byGRP_in_nest <- function(df, nest_cols, summary_vars){
+grpSumm_in_nest <- function(df, nest_cols, summary_vars){
   
   if(nrow(df)==0){
     stop(paste(emo::ji("bomb"), "No user left, tune your treshold and try again."))
@@ -52,22 +52,22 @@ summ_byGRP_in_nest <- function(df, nest_cols, summary_vars){
   
   cal_column <- . %>% 
     summarise(!!!summary_vars)
-
+  
   add_column <- . %>% 
-    mutate(adds = purrr::map(data, cal_column)) %>% 
-    unnest_legacy(adds)
+      mutate(adds = purrr::map(data, cal_column)) %>% 
+      unnest_legacy(adds) 
+  
   
   nested_data <- names(df[,grepl("data", names(df))])
-  ori_cols <- df[[nested_data]][[1]] %>% names()
+  ori_cols_nm <- df[[nested_data]][[1]] %>% names()
   
   # double nest 
   df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% nest(data = nest_cols))
-  
-  output <- df %>%
-      mutate({{nested_data}} := purrr::map(df[[nested_data]], add_column)) 
-  output_cols <- output[[nested_data]][[1]] %>% names()
-  add_cols <- setdiff(output_cols, ori_cols)
-  add_cols <- add_cols[-which(add_cols == "data")]
-  message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols, "\n"))
+ 
+  output <- df %>% mutate({{nested_data}} := purrr::map(df[[nested_data]], add_column))
+  output_cols_nm <- output[[nested_data]][[1]] %>% names()
+  output_cols_nm <- output_cols_nm[-which(output_cols_nm == "data")]
+  add_cols_nm <- setdiff(output_cols_nm, ori_cols_nm)
+  message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols_nm, "\n"))
   output
 }
