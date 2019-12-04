@@ -9,8 +9,6 @@
 
 remove_bots <- function(df, user = "u_id", counts = "n_tweets", topNpct_user = 0.01){
   
-  topNpct_user_enq <- enquo(topNpct_user)
-  
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
@@ -25,12 +23,12 @@ remove_bots <- function(df, user = "u_id", counts = "n_tweets", topNpct_user = 0
   message(paste(emo::ji("locked"), "There are", n_users, "users at this moment."))
   message(paste0(emo::ji("hammer_and_wrench"), " Removing top ", topNpct_user*100, "% active users..."))
   
-  suppressMessages(output <- df %>% 
+  output <- df %>% 
     dplyr::select({{user}}, {{counts}}) %>%
     arrange(desc({{counts}})) %>% 
     unique() %>%
-    dplyr::slice(round(n_users*{{topNpct_user_enq}}):n()) %>%
-    left_join(., df))
+    dplyr::slice(round(n_users*topNpct_user):n()) %>%
+    left_join(., df)
   
   left_users <- output %>% pull({{user}}) %>% n_distinct()
   n_rm <- n_users - left_users
