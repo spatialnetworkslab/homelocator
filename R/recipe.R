@@ -95,7 +95,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       add_col(empty_tb = map_lgl(data, plyr::empty)) %>% 
       filter_var(empty_tb == F) %>% 
       spread2_in_nest(key_var = tf, value_var = n_tweets_tf)  %>% 
-      spread2_add_missing_col(c("LT", "RT")) %>% 
+      spread2_add_missing(c("LT", "RT")) %>% 
       add_col_in_nest(w_counts = mean(0.744, 0.735, 0.737) * RT + mean(0.362, 0.357, 0.354) * LT) 
     
     score_data_cols_nm <- df_score$data[[1]] %>% names()
@@ -149,23 +149,25 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       slice(1:show_n_home) %>% 
       summarise(home =  paste(!!location_exp, collapse = "; "))
   } else if(recipe == "FREQ"){
-    cleaned_df_byuser <- df_nest %>%
-      summ_in_nest(n_tweets = n(),
-                    n_locs = n_distinct(!!location_exp)) %>%
-      remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) %>%
+    
+    cleaned_df_byuser <- df_enrich %>%
+      summ_in_nest(n_tweets = n(), 
+                   n_locs = n_distinct(!!location_exp)) %>%
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
     
+    
+    data_cols_nm <- cleaned_df_byuser$data[[1]] %>% names()
+    nest_cols_nm <- data_cols_nm[-which(data_cols_nm %in% c(location_exp))]
+    
     cleaned_df_byloc <- cleaned_df_byuser %>% 
-      summarise_groupVar(vars(!!location_exp),
-                         vars(n_tweets_loc = n())) %>% 
+      grpSumm_in_nest(nest_cols = nest_cols_nm, vars(n_tweets_loc = n())) %>% 
       filter_in_nest(n_tweets_loc > 10)
     
     cleaned_df_byloc %>% 
-      group_by(!!user_exp, !!location_exp) %>% 
-      arrange(desc(n_tweets_loc)) %>% 
-      group_by(!!user_exp) %>% 
-      slice(1:show_n_home) %>% 
-      summarise(home =  paste(!!location_exp, collapse = "; "))
+      add_col(empty_tb = map_lgl(data, plyr::empty)) %>% 
+      filter_var(empty_tb == F) %>% 
+      extract_loc(vars(n_tweets_loc), show_n_loc = show_n_loc, keep_score = F)
   }
 }
 
