@@ -13,6 +13,7 @@ filter_var <- function(df, filter_exp, user = "u_id"){
   filter_exp_enq <- enquo(filter_exp)
   
   n_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
+  message("\n")
   message(paste(emo::ji("locked"), "There are", n_users, "users at this moment."))
   
   output <- df %>% 
@@ -20,7 +21,7 @@ filter_var <- function(df, filter_exp, user = "u_id"){
   
   left_users <- output %>% pull({{user}}) %>% n_distinct()
   n_rm <- n_users - left_users
-  
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
   output
 }
@@ -53,12 +54,19 @@ filter_in_nest <- function(df, ...){
   output <- df %>% 
     mutate({{nested_data}} := purrr::map(df[[nested_data]], ~filter_with_progress(.))) 
   
+  output_data <- output[[nested_data]]
   
-  left_users <- output[1] %>% dplyr::n_distinct()
+  #check empty tibble 
+  result <- output %>% 
+    mutate(empty_tb = purrr::map_lgl(output_data, plyr::empty)) %>% 
+    filter(empty_tb != T) %>% 
+    dplyr::select(-empty_tb)
+  
+  left_users <- result[1] %>% dplyr::n_distinct()
   n_rm <- n_users - left_users
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
-  output
+  result
 }
 
 
