@@ -7,7 +7,7 @@
 #' @param location Name of column that holds unique identifier for each location
 #' @param recipe Different methods to identify home locations
 #' @param show_n_home Number of potential homes to be shown
-identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_home = 1){
+identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_loc = 1){
   user_exp <- rlang::sym(user)
   timestamp_exp <- rlang::sym(timestamp)
   location_exp <- rlang::sym(location)
@@ -46,9 +46,9 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       add_col_in_nest(wk_am = if_else(numTime >= 6 & numTime <= 12 & wd_or_wk == "weekend", "wk_am", "none_wk_am")) %>% 
       summ_in_nest(n_wdays_loc = n_distinct(wday),
                    n_months_loc = n_distinct(month)) %>% 
-      add_var_pec(wd_or_wk) %>%
-      add_var_pec(rest_or_work) %>%
-      add_var_pec(wk_am) %>%
+      add_pct_in_nest(wd_or_wk) %>%
+      add_pct_in_nest(rest_or_work) %>%
+      add_pct_in_nest(wk_am) %>%
       replace(., is.na(.), 0)
     ## assign weight to variables and sum variables
     df_score_var <- df_expanded  %>%
@@ -67,35 +67,46 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       sum_score(user = user, location = location, 
                 s_rest, s_weekend, s_wk_am, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hrs_loc)
     
-    home_loc <- df_sum_score %>% extract_loc(vars(score), show_n_home = show_n_home, keep_score = F)
+    home_loc <- df_sum_score %>% extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
     home_loc
 
   } else if(recipe == "OSN"){#online social network
-    df_moved_bots <- df_nest %>%
+    df_moved_bots <- df_enrich %>%
       summ_in_nest(n_tweets = n(),
-                    n_locs = n_distinct(!!location_exp)) %>%
-      remove_bots(user = user, counts = "n_tweets", top_u_percent = 0.01) 
+                   n_locs = n_distinct({{location_exp}})) %>% 
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) 
     
+    ## pre-conditions
     df_filtered <- df_moved_bots %>%
       filter_var(n_locs > 3) %>%
       filter_in_nest(!wday %in% c(1, 7))  
     
     df_timeframe <- df_filtered %>%
-      nest_by_sglGp(., group_var = user) %>%
       add_col_in_nest(tf = if_else(hour >= 2 & hour < 8, "RT", if_else(hour >= 8 & hour < 19, "AT", "LT"))) %>%
       filter_in_nest(tf != "AT") 
     
     
+    #pre-condition set on locations     
+    data_cols_nm <- df_timeframe$data[[1]] %>% names()
+    nest_cols_nm <- data_cols_nm[-which(data_cols_nm %in% c(location, "ymd", "tf"))]
+    
     df_score <- df_timeframe %>%
-      nest_by_sglGp(., group_var = user) %>%
-      summarise_groupVar(vars(!!location_exp, ymd, tf),
-                         vars(n_tweets_tf = n())) %>%
-      spread2_in_nest(key = tf, value = n_tweets_tf) %>%
-      add_col_in_nest(w_counts = mean(0.744, 0.735, 0.737) * RT + mean(0.362, 0.357, 0.354) * LT) %>%
-      summarise_groupVar(vars(!!location_exp),
-                         vars(score = sum(w_counts))) 
-      
-    extract_home(df_score, score, keep_score = F, show_n_home = show_n_home)
+      grpSumm_in_nest(nest_cols = nest_cols_nm, vars(n_tweets_tf = n())) %>% 
+      add_col(empty_tb = map_lgl(data, plyr::empty)) %>% 
+      filter_var(empty_tb == F) %>% 
+      spread2_in_nest(key_var = tf, value_var = n_tweets_tf)  %>% 
+      spread2_add_missing_col(c("LT", "RT")) %>% 
+      add_col_in_nest(w_counts = mean(0.744, 0.735, 0.737) * RT + mean(0.362, 0.357, 0.354) * LT) 
+    
+    score_data_cols_nm <- df_score$data[[1]] %>% names()
+    to_nest_cols_nm <- score_data_cols_nm[-which(score_data_cols_nm == location)]
+    
+    df_sum_score <- df_score %>%
+      grpSumm_in_nest(nest_cols = to_nest_cols_nm, vars(score = sum(w_counts)))
+    
+    df_sum_score %>% 
+      extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
+    
   } else if(recipe == "MPD"){ #mobile positioning data
     regular_cells <- df_nest %>% 
       summarise_groupVar(vars(!!location_exp, year, month),
