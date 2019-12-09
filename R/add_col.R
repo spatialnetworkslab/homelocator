@@ -28,6 +28,7 @@ add_col_in_nest <- function(df, ...){
   
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
   
   output <- df %>%
@@ -64,6 +65,7 @@ add_pct_in_nest <- function(df, var){
   }
   
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
   output <- df %>% 
     dplyr::bind_cols(do.call(dplyr::bind_rows, purrr::map(df[[nested_data]], ~add_with_progress(.))))
@@ -89,11 +91,29 @@ add_col_in_nest_byGRP <- function(df, group_vars, mutate_vars){
     is.list(mutate_vars)
   )
   
-  df %>%
-    group_by(!!!group_vars) %>%
-    mutate(!!!mutate_vars) %>%
-    ungroup() 
-  # %>% 
-  #   unnest() 
+  nested_data <- names(df[,grepl("data", names(df))])
+  user_data <- df[[nested_data]]
+  
+  add_bygrp_with_progress <- function(data){
+    pb$tick()$print()
+    add_bygrp <- data %>% 
+      group_by(!!!group_vars) %>%
+      mutate(!!!mutate_vars) %>%
+      ungroup() 
+  }
+  pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
+  message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
+  
+  output <- df %>% 
+    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~add_bygrp_with_progress(.))) 
+  
+  ori_cols <- df[[nested_data]][[1]] %>% names()
+  new_cols <- output[[nested_data]][[1]] %>% names()
+  added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
+  output
 }
 
