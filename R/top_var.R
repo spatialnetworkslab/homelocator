@@ -17,6 +17,7 @@ top_n_in_nest <- function(df, n = 2, wt){
   
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Selecting top entries in each group..."))
   
   output <- df %>%

@@ -44,6 +44,7 @@ score_var <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F
   
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Scoring variables..."))
   
   if(keep_ori_vars){

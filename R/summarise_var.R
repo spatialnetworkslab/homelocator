@@ -20,6 +20,7 @@ summ_in_nest <- function(df, ...){
   }
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Summarise variables in nested dataset..."))
   
   output <- df %>%
@@ -68,6 +69,7 @@ grpSumm_in_nest <- function(df, nest_cols, summary_vars){
   output_cols_nm <- output[[nested_data]][[1]] %>% names()
   output_cols_nm <- output_cols_nm[-which(output_cols_nm == "data")]
   add_cols_nm <- setdiff(output_cols_nm, ori_cols_nm)
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols_nm, "\n"))
   output
 }

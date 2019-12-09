@@ -33,7 +33,7 @@ enrich_timestamp <- function(df, timestamp, tz = "Asia/Singapore"){
   message(paste(emo::ji("hammer_and_wrench"), "Enrich variables from timestamp for each user..."))
   output <- df %>%
     mutate({{nested_data}} := purrr::map(df[[nested_data]], ~enrich_with_progress(.)))
-  
+  message("\n")
   message(paste("\n", emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, ymd."))
   output
 }

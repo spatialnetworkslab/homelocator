@@ -18,7 +18,6 @@ extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show
     pb$tick()$print()
     get_loc <- data %>%
       dplyr::arrange(desc(!!!score_var)) %>% 
-      # dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
       slice(1:show_n_loc) %>%
       pull({{location}}) 
     if(show_n_loc == 1){

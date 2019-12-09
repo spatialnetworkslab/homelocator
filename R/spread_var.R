@@ -22,6 +22,7 @@ spread2_in_nest <- function(df, key_var, value_var){
 
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Spread variable:", quo_name(key_var_enq)))
 
   
