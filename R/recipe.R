@@ -67,8 +67,8 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       sum_score(user = user, location = location, 
                 s_rest, s_weekend, s_wk_am, s_n_tweets_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_n_hrs_loc)
     
-    home_loc <- df_sum_score %>% extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
-    home_loc
+    inferred_loc <- df_sum_score %>% extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
+    inferred_loc
 
   } else if(recipe == "OSN"){#online social network
     df_moved_bots <- df_enrich %>%
@@ -92,8 +92,8 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     
     df_score <- df_timeframe %>%
       grpSumm_in_nest(nest_cols = nest_cols_nm, vars(n_tweets_tf = n())) %>% 
-      add_col(empty_tb = map_lgl(data, plyr::empty)) %>% 
-      filter_var(empty_tb == F) %>% 
+      # add_col(empty_tb = map_lgl(data, plyr::empty)) %>%
+      # filter_var(empty_tb == F) %>%
       spread2_in_nest(key_var = tf, value_var = n_tweets_tf)  %>% 
       spread2_add_missing(c("LT", "RT")) %>% 
       add_col_in_nest(w_counts = mean(0.744, 0.735, 0.737) * RT + mean(0.362, 0.357, 0.354) * LT) 
@@ -104,50 +104,53 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     df_sum_score <- df_score %>%
       grpSumm_in_nest(nest_cols = to_nest_cols_nm, vars(score = sum(w_counts)))
     
-    df_sum_score %>% 
+    inferred_loc <- df_sum_score %>% 
       extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
-    
+    inferred_loc
   } else if(recipe == "MPD"){ #mobile positioning data
-    regular_cells <- df_nest %>% 
-      summarise_groupVar(vars(!!location_exp, year, month),
-                         vars(n_days_month_loc = n_distinct(ymd))) %>% 
-      filter_in_nest(n_days_month_loc >= 2) %>% # at least two tweets at different days a month 
-      unnest() 
-    regular_nest <- nest_by_sglGp(regular_cells, group_var = user)
+
+    data_cols_nm <- df_enrich$data[[1]] %>% names()
+    nest_cols_nm <- data_cols_nm[-which(data_cols_nm %in% c(location))]
     
-    regular_append <- regular_nest %>% 
-      summarise_groupVar(vars(!!location_exp),
-                         vars(n_tweets_loc = n(),
-                         n_days_loc = n_distinct(ymd)))
+    df_appended <- df_enrich %>% 
+      grpSumm_in_nest(nest_cols = nest_cols_nm, 
+                      vars(n_tweets_loc = n(),
+                           n_days_loc = n_distinct(ymd)))
     
-    most5popular_regulars <- regular_append %>% 
+    df_top5popular <- df_appended %>% 
       arrange_in_nest(group_var = location, n_days_loc, n_tweets_loc) %>% 
-      top_n_in_nest(., n = 3, wt = n_tweets_loc)
-    
-    regular_filtered <- most5popular_regulars %>% 
-      unnest() %>% 
-      filter_in_nest(n_days_month_loc >= 7) %>% # remove respondents who have made tweets less than 7 days a month in 2 most frequently visited network cells 
-      nest_by_sglGp(., group_var = user) %>% 
-      summarise_groupVar(vars(year, month),
-                         vars(n_tweets_month = n())) %>% 
-      filter_in_nest(n_tweets_month <= 500) %>% # remove respondents who have made more than 500 tweets a month in 2 most frequently visited network cells 
-      unnest()
+      top_n_in_nest(., n = 5, wt = n_tweets_loc) %>% 
+      unnest_cols_in_nest()
     
     time_line <- chron::times("17:00:00") %>% as.numeric()
-    regular_score <- regular_filtered %>% 
-      add_col(time = format(!!timestamp_exp, format="%H:%M:%S") %>% chron::times() %>% as.numeric()) %>% 
-      nest_by_mulGps(vars(!!user_exp, !!location_exp)) %>% 
-      summ_in_nest(avg_time = mean(time),
-                    sd_time = sd(time)) %>% 
-      add_col(s_avg_time = if_else(avg_time > time_line, 1, 0)) %>% 
-      add_col(s_sd_time = if_else(sd_time > 0.175, 1, 0)) %>% 
-      add_col(score = rowSums(.[, c("s_avg_time", "s_sd_time")])) 
+    top5_data_cols_nm <- df_top5popular$data[[1]] %>% names()
+    top5_nest_cols_nm <- top5_data_cols_nm[-which(top5_data_cols_nm %in% c(location, "n_days_loc", "n_tweets_loc", "year", "month"))]
     
-    regular_score %>% 
-      filter_var(score >= 1) %>% 
-      group_by(!!user_exp) %>% 
-      slice(1:show_n_home) %>% 
-      summarise(home =  paste(!!location_exp, collapse = "; "))
+    
+    df_filtered <- df_top5popular %>% 
+      grpSumm_in_nest(nest_cols = top5_nest_cols_nm, 
+                      vars(n_days_month_loc = n_distinct(day), 
+                      n_tweets_month = n())) %>% 
+      filter_in_nest(n_days_month_loc >= 7) %>% # remove respondents who have made tweets less than 7 days a month in 2 most frequently visited network cells 
+      filter_in_nest(n_tweets_month <= 500) %>% # remove respondents who have made more than 500 tweets a month in 2 most frequently visited network cells 
+      unnest_cols_in_nest() %>% 
+      add_col_in_nest(time = format({{timestamp_exp}}, format="%H:%M:%S") %>% chron::times() %>% as.numeric()) 
+    
+    filter_data_cols_nm <- df_filtered$data[[1]] %>% names()
+    filter_nest_cols_nm <- filter_data_cols_nm[-which(filter_data_cols_nm %in% c(location))]
+    
+    df_score <- df_filtered %>% 
+      grpSumm_in_nest(nest_cols = filter_nest_cols_nm, 
+                      vars(avg_time = mean(time), 
+                           sd_time = sd(time))) %>% 
+      add_col_in_nest(s_avg_time = if_else(avg_time > time_line, 1, 0)) %>% 
+      add_col_in_nest(s_sd_time = if_else(sd_time > 0.175, 1, 0)) %>% 
+      add_col_in_nest_byGRP(group_vars = vars({{location_exp}}), mutate_vars = vars(score = sum(s_avg_time, s_sd_time))) %>% 
+      filter_in_nest(score >= 1)
+    
+    inferred_loc <- df_score %>% 
+      extract_loc(vars(score), show_n_loc = show_n_loc, keep_score = F)
+    inferred_loc
   } else if(recipe == "FREQ"){
     
     cleaned_df_byuser <- df_enrich %>%
@@ -164,10 +167,11 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
       grpSumm_in_nest(nest_cols = nest_cols_nm, vars(n_tweets_loc = n())) %>% 
       filter_in_nest(n_tweets_loc > 10)
     
-    cleaned_df_byloc %>% 
+    inferred_loc <- cleaned_df_byloc %>% 
       add_col(empty_tb = map_lgl(data, plyr::empty)) %>% 
       filter_var(empty_tb == F) %>% 
       extract_loc(vars(n_tweets_loc), show_n_loc = show_n_loc, keep_score = F)
+    inferred_loc
   }
 }
 
