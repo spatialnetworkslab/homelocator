@@ -12,7 +12,7 @@ output:
     toc_float: true   
     code_folding: hide
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
 ```{r load_library, message=FALSE, warning=FALSE}
-library(homelocator)
+#library(homelocator)
 library(dplyr)
 library(tidyverse)
 library(readr)
@@ -32,28 +32,30 @@ library(RColorBrewer)
 library(ggpubr)
 ```
 
+
+
+```{r}
+df <- readRDS(here::here("data/test_df.rds"))
+
+loc_hlc <- homelocator::identify_loc(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_loc = 1)
+loc_osn <- homelocator::identify_loc(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "OSN", show_n_loc = 1)
+loc_mpd <- homelocator::identify_loc(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "MPD", show_n_loc = 1)
+loc_freq <- homelocator::identify_loc(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "FREQ", show_n_loc = 1)
+```
+
 # Load dataset
 ```{r}
-tweets <- readRDS(here::here("data/tweets_gridID.rds"))
-df_subzone = read_sf(here::here("data/Shp/MP14_SUBZONE_NO_SEA_PL.shp")) %>% st_transform(., "+init=epsg:3414")
+tweets <- readRDS(here::here("data/tweets_ori.rds"))
+tweets_sf <- readRDS(here::here("data/tweets_gridID.rds"))
+
+df_subzone <- read_sf(here::here("data/Shp/MP14_SUBZONE_NO_SEA_PL.shp")) %>% st_transform(., "+init=epsg:3414")
 grids <- readRDS(here::here("data/grid_750.rds"))
-st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-neighbors <- st_queen(grids)
-get_neighbos <- function(ids){
-  neighbor <- c()
-  for (i in ids) {
-    neighbor <- append(neighbor, neighbors[[i]]) %>% unique()
-  }
-  return(neighbor)
-}
 
-
-# sample <- read_csv(here::here("data/sg_test.csv"))
 #homelocator recipe
 if (file.exists(here::here("data/hm_hlc.csv"))){
   hm_hlc <- read_csv(here::here("data/hm_hlc.csv")) %>% mutate(name = "HLC")
 } else {
-  hm_hlc <- homelocator::identify_home(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "homelocator")
+  hm_hlc <- homelocator::identify_loc(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_loc = 1)
   write_csv(hm_hlc, path = here::here("data/hm_hlc.csv"))
 }
 
@@ -61,7 +63,7 @@ if (file.exists(here::here("data/hm_hlc.csv"))){
 if (file.exists(here::here("data/hm_osn.csv"))) {
   hm_osn <- read_csv(here::here("data/hm_osn.csv")) %>% mutate(name = "OSN")
 } else{
-  hm_osn <- homelocator::identify_home(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "OSN")
+  hm_osn <- homelocator::identify_loc(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "OSN", show_n_loc = 1)
   write_csv(hm_osn, path = here::here("data/hm_osn.csv"))
 }
 
@@ -69,20 +71,21 @@ if (file.exists(here::here("data/hm_osn.csv"))) {
 if (file.exists(here::here("data/hm_mpd.csv"))){
   hm_mpd <- read_csv(here::here("data/hm_mpd.csv")) %>% mutate(name = "MPD")
 } else {
-  hm_mpd <- homelocator::identify_home(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "MPD")
+  hm_mpd <- homelocator::identify_loc(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "MPD", show_n_loc = 1)
   write_csv(hm_mpd, path = here::here("data/hm_mpd.csv"))
 }
   
 #frequency
-if (file.exists(here::here("data/hm_smp.csv"))){
-  hm_frq <- read_csv(here::here("data/hm_smp.csv")) %>% mutate(name = "FREQ")
+if (file.exists(here::here("data/hm_freq.csv"))){
+  hm_frq <- read_csv(here::here("data/hm_freq.csv")) %>% mutate(name = "FREQ")
 } else {
-  hm_frq <- homelocator::identify_home(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "simple")
-  write_csv(hm_frq, path = here::here("data/result_smp.csv"))
+  hm_frq <- homelocator::identify_loc(tweets %>% st_set_geometry(NULL), user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "FREQ", show_n_loc = 1)
+  write_csv(hm_frq, path = here::here("data/hm_freq.csv"))
 }
 
 hm_full <- bind_rows(hm_hlc, hm_osn, hm_mpd, hm_frq) %>% left_join(., grids, by = c("home" = "grid_id")) 
 ```
+
 
 # Overview home results Odds Ratio
 ```{r}
@@ -231,6 +234,8 @@ df_n_homes$n_hm %>% table() %>% prop.table() %>% round(., 4)
 # Different results
 
 ## One home - 4 results are same 
+
+### Common users character 
 ```{r}
 one_home <- df_n_homes %>% 
   filter(n_hm == 1) %>% 
@@ -240,42 +245,9 @@ one_home <- df_n_homes %>%
   unique() %>% 
   st_as_sf()
 
-# tm_shape(df_subzone) +
-#   tm_borders() +
-#   tm_shape(one_home) +
-#   tm_polygons(col = "lightblue") +
-#   tm_text(text = "method", size = 0.5)
-```
-
-
-
-### Common users character 
-```{r}
 user_1hm <- one_home$u_id %>% unique()
 user_1hm_tweets <- tweets %>% filter(u_id %in% user_1hm)
-## contour map 
-# onehm_coords <- user_1hm_tweets %>% 
-#   st_transform(4326) %>% 
-#   st_coordinates() %>% 
-#   as.data.frame() %>% 
-#   setNames(c("lon", "lat"))
-# ggplot(zone_4326) + 
-#   geom_sf(fill = "grey", alpha = 0.2) + 
-#   geom_density2d(data = onehm_coords, aes(x = lon, y = lat)) +
-#    stat_density2d(data = onehm_coords, aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
-#                   size = 0.01, bins = 16, geom = 'polygon') +
-#    scale_fill_gradient(low = "green", high = "red") +
-#    scale_alpha(range = c(0.00, 0.5), guide = FALSE) +
-#   labs(x = "Lon", y = "Lat", 
-#        title = "Tweets density") + 
-#   theme(
-#     legend.position = "bottom",
-#     panel.border = element_blank(),  
-#     panel.grid.major = element_blank(),
-#     panel.grid.minor = element_blank(),
-#     panel.background = element_blank(),
-#     axis.line = element_line(colour = "grey")
-#   )
+
 dens_tweets <- user_1hm_tweets %>% 
   st_set_geometry(NULL) %>% 
   group_by(grid_id) %>% 
@@ -308,23 +280,6 @@ pop2015 <- read_sf(here::here("data/pop2015/PLAN_BDY_DWELLING_TYPE_2015.shp")) %
   st_transform(., "+init=epsg:3414") 
 zone_4326 <- df_subzone %>% st_transform(4326) 
 zone_grids <- df_subzone %>% st_join(., grids)
-
-# pop2015_lon_lat <- pop2015 %>% 
-#   st_transform(4326) %>% 
-#   st_centroid() %>% 
-#   st_coordinates() %>% 
-#   as.data.frame() %>% 
-#   setNames(c("lon", "lat"))
-# pop2015_coords <- pop2015 %>%
-#   st_set_geometry(NULL) %>% 
-#   select(c(PLN_AREA_N, TOTAL)) %>% 
-#   cbind(., pop2015_lon_lat)
-# grid_u <- tweets %>% 
-#   st_set_geometry(NULL) %>% 
-#   group_by(grid_id) %>% 
-#   summarise(n_users = n_distinct(u_id)) %>% 
-#   left_join(., grids) %>% 
-#   st_as_sf()
 ```
 
 ```{r}
@@ -430,13 +385,7 @@ actual_resides <- pop2015 %>%
 residents <- left_join(inferred_resids, actual_resides) %>% 
   mutate(norm_n = n/sum(n),
          norm_total = TOTAL/sum(TOTAL))
-# ggplot(residents, aes(norm_n, norm_total)) +
-#   geom_point() + 
-#   geom_smooth(method="lm") + 
-#   ggrepel::geom_text_repel(aes(label=PLN_AREA_N), size = 2.5) +
-#   theme(panel.background=element_rect(fill = "white", colour = "black")) + 
-#   labs(x = "Normalized inferred residents",
-#        y = "Normalized actual residents")
+
 ggscatter(residents, x = "norm_n", y = "norm_total",
   add = "reg.line") +
   stat_cor(label.y = 0.065) +
@@ -446,513 +395,3 @@ ggscatter(residents, x = "norm_n", y = "norm_total",
   labs(x = "Normalized number of inferred residents",
        y = "Normalized number of actual residents")
 ```
-
-
-## Two homes 
-
-```{r}
-two_home <- df_n_homes %>% 
-  filter(n_hm == 2) %>% 
-  left_join(., hm_full) %>% 
-  group_by(u_id, home) %>% 
-  summarise(name = paste(name, collapse = ";")) %>% 
-  ungroup() %>% 
-  left_join(., grids, by = c("home" = "grid_id")) %>% 
-  st_as_sf() %>% 
-  st_centroid()
-
-two_home_nest <- two_home %>% nest(-u_id)
-detect_distance <- function(data){
-  geoms <- st_geometry(data)
-  geom1 <- geoms[1]
-  geom2 <- geoms[2]
-  st_distance(geom1, geom2) %>% as.integer()
-}
-do.call(rbind, map(two_home_nest$data, detect_distance))
-two_home_info <- two_home_nest %>% 
-  mutate(
-    # relation = map(two_home_nest$data, detect_neighbor) %>% unlist(),
-         distance = map(data, detect_distance))
-two_home_info <- two_home_info %>% 
-  mutate(distance = unlist(distance)) %>% 
-  mutate(dis_type = if_else(distance <= 1000, "within 1km", if_else(distance > 1000 & distance <= 3000, "within 3km", "outside 3km")))
-
-two_home_info$dis_type %>% table()
-two_home_info$dis_type %>% table() %>% prop.table()
-```
-
-### Two home case 
-```{r}
-get_case <- function(df, id){
-  df %>% 
-  filter(u_id == id) %>% 
-  group_by(home) %>% 
-  summarise(name = paste(name, collapse = "; ")) %>% 
-  left_join(., grids, by = c("home" = "grid_id")) %>% 
-  st_as_sf()
-}
-
-plot_case <- function(df_case, title){
-  tm_shape(df_case) +
-   tm_polygons() + 
-   tm_text(text = "name", size = 0.6) + 
-   tm_layout(title = title,
-             title.size = 0.8)
-}
-# neighboring 
-two_neighboring <- get_case(hm_full, 1062933668)
-two_within3km <- get_case(hm_full, 215326384)
-two_outside3km <- get_case(hm_full, 7450452)
-p2_1 <- plot_case(two_neighboring, "Neighbor")
-p2_2 <- plot_case(two_within3km, "Within 3km") 
-p2_3 <- plot_case(two_outside3km, "Outside 3km")
-showcase_2homes <- tmap_arrange(p2_1, p2_2, p2_3, nrow = 1, ncol = 3)
-```
-
-
-## Three homes 
-
-```{r}
-three_homeids <- df_n_homes %>% 
-  filter(n_hm == 3) %>% 
-  pull(u_id)
-
-three_home <- hm_full %>% 
-  filter(u_id %in% three_homeids)
-three_home <- three_home %>% 
-  group_by(u_id, home) %>% 
-  summarise(name = paste(name, collapse = ";")) %>% 
-  ungroup() %>% 
-  left_join(., grids, by = c("home" = "grid_id")) %>% 
-  st_as_sf() %>% 
-  st_centroid()
-```
-
-
-```{r}
-three_home_nest <- three_home %>% nest(-u_id)
-detect_3home <- function(data){
-  geoms <- st_geometry(data)
-  geom1 <- geoms[1]
-  geom2 <- geoms[2]
-  geom3 <- geoms[3]
-  dist1 <- st_distance(geom1, geom2) %>% as.integer()
-  dist2 <- st_distance(geom1, geom3) %>% as.integer()
-  dist3 <- st_distance(geom2, geom3) %>% as.integer()
-  dists <- c(dist1, dist1, dist3)
-  
-  if(length(dists[dists <= 1000]) == 3) {
-    return("3 less than 1km")
-  } else if(length(dists[dists <= 3000]) == 1 & length(dists[dists<= 1000]) == 2) {
-    return("1 less than 3km, 2 less than 1km")
-  } else if(length(dists[dists <= 3000]) == 2 & length(dists[dists<= 1000]) == 1) {
-    return("2 less than 3km, 1 less than 1km")
-  } else if(length(dists[dists <= 3000]) == 3){
-    return("3 less than 3km")
-  } else   {return("Outside 3km")}
-}
-
-
-three_home_info <- three_home_nest %>% 
-  mutate(type = map(three_home_nest$data, detect_3home) %>% unlist())
-three_home_info$type %>% table
-three_home_info$type %>% table %>% prop.table()
-```
-
-### Three home show case 
-```{r}
-three_neighboring <- get_case(hm_full, 14188918)
-three_within3km <- get_case(hm_full, 68106126)
-three_outside3km <- get_case(hm_full, 72804204)
-p3_1 <- plot_case(three_neighboring, "Neighbor")
-p3_2 <- plot_case(three_within3km, "Within 3km") 
-p3_3 <- plot_case(three_outside3km, "Outside 3km")
-showcase_3homes <- tmap_arrange(p3_1, p3_2, p3_3, nrow = 1, ncol = 3)
-```
-
-
-## Four homes 
-
-```{r}
-four_homeids <- df_n_homes %>% 
-  filter(n_hm == 4) %>% 
-  pull(u_id)
-four_home <- hm_full %>% filter(u_id %in% four_homeids)
-four_home_nest <- four_home %>% nest(-u_id)
-detect_4homes <- function(data){
-  geoms <- data %>% st_as_sf() %>% st_centroid() %>% st_geometry()
-  geom1 <- geoms[1]
-  geom2 <- geoms[2]
-  geom3 <- geoms[3]
-  geom4 <- geoms[4]
-  
-  center <- data %>% st_as_sf %>% summarise() %>% st_centroid()
-  dist1 <- st_distance(geom1, center) %>% as.integer()
-  dist2 <- st_distance(geom2, center) %>% as.integer()
-  dist3 <- st_distance(geom3, center) %>% as.integer()
-  dist4 <- st_distance(geom4, center) %>% as.integer()
-  dists <- c(dist1, dist2, dist3, dist4)
-  if(length(dists[dists <= 3000]) == 4){
-    return("all in 3km")
-  } else if (length(dists[dists <= 3000]) == 3){
-    return("3 in 3km")
-  } else if(length(dists[dists <= 3000]) == 2){
-    return("2 in 3km")
-  } else if(length(dists[dists <= 3000]) == 1) {
-    return("1 in 3km")
-  } else {
-    return("out 3km")
-  }
-}
-
-four_home_info <- four_home_nest %>% 
-  mutate(type = map(four_home_nest$data, detect_4homes) %>% unlist())
-four_home_info$type %>% table
-four_home_info$type %>% table %>% prop.table()
-
-```
-
-
-### Four home case 
-```{r}
-four_neighboring <- get_case(hm_full, 616987952)
-four_within3km <- get_case(hm_full, 75275607)
-four_outside3km <- get_case(hm_full, 128865190)
-p4_1 <- plot_case(four_neighboring, "Neighbor") 
-p4_2 <- plot_case(four_within3km, "Within 3km")
-p4_3 <- plot_case(four_outside3km, "Outside 3km")
-showcase_4homes <- tmap_arrange(p4_1, p4_2, p4_3, nrow = 1, ncol = 3)
-tmap_arrange(p2_1, p2_2, p2_3,
-  p3_1, p3_2, p3_3,
-  p4_1, p4_2, p4_3,
-  nrow = 3, ncol = 3)
-
-```
-
-
-# Distribution of users in different number of tweets groups
-```{r}
-view_user_tweets <- tweets %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n())
-raw_bar <- view_user_tweets %>% 
-  na.omit() %>% 
-   mutate(groups = cut(n_tweets, c(0, 10, 100, 500, 1000, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000), dig.lab = 5)) %>%
-  group_by(groups) %>% 
-  summarise(users = n()) %>% 
-  mutate(perce_users = users/sum(users) * 100) %>% 
-  ggplot(., aes(x = groups, y = perce_users)) + 
-  geom_bar(stat = "identity", fill = "lightblue") + 
-  # geom_text(aes(label=n_users_pct), hjust=0.5, vjust=-0.7, size=3, color = "black", angle = 270) + 
-  geom_text(aes(label=round(perce_users, 4)), hjust=0.5, vjust=-0.4, size=2, color = "black") + 
-  labs(x = "Number of Tweets",
-       y = "Percentage of Users (%)",
-       title = "All users in the original data set") + 
-  theme(
-    #axis.text.x = element_text(angle = 30, hjust = 0.7, vjust = 0.8), 
-    axis.text.x = element_text(angle = 30, hjust = 0.7, vjust = 0.8, size = 8), 
-    legend.position = "bottom",
-    panel.border = element_blank(),  
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.line = element_line(colour = "grey")
-  )
-
-
-tweets_comm <- tweets %>% st_set_geometry(NULL) %>% 
-  filter(u_id %in% df_n_homes$u_id) %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n()) 
-
-comm_bar <- tweets_comm %>% 
-  mutate(groups = cut(n_tweets, seq(from = 0, to = 1300, by = 100), dig.lab = 5)) %>% 
-  group_by(groups) %>% 
-  summarise(users = n()) %>% 
-  mutate(perce_users = users/sum(users) * 100) %>% 
-  ggplot(., aes(x = groups, y = perce_users)) + 
-  geom_bar(stat = "identity", fill = "pink") + 
-   geom_text(aes(label=round(perce_users, 4)), hjust=0.5, vjust=-0.4, size=2, color = "black") + 
-  labs(x = "Number of Tweets",
-       y = "Percentage of Users (%)",
-       title = "Common uers assigned homes in all 4 algorithms") + 
-  theme(
-    axis.text.x = element_text(angle = 30, hjust = 0.7, vjust = 0.8, size = 8), 
-    legend.position = "bottom",
-    panel.border = element_blank(),  
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.line = element_line(colour = "grey")
-  )
-
-ggarrange(raw_bar, comm_bar, 
-          ncol = 2)
-```
-
-
-# Compare 4 algorithms
-```{r}
-library(RColorBrewer)
-rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
-
-ids_hlc <- hm_hlc$u_id
-t_hlc <- tweets %>% st_set_geometry(NULL) %>% filter(u_id %in% ids_hlc)
-t_hlc2 <- t_hlc %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n()) 
-
-ids_osn <- hm_osn$u_id
-t_osn <- tweets %>% st_set_geometry(NULL) %>% filter(u_id %in% ids_osn)
-t_osn2 <- t_osn %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n()) 
-
-
-ids_mpd <- hm_mpd$u_id
-t_mpd <- tweets %>% st_set_geometry(NULL) %>% filter(u_id %in% ids_mpd)
-t_mpd2 <- t_mpd  %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n()) 
-
-
-ids_fre <- hm_frq$u_id
-t_fre <- tweets %>% st_set_geometry(NULL) %>% filter(u_id %in% ids_fre)
-t_fre2 <- t_fre  %>% 
-  group_by(u_id) %>% 
-  summarise(n_tweets = n()) 
-
-t_4_algs <- bind_rows(t_hlc2 %>% select(groups) %>% mutate(name = "HLC"), 
-                      t_osn2 %>% select(groups) %>% mutate(name = "OSN"), 
-                      t_mpd2 %>% select(groups) %>% mutate(name = "MPD"), 
-                      t_fre2 %>% select(groups) %>% mutate(name = "FREQ"))
-t_4_algs_value <- bind_rows(t_hlc2 %>% select(n_tweets) %>% mutate(name = "HLC"), 
-                            t_osn2 %>% select(n_tweets) %>% mutate(name = "OSN"), 
-                            t_mpd2 %>% select(n_tweets) %>% mutate(name = "MPD"), 
-                            t_fre2 %>% select(n_tweets) %>% mutate(name = "FREQ"))
-density.p <- ggdensity(t_4_algs, x = "groups", fill = "name", palette = "jco")
-stable <- desc_statby(t_4_algs_value, measure.var = "n_tweets",grps = "name")
-stable <- stable[, c("name", "length","mean", "sd")] %>% 
-  mutate(mean = as.integer(mean)) %>% 
-  setNames(c("Algorithm", "# of users", "Average # of tweets", "SD. of tweets"))
-stable.p <- ggtexttable(stable, rows = NULL, theme = ttheme("classic"))
-
-
-t_4_algs %>% 
-  group_by(name, groups) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  ggplot(., aes(x = groups, y = n)) + 
-  geom_bar(stat = "identity") + 
-  facet_wrap(~name, scales = "free")
-```
-
-
-```{r}
-t_4_algs_value_group <- t_4_algs_value %>% 
-  mutate(ranges = case_when(
-          n_tweets %in% seq(0, 100, 1)   ~ "(0,100]",
-          n_tweets %in% seq(101, 200, 1) ~ "(100,200]",
-          n_tweets %in% seq(201, 300, 1) ~ "(200,300]",
-          n_tweets %in% seq(301, 400, 1) ~ "(300,400]",
-          n_tweets %in% seq(401, 500, 1) ~ "(400,500]",
-          n_tweets %in% seq(501, 600, 1) ~ "(500,600]",
-          n_tweets  %in% seq(601, 700, 1) ~ "(600,700]",
-          n_tweets  %in% seq(701, 800, 1) ~ "(700,800]",
-          n_tweets  %in% seq(801, 900, 1) ~ "(800,900]",
-          n_tweets  %in% seq(901, 1000, 1) ~ "(900,1000]",
-          n_tweets  %in% seq(1001, 1100, 1) ~ "(1000,1100]",
-          n_tweets  %in% seq(1101, 1200, 1) ~ "(1100,1200]",
-          n_tweets  %in% seq(1200, 1300, 1) ~ "(1200,1300]",
-          n_tweets %in% seq(1300, max(.$n_tweets), 1) ~ "> 1300"
-  )) %>% 
-  group_by(name, ranges) %>% 
-  summarise(n = n()) %>% 
-  group_by(name) %>% 
-  mutate(norm_n = round((n/sum(n)), 2) * 100)
-
-p_4alogrithms <- t_4_algs_value_group %>% 
-  ungroup() %>% 
-  ggplot(., aes(x = ranges, y = norm_n)) + 
-  geom_bar(stat = "identity", aes(fill = name)) + 
-  facet_wrap(~name, scales = "free") + 
-  labs(x = "Number of Tweets",
-       y = "Percentage of Users (%)",
-       title = "Users assigned home by each algorithms",
-       fill = "Algorithms") + 
-  theme(
-    axis.text.x = element_text(angle = 30, hjust = 0.7, vjust = 0.8, size = 5), 
-    legend.position = "bottom",
-    panel.border = element_blank(),  
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.line = element_line(colour = "grey")
-  )
-
-ggarrange(raw_bar, comm_bar, 
-          p_4alogrithms, stable.p, 
-          ncol = 2, nrow = 2)
-```
-
-
-<!-- # buffer  -->
-<!-- ```{r} -->
-<!-- tt <- df_wk_or_sf %>%  -->
-<!--   filter(grid_id == 1040) %>%  -->
-<!--   st_centroid() -->
-
-<!-- km <- as_units("km") -->
-<!-- r250 <- set_units(0.25, km) %>% set_units(m) -->
-<!-- grid_buffer <- st_buffer(tt, r250) -->
-
-
-
-<!-- tm_shape(df_wk_or_sf %>% filter(grid_id == 1040)) +  -->
-<!--   tm_polygons() +  -->
-<!--   tm_shape(tt) + -->
-<!--   tm_dots(size = 0.3, col = "red") +  -->
-<!--   tm_shape(grid_buffer) +  -->
-<!--   tm_borders() -->
-<!-- ``` -->
-
-```{r}
-# # Population in Singapore
-# tweets_lon_lat <- tweets %>%
-#   st_transform(4326) %>% 
-#   st_coordinates() %>% 
-#   as.data.frame() %>% 
-#   setNames(c("lon", "lat")) 
-# df_tweets <- tweets %>% 
-#   st_set_geometry(NULL) %>% 
-#   select(c(u_id, id, created_at, grid_id))
-# 
-# tweets_with_coords <- cbind(df_tweets, tweets_lon_lat)
-# # saveRDS(tweets_with_coords, file = here::here("data/tweets_with_coords.rds"))
-# 
-# test <- tweets_with_coords %>% sample_n(3000)
-# ggplot(data = test) + 
-#   geom_density2d(aes(x = lon, y = lat), size = 0.5) + 
-#   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
-#                    bins = 16, geom = "polygon") + 
-#   scale_fill_gradient(low = "green", high = "red") + 
-#   scale_alpha(range = c(0, 0.5), guide = FALSE) +
-#   theme(
-#     legend.position = "bottom",
-#     panel.border = element_blank(),  
-#     panel.grid.major = element_blank(),
-#     panel.grid.minor = element_blank(),
-#     panel.background = element_blank(),
-#     axis.line = element_line(colour = "grey")
-#   )
-# ###------------------------------------------------------------
-# df_zone <- df_subzone %>% st_join(., grids) %>% 
-#   select(c(PLN_AREA_N, REGION_N, grid_id))
-# 
-# t_users <- tweets_with_coords %>% 
-#   select(c(u_id, grid_id)) %>% 
-#   unique() %>% 
-#   left_join(df_zone)
-# 
-# dens_users <- t_users %>% 
-#   group_by(PLN_AREA_N) %>% 
-#   summarise(n_users = n_distinct(u_id)) 
-#   
-# populations <- tweets %>%
-#   st_set_geometry(NULL) %>% 
-#   group_by(grid_id) %>% 
-#   summarise(n_tweets = n(),
-#             n_users = n_distinct(u_id)) %>% 
-#   left_join(., grids) %>% 
-#   st_as_sf() %>% 
-#   st_centroid()
-#   
-# populations_coords <- populations %>% 
-#     st_transform(4326) %>% 
-#     st_coordinates() %>% 
-#     as.data.frame() 
-# 
-# popul_coords <- populations %>% 
-#   st_set_geometry(NULL) %>% 
-#   cbind(populations_coords) %>% 
-#   setNames(c("grid_id", "n_tweets", "n_users", "lon", "lat")) 
-# 
-# 
-# 
-# ggplot(data = popul_coords, aes(lon, lat)) + 
-#     geom_density2d(aes(x = lon, y = lat), size = 0.5) +
-#     stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..), size = 0.01,
-#                    bins = 16, geom = "polygon") + 
-#     scale_fill_gradient(low = "green", high = "red") +
-#     scale_alpha(range = c(0, 0.5), guide = FALSE) + 
-#     geom_point(aes(col = landuse_type)) 
-```
-
-
-<!-- ## distance, take HLC as reference  -->
-```{r}
-# <!-- df_hm_reference <- df_same %>% filter(name == "HLC") -->
-# <!-- geom_hlc <- st_geometry(df_hm_reference) -->
-# <!-- geom_osn <- st_geometry(df_same %>% filter(name == "OSN")) -->
-# <!-- geom_frq <- st_geometry(df_same %>% filter(name == "FREQ")) -->
-# <!-- geom_mpd <- st_geometry(df_same %>% filter(name == "MPD")) -->
-# 
-# 
-# <!-- df_distance <- df_hm_reference %>%  -->
-# <!--   st_set_geometry(NULL) %>%  -->
-# <!--   select(-name) %>%  -->
-# <!--   mutate(OSN = st_distance(geom_hlc, geom_osn, by_element = T) %>% as.integer(), -->
-# <!--          FREQ = st_distance(geom_hlc, geom_frq, by_element = T) %>% as.integer(), -->
-# <!--          MPD = st_distance(geom_hlc, geom_mpd, by_element = T) %>% as.integer(), -->
-# <!--     ) -->
-# 
-# 
-# <!-- df_dist_range <- df_distance %>%  -->
-# <!--   gather(., key = "method", value = "distance", -u_id, -home) %>%  -->
-# <!--   mutate(dist_range = case_when( -->
-# <!--     distance %in% seq(0, 0, 1)   ~ "0 km", -->
-# <!--     distance %in% seq(1, 1000, 1) ~ "1 km", -->
-# <!--     distance %in% seq(1001, 2000, 1) ~ "2 km", -->
-# <!--     distance %in% seq(2001, 3000, 1) ~ "3 km", -->
-# <!--     distance %in% seq(3001, 4000, 1) ~ "4 km", -->
-# <!--     distance %in% seq(4001, 5000, 1) ~ "5 km", -->
-# <!--     distance  %in% seq(5001, 6000, 1) ~ "6 km", -->
-# <!--     distance  %in% seq(6001, 7000, 1) ~ "7 km", -->
-# <!--     distance  %in% seq(7001, 8000, 1) ~ "8 km", -->
-# <!--     distance  %in% seq(8001, 9000, 1) ~ "9 km", -->
-# <!--     distance  %in% seq(9001, 10000, 1) ~ "10 km", -->
-# <!--     distance %in% seq(10001, max(.$distance), 1) ~ ">10 km" -->
-# <!--   )) %>%  -->
-# <!--   group_by(method, dist_range) %>%  -->
-# <!--   summarise(n_users = n_distinct(u_id)) %>%  -->
-# <!--   group_by(method) %>%  -->
-# <!--   mutate(n_users_pct = round((n_users/sum(n_users)), 4)*100, -->
-# <!--          dist_range = factor(dist_range, levels = c(">10 km", "10 km", "9 km", "8 km", "7 km", "6 km", "5 km", "4 km", "3 km", "2 km", "1 km", "0 km"))) %>%  -->
-# <!--   ungroup() %>%  -->
-# <!--   mutate(method = factor(method, levels = c("OSN", "MPD", "FREQ"))) -->
-# 
-# 
-# <!-- ggplot(df_dist_range, aes(x = dist_range, y = n_users_pct, fill = method)) + -->
-# <!--   geom_bar(stat="identity") + -->
-# <!--   geom_text(aes(label=n_users_pct), hjust=0.5, vjust=-0.7, size=3, color = "black", angle = 270) +  -->
-# <!--   #geom_text(aes(label=), vjust=-0.3, size=3.5) +  -->
-# <!--   facet_wrap(~method) +  -->
-# <!--   labs( -->
-# <!--     x = "Different distance compared to HCL results (m)", -->
-# <!--     y = "Percentage of users (%)", -->
-# <!--     fill = "Approaches" -->
-# <!--   ) +  -->
-# <!--   theme( -->
-# <!--     legend.position = "bottom", -->
-# <!--     # Remove panel border -->
-# <!--   panel.border = element_blank(),   -->
-# <!--   # Remove panel grid lines -->
-# <!--   panel.grid.major = element_blank(), -->
-# <!--   panel.grid.minor = element_blank(), -->
-# <!--   # Remove panel background -->
-# <!--   panel.background = element_blank(), -->
-# <!--     axis.line = element_line(colour = "grey") -->
-# <!--   ) +  -->
-# <!--   coord_flip()  -->
-# <!-- ``` -->
