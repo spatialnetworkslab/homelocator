@@ -9,18 +9,6 @@ arrange_var <- function(df, ...){
 }
 
 
-#' arrange 
-#' arrange order by certain variable 
-#' @param df A nested dataframe 
-#' @param group_var The varaible to be grouped 
-arrange_groupVar <- function(df, group_var, ...){
-  group_var_enq <- enquo(group_var)
-  arrange_exp_enq <- enquos(...)
-  df %>% 
-    group_by(!!group_var_enq) %>% 
-    arrange(desc(!!!arrange_exp_enq)) %>% 
-    ungroup()
-}
 
 #' arrange in nested dataframe 
 #' @param df A nested dataframe 
@@ -44,6 +32,7 @@ arrange_in_nest <- function(df, group_var, ...){
   
   #create the progress bar
   pb <- dplyr::progress_estimated(length(user_data))
+  message("\n")
   message(paste(emo::ji("hammer_and_wrench"), "Sorting..."))
   
   output <- df %>%
