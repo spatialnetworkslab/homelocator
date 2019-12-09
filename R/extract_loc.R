@@ -2,10 +2,10 @@
 #' 
 #' Extract most likely home location of each user 
 #' @param df A nested dataframe by user 
-#' @param show_n_home Number of homes to be shown 
+#' @param show_n_loc Number of homes to be shown 
 #' @param keep_score Choice to keep score or not 
 #' 
-extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show_n_home = 1, keep_score = F){
+extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
@@ -19,9 +19,9 @@ extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show
     get_loc <- data %>%
       dplyr::arrange(desc(!!!score_var)) %>% 
       # dplyr::arrange(desc(!!!arrange_vars_enq)) %>%
-      slice(1:show_n_home) %>%
+      slice(1:show_n_loc) %>%
       pull({{location}}) 
-    if(show_n_home == 1){
+    if(show_n_loc == 1){
       get_loc
     } else{
       paste(get_loc, collapse = "; ")
@@ -43,7 +43,8 @@ extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show
     output <- df %>%
       mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
       dplyr::select(-nested_data) %>%
-      unnest(home)
+      unnest(home) %>% 
+      dplyr::select({{user}}, home)
     n_user <- output %>% pull(!!user) %>% n_distinct()
     message("\n")
     message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))

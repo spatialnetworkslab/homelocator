@@ -36,7 +36,7 @@ validate_dataset <- function(df, user = "u_id", timestamp = "created_at", locati
   message(paste(emo::ji("bust_in_silhouette"), "There are", unique_users, "unique users in your dataset. Now you can start your journey identifying their meaningful location(s)!"))
   message(paste(emo::ji("clap"), "Good luck!"))
 
-  if (keep_other_vars) {
+  if(keep_other_vars) {
     df
   } else {
     df %>%
