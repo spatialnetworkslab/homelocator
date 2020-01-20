@@ -7,7 +7,8 @@
 #' @param location Name of column that holds unique identifier for each location
 #' @param recipe Different methods to identify home locations
 #' @param show_n_home Number of potential homes to be shown
-identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", show_n_loc = 1){
+identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", 
+  show_n_loc = 1, rm_pct = 0.01){
   user_exp <- rlang::sym(user)
   timestamp_exp <- rlang::sym(timestamp)
   location_exp <- rlang::sym(location)
@@ -22,7 +23,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     cleaned_df_byuser <- df_enrich %>%
       summ_in_nest(n_tweets = n(),
                    n_locs = n_distinct({{location_exp}})) %>%
-      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) %>%
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = rm_pct) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
     
     #pre-condition set on locations     
@@ -74,7 +75,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     df_moved_bots <- df_enrich %>%
       summ_in_nest(n_tweets = n(),
                    n_locs = n_distinct({{location_exp}})) %>% 
-      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) 
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = rm_pct) 
     
     ## pre-conditions
     df_filtered <- df_moved_bots %>%
@@ -156,7 +157,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     cleaned_df_byuser <- df_enrich %>%
       summ_in_nest(n_tweets = n(), 
                    n_locs = n_distinct(!!location_exp)) %>%
-      remove_bots(user = user, counts = "n_tweets", topNpct_user = 0.01) %>%
+      remove_bots(user = user, counts = "n_tweets", topNpct_user = rm_pct) %>%
       filter_var(n_tweets > 10 & n_locs > 10)
     
     
