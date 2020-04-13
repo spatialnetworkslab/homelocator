@@ -2,7 +2,7 @@
 % Please edit documentation in R/arrange_var.R
 \name{arrange_var}
 \alias{arrange_var}
-\title{arrange 
+\title{arrange
 arrange order by certain variable}
 \usage{
 arrange_var(df, ...)
@@ -11,6 +11,6 @@ arrange_var(df, ...)
 \item{df}{A nested dataframe}
 }
 \description{
-arrange 
+arrange
 arrange order by certain variable
 }

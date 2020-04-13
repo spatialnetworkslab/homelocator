@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_var.R
 \name{filter_var}
 \alias{filter_var}
-\title{Filter 
+\title{Filter
 Keep only users that meet certain preconditions}
 \usage{
 filter_var(df, filter_exp, user = "u_id")
@@ -15,6 +15,6 @@ filter_var(df, filter_exp, user = "u_id")
 \item{user}{Name of column that holds unique identifier for each user}
 }
 \description{
-Filter 
+Filter
 Keep only users that meet certain preconditions
 }

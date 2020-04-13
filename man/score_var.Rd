@@ -4,17 +4,16 @@
 \alias{score_var}
 \title{score of variables}
 \usage{
-score_var(df, group_var, user = "u_id", location = "grid_id",
-  keep_original_vars = F, ...)
+score_var(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...)
 }
 \arguments{
 \item{df}{A nested dataframe by user}
 
-\item{group_var}{Variable to be grouped}
-
 \item{user}{Name of column that holds unique identifier for each user}
 
 \item{location}{Name of column that holds unique identifier for each location}
+
+\item{group_var}{Variable to be grouped}
 
 \item{keep_original_vars}{Choice to keep original variables or not}
 }

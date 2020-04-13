@@ -4,8 +4,13 @@
 \alias{validate_dataset}
 \title{Validate used dataset}
 \usage{
-validate_dataset(df, user = "u_id", timestamp = "created_at",
-  location = "grid_id", keep_other_vars = F)
+validate_dataset(
+  df,
+  user = "u_id",
+  timestamp = "created_at",
+  location = "grid_id",
+  keep_other_vars = F
+)
 }
 \arguments{
 \item{df}{A dataframe with columns for the user id, location, timestamp}

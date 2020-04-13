@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_var.R
 \name{filter_in_nest}
 \alias{filter_in_nest}
-\title{Filter 
+\title{Filter
 Keep only users that meet certain preconditions}
 \usage{
 filter_in_nest(df, ...)
@@ -11,6 +11,6 @@ filter_in_nest(df, ...)
 \item{df}{A nested dataframe grouped by user}
 }
 \description{
-Filter 
+Filter
 Keep only users that meet certain preconditions
 }

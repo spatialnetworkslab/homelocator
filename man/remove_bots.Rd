@@ -4,8 +4,7 @@
 \alias{remove_bots}
 \title{remove bots}
 \usage{
-remove_bots(df, user = "u_id", counts = "n_tweets",
-  top_u_percent = 0.01)
+remove_bots(df, user = "u_id", counts = "n_tweets", topNpct_user = 0.01)
 }
 \arguments{
 \item{df}{A dataframe with columns for the user id, counts point per user}
@@ -14,7 +13,7 @@ remove_bots(df, user = "u_id", counts = "n_tweets",
 
 \item{counts}{Number of data points per user}
 
-\item{top_user_percent}{The percentage of top user you want to remove}
+\item{topNpct_user}{The percentage of active users}
 }
 \description{
 remove certain percentage of top users to avoid bots
