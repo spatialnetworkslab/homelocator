@@ -9,6 +9,8 @@ arrange_var(df, ...)
 }
 \arguments{
 \item{df}{A nested dataframe}
+
+\item{...}{Variables or functions}
 }
 \description{
 arrange

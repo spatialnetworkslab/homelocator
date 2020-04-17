@@ -16,6 +16,12 @@ extract_loc(
 \arguments{
 \item{df}{A nested dataframe by user}
 
+\item{score_var}{Name of column that holds weighted score for each user}
+
+\item{user}{Name of column that holds unique identifier for each user}
+
+\item{location}{Name of column that holds unique identifier for each location}
+
 \item{show_n_loc}{Number of homes to be shown}
 
 \item{keep_score}{Choice to keep score or not}

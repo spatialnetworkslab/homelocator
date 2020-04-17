@@ -8,6 +8,8 @@ summ_in_nest(df, ...)
 }
 \arguments{
 \item{df}{A nested dataframe}
+
+\item{...}{Variables or functions}
 }
 \description{
 Add needed variables as you want

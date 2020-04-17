@@ -7,6 +7,7 @@ vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  \VignetteDepends{rlang}
 ---
 
 ```{r setup, include = FALSE}
@@ -17,183 +18,183 @@ knitr::opts_chunk$set(
 ```
 
 
-# Introduction
+<!-- # Introduction -->
 
-User's locations are important to many applications such as:
+<!-- User's locations are important to many applications such as: -->
 
-  - event detection
-  - epidemic dispersion
-  - targeted advertisment
-  - news recommendation
-  
-`homelocator` package estimates users' home location with **location** and **timestamped data** at neighborhood-level. 
+<!--   - event detection -->
+<!--   - epidemic dispersion -->
+<!--   - targeted advertisment -->
+<!--   - news recommendation -->
 
-# Data
+<!-- `homelocator` package estimates users' home location with **location** and **timestamped data** at neighborhood-level.  -->
 
-To explore the basic data manipulation functions of `homelocator`, we'll use a `test_sample` dataset with columns described below: 
+<!-- # Data -->
 
-  - `u_id`: which is the user id that hold unique identifier for each use 
-  - `created_at`: which is timestamp column and it should be `POSIXct` class. 
-  - `GEOID`: which is location id that holds unique identifier for each location 
+<!-- To explore the basic data manipulation functions of `homelocator`, we'll use a `test_sample` dataset with columns described below:  -->
 
-# Usage
+<!--   - `u_id`: which is the user id that hold unique identifier for each use  -->
+<!--   - `created_at`: which is timestamp column and it should be `POSIXct` class.  -->
+<!--   - `GEOID`: which is location id that holds unique identifier for each location  -->
 
-## Load package 
+<!-- # Usage -->
 
-```{r warning=FALSE, message=FALSE}
-devtools::load_all(".")
-library(homelocator)
-library(tidyverse)
-library(dplyr)
-library(readr)
-```
+<!-- ## Load package  -->
 
-## Load test dataset 
+<!-- ```{r warning=FALSE, message=FALSE} -->
+<!-- devtools::load_all(".") -->
+<!-- library(homelocator) -->
+<!-- library(tidyverse) -->
+<!-- library(dplyr) -->
+<!-- library(readr) -->
+<!-- ``` -->
 
-```{r warning=FALSE}
-df <- read_csv(system.file("extdata", "test_sample_new.csv", package = "homelocator", mustWork = TRUE)) %>% 
-  select(-id) %>% 
-  mutate(u_id = as.character(u_id),
-         GEOID = as.character(GEOID)) %>% 
-  sample_frac(0.5)
-head(df)
-```
+<!-- ## Load test dataset  -->
 
-<span style="color:red">*Note:*</span> *if you use your own dataset, please make sure that you have coverted the time to your local time zone!*
-  
-## Functions 
+<!-- ```{r warning=FALSE} -->
+<!-- df <- read_csv(system.file("extdata", "test_sample_new.csv", package = "homelocator", mustWork = TRUE)) %>%  -->
+<!--   select(-id) %>%  -->
+<!--   mutate(u_id = as.character(u_id), -->
+<!--          GEOID = as.character(GEOID)) %>%  -->
+<!--   sample_frac(0.5) -->
+<!-- head(df) -->
+<!-- ``` -->
 
-### Derive basic needed variables with `derive_timestamp()`
+<!-- <span style="color:red">*Note:*</span> *if you use your own dataset, please make sure that you have coverted the time to your local time zone!* -->
 
-The `derive_timestamp()` function in `derive_timestamp.R` script allows you to derive basic needed variables from timestamp column of the dataset
+<!-- ## Functions  -->
 
-```{r}
-df <- df %>% derive_timestamp(created_at)
-head(df)
-```
+<!-- ### Derive basic needed variables with `derive_timestamp()` -->
 
-### Nest dataset by variable with `nest_dataframe()`
+<!-- The `derive_timestamp()` function in `derive_timestamp.R` script allows you to derive basic needed variables from timestamp column of the dataset -->
 
-The `nest_dataframe()` function in `nest_dataframe.R` script allows you to nest your dataset by certain variable
+<!-- ```{r} -->
+<!-- df <- df %>% derive_timestamp(created_at) -->
+<!-- head(df) -->
+<!-- ``` -->
 
-  - `group_var`: is the variable you choosed to be grouped by 
-  - the nested column is named by grouped variabe + "_data" to make the nested dataframe clearer 
-  
-```{r}
-# nest dataset
-df_nest <- df %>% nest_dataframe(u_id)
-head(df_nest)
-```
+<!-- ### Nest dataset by variable with `nest_dataframe()` -->
 
-### Filter the dataset by certain preconditions
+<!-- The `nest_dataframe()` function in `nest_dataframe.R` script allows you to nest your dataset by certain variable -->
 
-In order to remove users with too scarce data or users that may potentially be bots, we implement some functions below 
+<!--   - `group_var`: is the variable you choosed to be grouped by  -->
+<!--   - the nested column is named by grouped variabe + "_data" to make the nested dataframe clearer  -->
 
-   - The `summarise_var()` function in `summarise_var.R` script allows you to calculate variable to the nested dataframe, and you can name the variable yourself, those variable are based on the preconditions you set 
-   - The `summarise_groupVar()` function in `summarise_var.R` script allows you to calculate variable to the **double nested dataframe**, and you can also name the variable yourself
-   - The `filter_var()` funtion in `filter_var.R` script allows you to filter the users that meet the preconditions you set
-   - The `arrange_var()` function in `arrange_var.R` script allows you to arrange the dataframe by certain variable 
-   - The `remove_bots()` function in `remove_bots.R` script allows you to remove certain percent active users based on total tweets number sent by users, you can set the percentage as you want based on the preconditions you set 
-   
+<!-- ```{r} -->
+<!-- # nest dataset -->
+<!-- df_nest <- df %>% nest_dataframe(u_id) -->
+<!-- head(df_nest) -->
+<!-- ``` -->
 
-The preconditions we used here are: 
+<!-- ### Filter the dataset by certain preconditions -->
 
-  - `counts_per_user > 10`: More than 10 data points sent by per user  
-  - `distinct_loc_per_user > 10`: Users tweets in more than 10 different locations 
-  - `counts_per_loc > 10`: More than 10 data points sent by per user per location 
-  - `distinct_hour_per_loc > 10`: More than 10 hours user was active at location 
-  - `distinct_day_per_loc > 10`: More than 10 unique days user was active at a location 
-  - `time_period_per_loc > 10`: More than 10 days between the first and the last day user was active at location 
-  - `top_user_percent = 0.1`: Remove top 10% users to avoid potential bots
+<!-- In order to remove users with too scarce data or users that may potentially be bots, we implement some functions below  -->
 
-<span style="color:red">*Note:*</span> *You can tune those treshold according to your project/research/study needed.*
-  
-```{r initial_filter, message=FALSE, warning=FALSE}
-df_filtered <- df_nest %>% 
-  summarise_var(counts_per_user = n(), 
-                distinct_loc_per_user = n_distinct(GEOID)) %>% 
-  filter_var(counts_per_user > 10) %>% 
-  filter_var(distinct_loc_per_user > 10) %>% 
-  summarise_groupVar(vars(GEOID), 
-                     vars(counts_per_loc = n(), 
-                          distinct_hour_per_loc = n_distinct(hour_of_day), 
-                          distinct_day_per_loc = n_distinct(date), 
-                          time_period_per_loc = as.numeric(max(created_at) - min(created_at), "days"))) %>% 
-  filter_var(counts_per_loc > 10) %>% 
-  filter_var(distinct_hour_per_loc > 10) %>% 
-  filter_var(distinct_day_per_loc > 10) %>% 
-  filter_var(time_period_per_loc > 10) %>% 
-  arrange_var(counts_per_user) %>% 
-  remove_bots(top_user_percent = 0.1) 
-head(df_filtered)
-```
+<!--    - The `summarise_var()` function in `summarise_var.R` script allows you to calculate variable to the nested dataframe, and you can name the variable yourself, those variable are based on the preconditions you set  -->
+<!--    - The `summarise_groupVar()` function in `summarise_var.R` script allows you to calculate variable to the **double nested dataframe**, and you can also name the variable yourself -->
+<!--    - The `filter_var()` funtion in `filter_var.R` script allows you to filter the users that meet the preconditions you set -->
+<!--    - The `arrange_var()` function in `arrange_var.R` script allows you to arrange the dataframe by certain variable  -->
+<!--    - The `remove_bots()` function in `remove_bots.R` script allows you to remove certain percent active users based on total tweets number sent by users, you can set the percentage as you want based on the preconditions you set  -->
 
 
-### Expand variables used to determine home loaction(s) of users
+<!-- The preconditions we used here are:  -->
 
-In order to determine users' home location(s), we implement some functions below to expand useful variables that can reflect users' activities or behavior
-  
-  - The `add_col()` function in `add_col.R` script allows you to expand needed variable to normal dataframe, and you can name the variables yourself
-  - The `add_groupCol()` function in `add_col.R` script allows you to expand needed variable to grouped dataframe, when implete the `add_groupCol()` function, it will return a normal dataframe, so if you want to do some calculation with `summarise_var()` or `summarise_groupVar()` you need to nest the dataframe again, because these two functions are worked on nested dataframe. (this part may need some improvement)
-  - The `filter_nest()` funtion in `filter_var.R` script allows you to filter users that meet certain conditions you set on nested dataframe
+<!--   - `counts_per_user > 10`: More than 10 data points sent by per user   -->
+<!--   - `distinct_loc_per_user > 10`: Users tweets in more than 10 different locations  -->
+<!--   - `counts_per_loc > 10`: More than 10 data points sent by per user per location  -->
+<!--   - `distinct_hour_per_loc > 10`: More than 10 hours user was active at location  -->
+<!--   - `distinct_day_per_loc > 10`: More than 10 unique days user was active at a location  -->
+<!--   - `time_period_per_loc > 10`: More than 10 days between the first and the last day user was active at location  -->
+<!--   - `top_user_percent = 0.1`: Remove top 10% users to avoid potential bots -->
 
-```{r expand_variables, message=FALSE, warning=FALSE}
-df_expanded <- df_filtered %>% 
-  add_col(week = if_else(day_of_week %in% c(1,7), 1, 2)) %>%  # 1 for weekend, 2 for weekday 
-  add_col(numeric_time = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600) %>% 
-  add_col(rest_or_work = if_else(numeric_time >= 9 & numeric_time <= 18, 2, 1)) %>% # 1 for rest time, 2 for work time 
-  add_col(early_or_late = if_else(numeric_time >= 6 & numeric_time <= 12, 1, 2)) # 1 for early morning, 2 for late afternoon and night 
-  
+<!-- <span style="color:red">*Note:*</span> *You can tune those treshold according to your project/research/study needed.* -->
 
-## do calculation based on added columns 
-df_expanded <- df_expanded %>% 
-  nest_dataframe(u_id) %>% 
-  summarise_var(distinct_day_of_week = n_distinct(day_of_week), 
-                distinct_month = n_distinct(month)) %>% 
-  summarise_groupVar(vars(week), vars(counts_week = n())) %>% 
-  add_groupCol(vars(u_id), vars(percent_week = counts_week/sum(counts_week))) %>% 
-  nest_dataframe(u_id) %>% 
-  summarise_groupVar(vars(rest_or_work), vars(counts_rest_or_work = n())) %>% 
-  add_groupCol(vars(u_id), vars(percent_rest_or_work = counts_rest_or_work/sum(counts_rest_or_work))) %>% 
-  nest_dataframe(u_id) %>% 
-  filter_nest(rest_or_work == 1 & percent_rest_or_work >= 0.5) 
-head(df_expanded)
-```
-
-### Scoring 
-
-When we have expanded all variables that you think can reflect users' tweeting behavior, then we can use functions below to score each variable and sum all scored variables to per user per location 
-
-  - The `score_user()` function in `score_user.R` script allows you to score varialbes. <span style="color:red">*Note:*</span> *You can tune the weight of each variable according to your project/research/study needed.*
-  - The `sum_score()` function in `score_user.R` script allows you to sum the score for each location of each user 
-  
-```{r score_variables, message=FALSE, warning=FALSE}
-df_scored <- df_expanded %>% 
-  score_user(u_id, score_counts_per_loc = 0.1 * (counts_per_loc/max(counts_per_loc))) %>% 
-  score_user(u_id, score_distinct_hour_per_loc = 0.1 * (distinct_hour_per_loc/24)) %>% 
-  score_user(u_id, score_distinct_day_per_loc = 0.1 * (distinct_day_per_loc/max(distinct_day_per_loc))) %>% 
-  score_user(u_id, score_time_period_per_loc = 0.1 * (time_period_per_loc/max(as.numeric(time_period_per_loc)))) %>% 
-  score_user(u_id, score_percent_week = 0.2 * (time_period_per_loc)) %>% 
-  score_user(u_id, score_percent_rest_or_work = 0.2 * (percent_rest_or_work)) %>% 
-  score_user(u_id, score_distinct_day_of_week = 0.1 * (distinct_day_of_week/7)) %>% 
-  score_user(u_id, score_distinct_month = 0.1 * (distinct_month)) %>% 
-  sum_score(u_id, GEOID, score_counts_per_loc, score_distinct_hour_per_loc, score_distinct_day_per_loc, score_time_period_per_loc, score_percent_week, score_percent_rest_or_work, score_distinct_day_of_week, score_distinct_month)
-head(df_scored)
-```
+<!-- ```{r initial_filter, message=FALSE, warning=FALSE} -->
+<!-- df_filtered <- df_nest %>%  -->
+<!--   summarise_var(counts_per_user = n(),  -->
+<!--                 distinct_loc_per_user = n_distinct(GEOID)) %>%  -->
+<!--   filter_var(counts_per_user > 10) %>%  -->
+<!--   filter_var(distinct_loc_per_user > 10) %>%  -->
+<!--   summarise_groupVar(vars(GEOID),  -->
+<!--                      vars(counts_per_loc = n(),  -->
+<!--                           distinct_hour_per_loc = n_distinct(hour_of_day),  -->
+<!--                           distinct_day_per_loc = n_distinct(date),  -->
+<!--                           time_period_per_loc = as.numeric(max(created_at) - min(created_at), "days"))) %>%  -->
+<!--   filter_var(counts_per_loc > 10) %>%  -->
+<!--   filter_var(distinct_hour_per_loc > 10) %>%  -->
+<!--   filter_var(distinct_day_per_loc > 10) %>%  -->
+<!--   filter_var(time_period_per_loc > 10) %>%  -->
+<!--   arrange_var(counts_per_user) %>%  -->
+<!--   remove_bots(top_user_percent = 0.1)  -->
+<!-- head(df_filtered) -->
+<!-- ``` -->
 
 
-### Extract home location(s) of each user 
+<!-- ### Expand variables used to determine home loaction(s) of users -->
 
-Based on the score we calculated from each variables, we can finally determine users' home location(s) based on the score values, the higher the score, the higher possibility the location to be user's home location(s)
+<!-- In order to determine users' home location(s), we implement some functions below to expand useful variables that can reflect users' activities or behavior -->
 
-   - The `extract_home()` function in `extract_home.R` script allows you to extract top two locations based on the score values, and the extracted location(s) are considered as users' home loaction(s)
-   
-```{r extract_home, message=FALSE, warning=FALSE}
-df_home <- df_scored %>% 
-  nest_dataframe(u_id) %>% 
-  extract_home(score > 0, score)
-head(df_home)
-```
+<!--   - The `add_col()` function in `add_col.R` script allows you to expand needed variable to normal dataframe, and you can name the variables yourself -->
+<!--   - The `add_groupCol()` function in `add_col.R` script allows you to expand needed variable to grouped dataframe, when implete the `add_groupCol()` function, it will return a normal dataframe, so if you want to do some calculation with `summarise_var()` or `summarise_groupVar()` you need to nest the dataframe again, because these two functions are worked on nested dataframe. (this part may need some improvement) -->
+<!--   - The `filter_nest()` funtion in `filter_var.R` script allows you to filter users that meet certain conditions you set on nested dataframe -->
+
+<!-- ```{r expand_variables, message=FALSE, warning=FALSE} -->
+<!-- df_expanded <- df_filtered %>%  -->
+<!--   add_col(week = if_else(day_of_week %in% c(1,7), 1, 2)) %>%  # 1 for weekend, 2 for weekday  -->
+<!--   add_col(numeric_time = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600) %>%  -->
+<!--   add_col(rest_or_work = if_else(numeric_time >= 9 & numeric_time <= 18, 2, 1)) %>% # 1 for rest time, 2 for work time  -->
+<!--   add_col(early_or_late = if_else(numeric_time >= 6 & numeric_time <= 12, 1, 2)) # 1 for early morning, 2 for late afternoon and night  -->
+
+
+<!-- ## do calculation based on added columns  -->
+<!-- df_expanded <- df_expanded %>%  -->
+<!--   nest_dataframe(u_id) %>%  -->
+<!--   summarise_var(distinct_day_of_week = n_distinct(day_of_week),  -->
+<!--                 distinct_month = n_distinct(month)) %>%  -->
+<!--   summarise_groupVar(vars(week), vars(counts_week = n())) %>%  -->
+<!--   add_groupCol(vars(u_id), vars(percent_week = counts_week/sum(counts_week))) %>%  -->
+<!--   nest_dataframe(u_id) %>%  -->
+<!--   summarise_groupVar(vars(rest_or_work), vars(counts_rest_or_work = n())) %>%  -->
+<!--   add_groupCol(vars(u_id), vars(percent_rest_or_work = counts_rest_or_work/sum(counts_rest_or_work))) %>%  -->
+<!--   nest_dataframe(u_id) %>%  -->
+<!--   filter_nest(rest_or_work == 1 & percent_rest_or_work >= 0.5)  -->
+<!-- head(df_expanded) -->
+<!-- ``` -->
+
+<!-- ### Scoring  -->
+
+<!-- When we have expanded all variables that you think can reflect users' tweeting behavior, then we can use functions below to score each variable and sum all scored variables to per user per location  -->
+
+<!--   - The `score_user()` function in `score_user.R` script allows you to score varialbes. <span style="color:red">*Note:*</span> *You can tune the weight of each variable according to your project/research/study needed.* -->
+<!--   - The `sum_score()` function in `score_user.R` script allows you to sum the score for each location of each user  -->
+
+<!-- ```{r score_variables, message=FALSE, warning=FALSE} -->
+<!-- df_scored <- df_expanded %>%  -->
+<!--   score_user(u_id, score_counts_per_loc = 0.1 * (counts_per_loc/max(counts_per_loc))) %>%  -->
+<!--   score_user(u_id, score_distinct_hour_per_loc = 0.1 * (distinct_hour_per_loc/24)) %>%  -->
+<!--   score_user(u_id, score_distinct_day_per_loc = 0.1 * (distinct_day_per_loc/max(distinct_day_per_loc))) %>%  -->
+<!--   score_user(u_id, score_time_period_per_loc = 0.1 * (time_period_per_loc/max(as.numeric(time_period_per_loc)))) %>%  -->
+<!--   score_user(u_id, score_percent_week = 0.2 * (time_period_per_loc)) %>%  -->
+<!--   score_user(u_id, score_percent_rest_or_work = 0.2 * (percent_rest_or_work)) %>%  -->
+<!--   score_user(u_id, score_distinct_day_of_week = 0.1 * (distinct_day_of_week/7)) %>%  -->
+<!--   score_user(u_id, score_distinct_month = 0.1 * (distinct_month)) %>%  -->
+<!--   sum_score(u_id, GEOID, score_counts_per_loc, score_distinct_hour_per_loc, score_distinct_day_per_loc, score_time_period_per_loc, score_percent_week, score_percent_rest_or_work, score_distinct_day_of_week, score_distinct_month) -->
+<!-- head(df_scored) -->
+<!-- ``` -->
+
+
+<!-- ### Extract home location(s) of each user  -->
+
+<!-- Based on the score we calculated from each variables, we can finally determine users' home location(s) based on the score values, the higher the score, the higher possibility the location to be user's home location(s) -->
+
+<!--    - The `extract_home()` function in `extract_home.R` script allows you to extract top two locations based on the score values, and the extracted location(s) are considered as users' home loaction(s) -->
+
+<!-- ```{r extract_home, message=FALSE, warning=FALSE} -->
+<!-- df_home <- df_scored %>%  -->
+<!--   nest_dataframe(u_id) %>%  -->
+<!--   extract_home(score > 0, score) -->
+<!-- head(df_home) -->
+<!-- ``` -->
 
 
 

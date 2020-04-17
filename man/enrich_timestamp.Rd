@@ -10,6 +10,8 @@ enrich_timestamp(df, timestamp, tz = "Asia/Singapore")
 \item{df}{A nested dataframe}
 
 \item{timestamp}{Name of timestamp column. Should be POSIXct}
+
+\item{tz}{Time zone of timestamp}
 }
 \description{
 Add basic needed variables derived from timestamp

@@ -10,6 +10,8 @@ arrange_in_nest(df, group_var, ...)
 \item{df}{A nested dataframe}
 
 \item{group_var}{The variable to be grouped}
+
+\item{...}{Variables or functions}
 }
 \description{
 arrange in nested dataframe

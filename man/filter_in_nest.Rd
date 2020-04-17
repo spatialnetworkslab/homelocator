@@ -9,6 +9,8 @@ filter_in_nest(df, ...)
 }
 \arguments{
 \item{df}{A nested dataframe grouped by user}
+
+\item{...}{Variables or functions}
 }
 \description{
 Filter

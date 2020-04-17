@@ -8,6 +8,8 @@ unnest_cols(df, ...)
 }
 \arguments{
 \item{df}{A dataframe}
+
+\item{...}{Variables or functions}
 }
 \description{
 Unnest dataframe

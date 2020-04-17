@@ -8,6 +8,8 @@ nest_cols(df, ...)
 }
 \arguments{
 \item{df}{A dataframe}
+
+\item{...}{Variables or functions}
 }
 \description{
 Nest dataframe by variable

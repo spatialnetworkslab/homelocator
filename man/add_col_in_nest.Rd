@@ -8,6 +8,8 @@ add_col_in_nest(df, ...)
 }
 \arguments{
 \item{df}{A dataframe}
+
+\item{...}{Variables to be added}
 }
 \description{
 Add variables as you want/needed

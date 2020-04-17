@@ -8,6 +8,8 @@ add_col(df, ...)
 }
 \arguments{
 \item{df}{A dataframe}
+
+\item{...}{Variables or functions}
 }
 \description{
 Add variables as you want/needed

@@ -12,6 +12,8 @@ sum_score(df, user = "u_id", location = "grid_id", ...)
 \item{user}{Name of column that holds unique identifier for each user}
 
 \item{location}{Name of column that holds unique identifier for each location}
+
+\item{...}{Variables or functions}
 }
 \description{
 Sum up scored variables

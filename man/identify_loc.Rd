@@ -25,7 +25,9 @@ identify_loc(
 
 \item{recipe}{Different methods to identify home locations}
 
-\item{show_n_home}{Number of potential homes to be shown}
+\item{show_n_loc}{Number of potential homes to be shown}
+
+\item{rm_pct}{Percentage of the top active users that to be removed}
 }
 \description{
 Identify home location with chose recipe

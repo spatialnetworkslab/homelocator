@@ -13,9 +13,11 @@ score_var(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...)
 
 \item{location}{Name of column that holds unique identifier for each location}
 
-\item{group_var}{Variable to be grouped}
+\item{keep_ori_vars}{Choice to keep original variables or not}
 
-\item{keep_original_vars}{Choice to keep original variables or not}
+\item{...}{Variables or functions}
+
+\item{group_var}{Variable to be grouped}
 }
 \description{
 Add score of each variables
