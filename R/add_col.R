@@ -83,7 +83,7 @@ add_pct_in_nest <- function(df, var){
 #' @param df A dataframe 
 #' @param group_var The variable to be grouped 
 #' @param mutate_vars The variables you want to add to the dataframe
-
+#' 
 add_col_in_nest_byGRP <- function(df, group_vars, mutate_vars){
   
   stopifnot(

@@ -14,9 +14,9 @@ nest_cols <- function(df, ...){
     nest_legacy(!!!nest_exp_enq)
 }
 
-
-
-
+#' Nest dataframe 
+#' @param df A dataframe 
+#' 
 nest_cols_in_nest <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
@@ -92,8 +92,6 @@ unnest_cols_in_nest <- function(df, ...){
 #' Nest dataframe 
 #' 
 #' Nest dataframe by multiple varibles 
-#' @param df A dataframe
-#' @param group_vars A list contains variables to be grouped
 #'
 # nest_by_mulGps <- function(df, group_vars) {
 #   if (!is.data.frame(df)) {
