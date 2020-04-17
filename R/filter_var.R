@@ -3,6 +3,9 @@
 #' @param df A nested dataframe grouped by user 
 #' @param filter_exp A certain condition to meet 
 #' @param user Name of column that holds unique identifier for each user
+#' 
+#' 
+#' 
 filter_var <- function(df, filter_exp, user = "u_id"){
   
   if (!rlang::has_name(df, user)) {
@@ -31,6 +34,8 @@ filter_var <- function(df, filter_exp, user = "u_id"){
 #' Filter 
 #' Keep only users that meet certain preconditions
 #' @param df A nested dataframe grouped by user 
+#' @param ... Variables or functions 
+#' 
 #' 
 filter_in_nest <- function(df, ...){
   

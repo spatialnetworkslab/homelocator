@@ -1,6 +1,9 @@
 #' arrange 
 #' arrange order by certain variable 
 #' @param df A nested dataframe 
+#' @param ... Variables or functions 
+#' 
+#' 
 arrange_var <- function(df, ...){
   arrange_exp_enq <- enquos(...)
   
@@ -13,6 +16,7 @@ arrange_var <- function(df, ...){
 #' arrange in nested dataframe 
 #' @param df A nested dataframe 
 #' @param group_var The variable to be grouped 
+#' @param ... Variables or functions 
 #' 
 #' 
 arrange_in_nest <- function(df, group_var, ...){

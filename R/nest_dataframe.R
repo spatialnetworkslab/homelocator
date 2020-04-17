@@ -2,6 +2,9 @@
 #' 
 #' Nest dataframe by variable
 #' @param df A dataframe 
+#' @param ... Variables or functions 
+#' 
+#' 
 nest_cols <- function(df, ...){
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
@@ -16,6 +19,8 @@ nest_cols <- function(df, ...){
 
 #' Nest dataframe 
 #' @param df A dataframe 
+#' @param ... Variables or functions 
+#' 
 #' 
 nest_cols_in_nest <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
@@ -45,6 +50,9 @@ nest_cols_in_nest <- function(df, ...){
 #' Unnest dataframe
 #' 
 #' @param df A dataframe
+#' @param ... Variables or functions 
+#' 
+#' 
 unnest_cols <- function(df, ...){
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
@@ -62,6 +70,10 @@ unnest_cols <- function(df, ...){
 #' Nunest dataframe
 #' 
 #' @param df A nested dataframe
+#' @param ... Variables or functions 
+#' 
+#' 
+#' 
 unnest_cols_in_nest <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
@@ -82,30 +94,3 @@ unnest_cols_in_nest <- function(df, ...){
     mutate({{nested_data}} := purrr::map(df[[nested_data]], ~unnest_with_progress(.)))
   output
 }
-
-
-
-
-
-
-
-#' Nest dataframe 
-#' 
-#' Nest dataframe by multiple varibles 
-#'
-# nest_by_mulGps <- function(df, group_vars) {
-#   if (!is.data.frame(df)) {
-#     stop("Error: Dataset is not a dataframe")
-#   }
-#   
-#   stopifnot(
-#     is.list(group_vars)
-#   )
-#   
-#   message(paste(emo::ji("hammer_and_wrench"), "Nesting dataset by multiple groups..."))
-# 
-#   df %>%
-#     group_by(!!!group_vars) %>%
-#     nest() 
-# }
-

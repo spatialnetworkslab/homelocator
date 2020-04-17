@@ -2,6 +2,9 @@
 #' 
 #' Add needed variables as you want 
 #' @param df A nested dataframe 
+#' @param ... Variables or functions 
+#' 
+#' 
 summ_in_nest <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
@@ -40,6 +43,9 @@ summ_in_nest <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param nest_cols Variables to be nested 
 #' @param summary_vars Summarise expression
+#' 
+#' 
+#' 
 grpSumm_in_nest <- function(df, nest_cols, summary_vars){
   
   if(nrow(df)==0){

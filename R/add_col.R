@@ -2,6 +2,8 @@
 #' 
 #' Add variables as you want/needed 
 #' @param df A dataframe 
+#' @param ... Variables or functions 
+#' 
 add_col <- function(df, ...){
   adds_exp_enq <- enquos(..., .named = TRUE)
   
@@ -13,6 +15,9 @@ add_col <- function(df, ...){
 #' 
 #' Add variables as you want/needed 
 #' @param df A dataframe 
+#' @param ... Variables to be added
+#'
+
 add_col_in_nest <- function(df, ...){
   
   adds_exp_enq <- enquos(..., .named = TRUE)
@@ -48,6 +53,8 @@ add_col_in_nest <- function(df, ...){
 #' Add variables as you want/needed 
 #' @param df A dataframe 
 #' @param var Variable to be calculated 
+#' 
+
 add_pct_in_nest <- function(df, var){
   var_expr <- enquo(var)
   nested_data <- names(df[,grepl("data", names(df))])
@@ -77,6 +84,9 @@ add_pct_in_nest <- function(df, var){
   message(paste(emo::ji("white_check_mark"), "New added variables:", added_cols))
   output
 }
+
+
+
 #' add variable 
 #' 
 #' Add variables as you want/needed 

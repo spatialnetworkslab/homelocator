@@ -6,7 +6,10 @@
 #' @param timestamp Name of timestamp column. Should be POSIXct
 #' @param location Name of column that holds unique identifier for each location
 #' @param recipe Different methods to identify home locations
-#' @param show_n_home Number of potential homes to be shown
+#' @param show_n_loc Number of potential homes to be shown
+#' @param rm_pct Percentage of the top active users that to be removed
+#' 
+#' 
 #' @export
 identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", 
   show_n_loc = 1, rm_pct = 0.01){

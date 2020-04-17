@@ -5,7 +5,10 @@
 #' @param group_var Variable to be grouped 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
-#' @param keep_original_vars Choice to keep original variables or not
+#' @param keep_ori_vars Choice to keep original variables or not
+#' @param ... Variables or functions 
+#' 
+#' 
 #' 
 score_var <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...){
   adds_exp_enq <- enquos(..., .named = TRUE)
@@ -72,6 +75,7 @@ score_var <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F
 #' @param df A  dataframe 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
+#' @param ... Variables or functions 
 #' 
 #' 
 #' 

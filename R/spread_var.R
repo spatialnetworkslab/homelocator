@@ -4,6 +4,9 @@
 #' @param df A dataframe 
 #' @param key_var Key variable to be spreaded 
 #' @param value_var Value variable to be spreaded
+#' 
+#' 
+#' 
 spread2_in_nest <- function(df, key_var, value_var){
   
   key_var_enq <- enquo(key_var)
@@ -37,6 +40,9 @@ spread2_in_nest <- function(df, key_var, value_var){
 #' Spread variables to tidy dataframe
 #' @param df A nested dataframe 
 #' @param full_col Full columns in nested data
+#' 
+#' 
+#' 
 spread2_add_missing <- function(df, full_col){
   
   nested_data <- names(df[,grepl("data$", names(df))])

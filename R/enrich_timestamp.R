@@ -3,6 +3,9 @@
 #' Add basic needed variables derived from timestamp 
 #' @param df A nested dataframe 
 #' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param tz Time zone of timestamp 
+#' 
+#' 
 enrich_timestamp <- function(df, timestamp, tz = "Asia/Singapore"){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
