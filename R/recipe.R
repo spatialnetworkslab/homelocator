@@ -7,6 +7,7 @@
 #' @param location Name of column that holds unique identifier for each location
 #' @param recipe Different methods to identify home locations
 #' @param show_n_home Number of potential homes to be shown
+#' @export
 identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", 
   show_n_loc = 1, rm_pct = 0.01){
   user_exp <- rlang::sym(user)
