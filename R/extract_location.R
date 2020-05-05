@@ -9,7 +9,7 @@
 #' @param location Name of column that holds unique identifier for each location
 #' 
 
-extract_loc <- function(df, score_var, user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F){
+extract_location <- function(df, score_var, user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }

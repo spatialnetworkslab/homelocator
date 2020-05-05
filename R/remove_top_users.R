@@ -7,7 +7,7 @@
 #' @param counts Number of data points per user
 #' @param topNpct_user The percentage of active users 
 
-remove_bots <- function(df, user = "u_id", counts = "n_tweets", topNpct_user = 0.01){
+remove_top_users <- function(df, user = "u_id", counts = "n_tweets", topNpct_user = 0.01){
   
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))

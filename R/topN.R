@@ -4,7 +4,7 @@
 #' @param df A dataframe 
 #' @param n Number of entries to be selected
 #' @param wt The variable to be used for ordering
-top_n_in_nest <- function(df, n = 2, wt){
+top_n_nested <- function(df, n = 2, wt){
   wt_enq = enquo(wt)
   nested_data <- names(df[,grepl("data$", names(df))])
   user_data <- df[[nested_data]]

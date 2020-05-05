@@ -5,7 +5,7 @@
 #' @param ... Variables or functions 
 #' 
 #' 
-nest_cols <- function(df, ...){
+nest_verbose <- function(df, ...){
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
   }
@@ -22,7 +22,7 @@ nest_cols <- function(df, ...){
 #' @param ... Variables or functions 
 #' 
 #' 
-nest_cols_in_nest <- function(df, ...){
+nest_double_nest <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
@@ -53,7 +53,7 @@ nest_cols_in_nest <- function(df, ...){
 #' @param ... Variables or functions 
 #' 
 #' 
-unnest_cols <- function(df, ...){
+unnest_verbose <- function(df, ...){
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
   }
@@ -74,7 +74,7 @@ unnest_cols <- function(df, ...){
 #' 
 #' 
 #' 
-unnest_cols_in_nest <- function(df, ...){
+unnest_double_nested <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }

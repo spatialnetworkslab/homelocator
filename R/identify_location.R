@@ -11,7 +11,7 @@
 #' 
 #' 
 #' @export
-identify_loc <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", 
+identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "HLC", 
   show_n_loc = 1, rm_pct = 0.01){
   user_exp <- rlang::sym(user)
   timestamp_exp <- rlang::sym(timestamp)
@@ -45,7 +45,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
     
     ## create new variables 
     df_expanded <- cleaned_df_byloc %>% 
-      add_col_in_nest(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday")) %>%
+      mutate_nest(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday")) %>%
       add_col_in_nest(numTime = lubridate::hour({{timestamp_exp}}) + lubridate::minute({{timestamp_exp}}) / 60 + lubridate::second({{timestamp_exp}}) / 3600) %>%
       add_col_in_nest(rest_or_work = if_else(numTime >= 9 & numTime <= 18, "work", "rest")) %>%
       add_col_in_nest(wk_am = if_else(numTime >= 6 & numTime <= 12 & wd_or_wk == "weekend", "wk_am", "none_wk_am")) %>% 
@@ -181,4 +181,7 @@ identify_loc <- function(df, user = "u_id", timestamp = "created_at", location =
 }
 
 
-
+recipe_HLC <- function (df_enrich) {
+  # some logic here
+  return inferred_loc
+}

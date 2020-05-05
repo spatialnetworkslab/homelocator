@@ -6,8 +6,9 @@
 #' @param value_var Value variable to be spreaded
 #' 
 #' 
+#' This was originally called spread2. Qingqing to check why that was?
 #' 
-spread2_in_nest <- function(df, key_var, value_var){
+spread_nested <- function(df, key_var, value_var){
   
   key_var_enq <- enquo(key_var)
   value_var_enq <- enquo(value_var)
@@ -43,7 +44,7 @@ spread2_in_nest <- function(df, key_var, value_var){
 #' 
 #' 
 #' 
-spread2_add_missing <- function(df, full_col){
+mutate_nested_if_missing <- function(df, full_col){
   
   nested_data <- names(df[,grepl("data$", names(df))])
   user_data <- df[[nested_data]]

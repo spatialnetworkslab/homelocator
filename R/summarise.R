@@ -5,7 +5,7 @@
 #' @param ... Variables or functions 
 #' 
 #' 
-summ_in_nest <- function(df, ...){
+summarise_nested <- function(df, ...){
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
@@ -46,7 +46,7 @@ summ_in_nest <- function(df, ...){
 #' 
 #' 
 #' 
-grpSumm_in_nest <- function(df, nest_cols, summary_vars){
+summarise_nested_by_group <- function(df, group_vars, summary_vars){
   
   if(nrow(df)==0){
     stop(paste(emo::ji("bomb"), "No user left, tune your treshold and try again."))
@@ -69,7 +69,7 @@ grpSumm_in_nest <- function(df, nest_cols, summary_vars){
   ori_cols_nm <- df[[nested_data]][[1]] %>% names()
   
   # double nest 
-  df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% nest(data = nest_cols))
+  df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% nest(data = group_vars))
  
   output <- df %>% mutate({{nested_data}} := purrr::map(df[[nested_data]], add_column))
   output_cols_nm <- output[[nested_data]][[1]] %>% names()

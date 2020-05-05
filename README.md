@@ -7,7 +7,7 @@ User's locations are important to many applications such as event detection, epi
 ``` devtools::build()```
 
 ### Install package 
-```devtools:install()```
+```devtools::install()```
 
 ### Load package 
 ``` Ctrl/Cmd + Shift + L``` or ```devtools::load_all()```

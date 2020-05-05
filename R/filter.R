@@ -6,7 +6,7 @@
 #' 
 #' 
 #' 
-filter_var <- function(df, filter_exp, user = "u_id"){
+filter_verbose <- function(df, filter_exp, user = "u_id"){
   
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
@@ -37,7 +37,7 @@ filter_var <- function(df, filter_exp, user = "u_id"){
 #' @param ... Variables or functions 
 #' 
 #' 
-filter_in_nest <- function(df, ...){
+filter_nested <- function(df, ...){
   
   filter_exp_enq <- enquos(...)
   nested_data <- names(df[,grepl("data", names(df))])
@@ -63,9 +63,10 @@ filter_in_nest <- function(df, ...){
   
   #check empty tibble 
   result <- output %>% 
-    mutate(empty_tb = purrr::map_lgl(output_data, plyr::empty)) %>% 
-    filter(empty_tb != T) %>% 
-    dplyr::select(-empty_tb)
+    filter(!(purrr::map_lgl(output_data, plyr::empty)))
+    # mutate(empty_tb = purrr::map_lgl(output_data, plyr::empty)) %>% 
+    # filter(empty_tb != T) %>% 
+    # dplyr::select(-empty_tb)
   
   left_users <- result[1] %>% dplyr::n_distinct()
   n_rm <- n_users - left_users

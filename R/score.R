@@ -9,8 +9,9 @@
 #' @param ... Variables or functions 
 #' 
 #' 
+#' Can we replace this with just mutate_nested? And potentially add transmute_nested counterpart?
 #' 
-score_var <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...){
+score_nested <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...){
   adds_exp_enq <- enquos(..., .named = TRUE)
   
   if (!rlang::has_name(df, user)) {
@@ -79,7 +80,7 @@ score_var <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F
 #' 
 #' 
 #' 
-sum_score <- function(df, user = "u_id", location = "grid_id", ...){
+score_summary <- function(df, user = "u_id", location = "grid_id", ...){
   
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
