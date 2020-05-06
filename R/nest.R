@@ -1,96 +1,134 @@
 #' Nest dataframe 
 #' 
-#' Nest dataframe by variable
+#' Nesting creates a list-column of dataframe
 #' @param df A dataframe 
-#' @param ... Variables or functions 
+#' @param ... A selection of columns. 
 #' 
 #' 
 nest_verbose <- function(df, ...){
+  
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
   }
   
-  nest_exp_enq <- enquos(..., .named = TRUE)
-  message("\n")
+  var_expr <- enquos(..., .named = TRUE)
+  
+  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
-  df %>%
-    nest_legacy(!!!nest_exp_enq)
+  output <- df %>% nest_legacy(!!!var_expr)
+  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  
+  return(output)
 }
 
-#' Nest dataframe 
-#' @param df A dataframe 
-#' @param ... Variables or functions 
+
+#' Unnest a list column
+#' 
+#' Unnesting makes each element of the list its own row.
+#' @param df A dataframe
+#' @param ... Specification of columns to unnest. 
+#' 
+#' 
+unnest_verbose <- function(df, ...){
+  
+  if (!is.data.frame(df)) {
+    stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
+  }
+  
+  var_expr <- enquos(..., .named = TRUE)
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
+  output <- suppressWarnings(
+    df %>% unnest_legacy(!!!var_expr)
+    )
+  message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  
+  return(output)
+}
+
+
+#' Nest nested dataframe 
+#' 
+#' Double nesting creates a list-column of nested dataframe
+#' @param df A nested dataframe 
+#' @param ... A selection of columns. 
 #' 
 #' 
 nest_double_nest <- function(df, ...){
-  if(!is.list(df[,grepl("data", names(df))])){
+  
+  if(!is.list(df[ , grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
   
-  nest_cols <- enquos(..., .named = TRUE)
-  nested_data <- names(df[,grepl("data", names(df))])
-  user_data <- df[[nested_data]]
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("data", names(df))])
 
   nest_with_progress <- function(data){
     pb$tick()$print()
     suppressWarnings(
-      unnest_col <- data %>%
-        nest_legacy(!!!nest_cols)
+      data %>% nest_legacy(!!!var_expr)
       )
   }
+  
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message(paste(emo::ji("hammer_and_wrench"), "Nesting..."))
+  pb <- dplyr::progress_estimated(nrow(df))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
   output <- df %>%
-    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~nest_with_progress(.)))
-  output
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
+  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  
+  return(output)
 }
 
-
-#' Unnest dataframe
-#' 
-#' @param df A dataframe
-#' @param ... Variables or functions 
-#' 
-#' 
-unnest_verbose <- function(df, ...){
-  if (!is.data.frame(df)) {
-    stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
-  }
-  
-  nest_exp_enq <- enquos(..., .named = TRUE)
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Unnesting..."))
-  
-  suppressWarnings(df %>%
-    unnest_legacy(!!!nest_exp_enq))
-}
 
 
 #' Nunest dataframe
 #' 
+#' Unnesting makes each element of the list its own row.
 #' @param df A nested dataframe
-#' @param ... Variables or functions 
+#' @param ... Specification of columns to unnest. 
 #' 
 #' 
 #' 
 unnest_double_nested <- function(df, ...){
+  
   if(!is.list(df[,grepl("data", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
-  nested_data <- names(df[,grepl("data", names(df))])
-  user_data <- df[[nested_data]]
+  
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("data", names(df))])
   
   unnest_with_progress <- function(data){
     pb$tick()$print()
-    suppressWarnings(unnest_col <- data %>% 
-        unnest_legacy())
+    suppressWarnings(
+      df %>% unnest_legacy(!!!var_expr)
+    )
   }
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Unnesting..."))
+  pb <- dplyr::progress_estimated(nrow(df))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
   output <- df %>%
-    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~unnest_with_progress(.)))
-  output
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
+  message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  
+  return(output)
 }
+
