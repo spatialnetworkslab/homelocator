@@ -1,6 +1,6 @@
 ---
-title: "homelocator"
-date: "`r Sys.Date()`"
+title: "homelocator" 
+date: "Last compiled on `r format(Sys.time(), '%d %b, %Y')`"
 author: Qingqing Chen, Ate Poorthuis
 output: rmarkdown::html_vignette
 vignette: >
@@ -23,11 +23,11 @@ library(homelocator)
 
 # Introduction
 
-The `homelocator` library is designed for identifying meaningful locations for users based on the spatial and temporal features contained within the mobility data, such as social media data, mobile phone data and so on.
+<p align="justify">The `homelocator` library is designed for identifying meaningful locations for users based on the spatial and temporal features contained within the mobility data, such as social media data, mobile phone data and so on.</p>
 
-The main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes' to identify the meaningful locations according to their research requirement and able to achieve an apples-to-apples comparison across the approaches. 
+<p align="justify">The main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes' to identify the meaningful locations according to their research requirement and able to achieve an apples-to-apples comparison across the approaches.</p>
 
-We hope that through packages and libraries like the one presented here, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.
+<p align="justify">We hope that through packages and libraries like the one presented here, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.</p>
 
 
 ```{r echo=FALSE, results='hide', message=F}
@@ -44,6 +44,8 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 load(here("data/test_sample.rda"))
+
+# show test sample 
 test_sample %>% head(3)
 ```
 
@@ -66,6 +68,8 @@ The `validate_dataset()` function in `validate_datset.R` script makes sure your 
 ```{r}
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", 
                                  location = "GEOID", keep_other_vars = FALSE)
+
+# show result 
 df_validated %>% head(3)
 ```
 
@@ -74,22 +78,24 @@ df_validated %>% head(3)
 
 The `nest_verbose()` and `unnest_verbose()` functions in `nest.R` script work in the same way as  [nest](https://www.rdocumentation.org/packages/tidyr/versions/0.8.3/topics/nest) and [unnest](https://www.rdocumentation.org/packages/tidyr/versions/0.8.3/topics/unnest) functions in [tidyverse](https://github.com/tidyverse/tidyverse) but with extra information of elapsed runing time. 
   
-  - `df`: A dataframe
-  - `...`: For `nest_verbose()` refers to selected columns to nest and for `unnest_verbose()` refers to list-column to unnest.
+  - `df`: a dataframe
+  - `...`: for `nest_verbose()` refers to selected columns to nest and for `unnest_verbose()` refers to list-column to unnest.
  
 
 ```{r}
 # nest data
 df_nested <- nest_verbose(df_validated, c("created_at", "GEOID"))
 
-# show nested dataframe 
+# show result 
 df_nested %>% head(3)
 
-# show data in nested list-column
+# show result 
 df_nested$data[[1]] %>% head(3)
 
 # unnest data
 df_unnested <- unnest_verbose(df_nested, data)
+
+# show result 
 df_unnested %>% head(3)
 ```
 
@@ -98,18 +104,18 @@ df_unnested %>% head(3)
 
 The `nest_double_nest()` and `unnest_double_nested()` functions in `nest.R` script work in the similar way as `nest_verbose()` and `unnest_verbose()` functions but they apply to nested dataframe. In another words, they map `nest` and `unnest` function to each element of a list.
   
-  - `df`: A nested dataframe
-  - `...`: For `nest_double_nest()` refers to selected columns to nest and for `unnest_double_nested()` refers to list-column to unnest.
+  - `df`: a nested dataframe
+  - `...`: for `nest_double_nest()` refers to selected columns to nest and for `unnest_double_nested()` refers to list-column to unnest.
  
 
 ```{r}
 # double nest data
-df_double_nested <- nest_double_nest(df_nested, c("created_at"))
+df_double_nested <- nest_double_nest(df_nested %>% head(100), c("created_at"))
 
-# show double nest dataframe
+# show result 
 df_double_nested %>% head(3)
 
-# shou data in double nested list-column
+# show result 
 df_double_nested$data[[1]] %>% head(3)
 
 df_double_nested$data[[1]]$data[[1]] %>% head(3)
@@ -119,8 +125,122 @@ df_double_unnested <- df_double_nested %>%
   head(100) %>%  ## take first 100 rows for example
   unnest_double_nested(., data) 
 
-# show unnest nested data 
+# show result 
 df_double_unnested %>% head(3)
 ```
+
+
+### Enrich timestamp 
+
+The `enrich_timestamp()` in `enrich_timestamp.R` script allows to derive new variables from timestamp column in each element of a list including: year, month, day, day of the week and hour of the day. The day of the week is a decimal number where 1 means Sunday and 7 means Saturday. 
+
+  - `df`: a nested dataframe
+  - `timestamp`: name of column that holds specific timestamp for each data point and it should be `POSIXct`
+  - `tz`: a character string containing the time zone to convert to and it should be recognized in R. The default `tz` is set to `Asia/Singapore`.
+
+```{r}
+# create new varialbes from "created_at" timestamp column 
+df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at", tz = "Asia/Singapore")
+
+# show result 
+df_enriched$data[[1]] %>% head(3)
+```
+
+
+
+### Summarize in nested and double nested dataframe 
+
+The `summarise_nested()` funciton in `summarise.R` script allows to aggregate multiple values to a single value of exisiting table by specified summary function for each element in a list.  `summarise_double_nested()` function create a new list-column inside existing list-column first and then aggregate multiple values in created list-column to a single value by name-value paired summary functions. 
+
+  - `df`: a nested dataframe 
+  - `nest_cols`: a selection of columns to nest in existing list-column
+  - `...`: name-value pairs of summary functions 
+
+```{r}
+# summarize in nested dataframe 
+df_summarize_nested <-summarise_nested(df_enriched, 
+                                       n_tweets = n(),
+                                       n_locs = n_distinct(GEOID))
+
+# show result 
+df_summarize_nested %>% head(3)
+
+# summarize in double nested dataframe (take first 100 users for example)
+df_summarize_double_nested <- summarise_double_nested(df_enriched %>% head(100), 
+                                                      nest_cols = c("created_at", "ymd"), 
+                                                      n_tweets = n(), n_days = n_distinct(ymd))
+
+# show result 
+df_summarize_double_nested[1, ]
+df_summarize_double_nested[1, ]$data[[1]] %>% head(3)
+```
+
+
+### Remove active users 
+
+The `remove_top_users()` funciton in `remove_top_users.R` script allows to remove top `N` percent of active users based on the total number of data points of users. Although the majority of users are real people, some users are accounts that are run by algorithms or 'bots', whereas others can be considered as spam accounts. So you can choose to remove certain top `N` percent of active users. 
+
+  - `df`: a dataframe with columns of user id, and data point counts 
+  - `user`: name of column that holds unique identifier for each user
+  - `counts`: name of column that holds the data points frequency for each user         
+  - `topNpct_user`: a decimal number that represent the certain percentage of users to remove
+
+```{r}
+# remove top 1% active users
+df_removed_active_users <- remove_top_users(df_summarize_nested, user = "u_id", 
+                                     counts = "n_tweets", topNpct_user = 1) 
+
+# show result 
+df_removed_active_users %>% head(3)
+```
+
+
+### Filter 
+
+The `filter_verbose()` function in `filter.R` script works in the same way as [filter](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/filter) function in [tidyverse](https://github.com/tidyverse/tidyverse) but with information of user numbers in the dataset. And the `filter_nested()` function works in the similar way as `filter_verbose()` but is applied in the list-column. 
+
+  - `df`: a dataframe with columns of user id, and variables that your are going to apply the filter function. If the column not in the dataset, you need to add that column before you apply the filter
+  - `user`: name of column that holds unique identifier for each user 
+  - `...`: Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
+
+```{r}
+# filter users with less than 10 tweets sent at less than 10 places 
+df_filtered <- filter_verbose(df_removed_active_users, user = "u_id", 
+                              n_tweets > 10 & n_locs > 10)
+
+# show result 
+df_filtered %>% head(3)
+
+# filter tweets that sent on weekends and during daytime (8am to 6pm)
+df_filter_nested <- filter_nested(df_filtered, user = "u_id", 
+                                  !wday %in% c(1, 7), # 1 means Sunday and 7 means Saturday
+                                  !hour %in% seq(8, 18, 1)) 
+
+# show result 
+df_filter_nested %>% head(3)
+
+df_filter_nested$data[[1]] %>% head(3)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
