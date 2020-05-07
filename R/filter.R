@@ -1,78 +1,89 @@
-#' Filter 
-#' Keep only users that meet certain preconditions
-#' @param df A nested dataframe grouped by user 
-#' @param filter_exp A certain condition to meet 
+#' Return rows with matching conditions 
+#' 
+#' Filter finds rows where conditions are true. 
+#' @param df A dataframe 
 #' @param user Name of column that holds unique identifier for each user
+#' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 #' 
 #' 
-#' 
-filter_verbose <- function(df, filter_exp, user = "u_id"){
+filter_verbose <- function(df, user = "u_id", ...){
   
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
   
   user <- rlang::sym(user) 
-  filter_exp_enq <- enquo(filter_exp)
+  var_expr <- enquos(...)
   
-  n_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
-  message("\n")
-  message(paste(emo::ji("locked"), "There are", n_users, "users at this moment."))
+  n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
+  message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
+  message(paste(emo::ji("hammer_and_wrench"), "Start filtering users..."))
   
   output <- df %>% 
-    filter({{filter_exp_enq}})
+    filter(!!!var_expr)
   
-  left_users <- output %>% pull({{user}}) %>% n_distinct()
-  n_rm <- n_users - left_users
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
-  output
+  n_new_users <- output %>% pull({{user}}) %>% n_distinct()
+  n_removed_users <- n_original_users - n_new_users
+  message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
+  message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left."))
+  
+  return(output)
 }
 
 
 
-#' Filter 
-#' Keep only users that meet certain preconditions
-#' @param df A nested dataframe grouped by user 
-#' @param ... Variables or functions 
+#' Return rows with matching condition in list-column 
+#' 
+#'   
+#' Filter finds rows where conditions are true in list-column
+#' @param df A nested dataframe 
+#' @param user Name of column that holds unique identifier for each user
+#' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 #' 
 #' 
-filter_nested <- function(df, ...){
+filter_nested <- function(df,  user = "u_id", ...){
   
-  filter_exp_enq <- enquos(...)
-  nested_data <- names(df[,grepl("data", names(df))])
-  user_data <- df[[nested_data]]
+  if(!is.list(df[ , grepl("data", names(df))])){
+    stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
+  }
+  
+  if (!rlang::has_name(df, user)) {
+    stop(paste(emo::ji("bomb"), "User column does not exist!"))
+  }
+  
+  var_expr <- enquos(...)
+  user <- rlang::sym(user) 
+  colname_nested_data <- names(df[,grepl("data", names(df))])
   
   #filter
   filter_with_progress <- function(data){
     pb$tick()$print()
-    to_filter <- data %>% 
-      filter(!!!filter_exp_enq)
+    data %>% 
+      filter(!!!var_expr)
   }
   
-  n_users <- df[1] %>% dplyr::n_distinct()
-  message(paste(emo::ji("locked"), "There are", n_users, "users at this moment."))
-  message(paste(emo::ji("hammer_and_wrench"), "Filtering...")) 
+  n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
+  message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
+  message(paste(emo::ji("hammer_and_wrench"), "Start filtering user...")) 
   
-  pb <- dplyr::progress_estimated(length(user_data))
-  #map filter on nested data
+  # create the progress bar
+  pb <- dplyr::progress_estimated(nrow(df))
+  
   output <- df %>% 
-    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~filter_with_progress(.))) 
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~filter_with_progress(.))) 
   
-  output_data <- output[[nested_data]]
+  output_data <- output[[colname_nested_data]]
   
   #check empty tibble 
-  result <- output %>% 
+  output <- output %>% 
     filter(!(purrr::map_lgl(output_data, plyr::empty)))
-    # mutate(empty_tb = purrr::map_lgl(output_data, plyr::empty)) %>% 
-    # filter(empty_tb != T) %>% 
-    # dplyr::select(-empty_tb)
-  
-  left_users <- result[1] %>% dplyr::n_distinct()
-  n_rm <- n_users - left_users
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Filter out", n_rm, "users, and there are", left_users, "users left.\n"))
-  result
+    
+  n_new_users <- output %>% pull({{user}}) %>% dplyr::n_distinct()
+  n_removed_users <- n_original_users - n_new_users
+  message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
+  message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left!"))
+ 
+  return(output)
 }
 
 
