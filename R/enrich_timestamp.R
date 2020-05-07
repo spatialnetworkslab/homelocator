@@ -3,7 +3,7 @@
 #' Create new variables from existing timestamp
 #' @param df A nested dataframe 
 #' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct
-#' @param tz Time zone of timestamp 
+#' @param tz A character string containing the time zone to convert to and it should be recognized in R. 
 #' 
 #' 
 enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"){
@@ -27,7 +27,7 @@ enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"
              month = lubridate::month({{timestamp}}),
              day = lubridate::day({{timestamp}}),
              wday = lubridate::wday({{timestamp}}), # day of the week
-             hour = lubridate::hour({{timestamp}}), #hour of the day
+             hour = lubridate::hour({{timestamp}}), # hour of the day
              ymd = as.Date({{timestamp}}, tz = tz))
   }
 

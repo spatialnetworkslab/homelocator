@@ -13,7 +13,6 @@ summarise_nested <- function(df, ...){
   var_expr <- enquos(..., .named = TRUE)
   colname_nested_data <- names(df[ , grepl("data", names(df))])
   
-  # define reading function which includes the progress bar
   summarise_with_progress <- function(data){
     pb$tick()$print()
     data %>% summarise(!!!var_expr)
