@@ -1,81 +1,92 @@
-#' Computed variables
+#' Aggregate multiple values to a single value 
 #' 
-#' Add needed variables as you want 
+#' Aggregate multiple values to a single value of existing table by name-value paired summary function
 #' @param df A nested dataframe 
-#' @param ... Variables or functions 
+#' @param ... Name-value pairs of summary functions.
 #' 
 #' 
 summarise_nested <- function(df, ...){
-  if(!is.list(df[,grepl("data", names(df))])){
-    stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
+  if(!is.list(df[ , grepl("data", names(df))])){
+    stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
   }
 
-  adds_exp_enq <- enquos(..., .named = TRUE)
-  nested_data <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data]]
-  ori_cols <- names(df)
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("data", names(df))])
   
   # define reading function which includes the progress bar
   summarise_with_progress <- function(data){
     pb$tick()$print()
-    summarise_cols <- data %>% 
-      summarise(!!!adds_exp_enq)
+    data %>% summarise(!!!var_expr)
   }
-  #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Summarise variables in nested dataset..."))
-  
+  # create the progress bar
+  pb <- dplyr::progress_estimated(nrow(df))
+
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values in nested dataset..."))
   output <- df %>%
-    mutate(adds = purrr::map(df[[nested_data]], ~summarise_with_progress(.))) %>%
+    mutate(adds = purrr::map(df[[colname_nested_data]], ~summarise_with_progress(.))) %>%
     unnest_legacy(adds)
-  new_cols <- names(output)
-  added_cols <- dplyr::setdiff(new_cols, ori_cols) 
-  added_cols_nm <- added_cols %>% paste(., collapse = ", ")
-  message(paste("\n", emo::ji("white_check_mark"), "After summarising, there are", length(added_cols), "new added variables:", added_cols_nm))
-  output
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  colnames_original <- names(df)
+  colnames_new <- names(output)
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original) 
+  message(paste(emo::ji("white_check_mark"), "Finish summarising! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Summarising time:", time.taken, "mins"))
+  
+  return(output)
 }
 
 
-#' Computed variables by group
+#' Aggregate multiple values to a single value 
 #' 
-#' Add needed variables by group 
+#' Create a list-column in existing list-column and aggregate multiple values in created list-column to a single value by name-value paired summary function
 #' @param df A nested dataframe 
-#' @param nest_cols Variables to be nested 
-#' @param summary_vars Summarise expression
+#' @param nest_cols A selection of columns to nest in existing list-column
+#' @param ... Name-value pairs of summary functions
 #' 
 #' 
 #' 
-summarise_nested_by_group <- function(df, group_vars, summary_vars){
+summarise_double_nested <- function(df, nest_cols, ...){
   
-  if(nrow(df)==0){
-    stop(paste(emo::ji("bomb"), "No user left, tune your treshold and try again."))
+  if(nrow(df) == 0){
+    stop(paste(emo::ji("bomb"), "No user left, tune your threshold and try again."))
   }
   
   stopifnot(
-    is.list(summary_vars),
-    is.list(df[,grepl("data", names(df))])
+    is.list(df[ , grepl("data", names(df))])
   )
   
-  cal_column <- . %>% 
-    summarise(!!!summary_vars)
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("data", names(df))])
+  
+  cal_column <- . %>% summarise(!!!var_expr)
   
   add_column <- . %>% 
       mutate(adds = purrr::map(data, cal_column)) %>% 
       unnest_legacy(adds) 
   
-  
-  nested_data <- names(df[,grepl("data", names(df))])
-  ori_cols_nm <- df[[nested_data]][[1]] %>% names()
-  
   # double nest 
-  df[[nested_data]] <- purrr::map(df[[nested_data]], ~.x %>% nest(data = group_vars))
- 
-  output <- df %>% mutate({{nested_data}} := purrr::map(df[[nested_data]], add_column))
-  output_cols_nm <- output[[nested_data]][[1]] %>% names()
-  output_cols_nm <- output_cols_nm[-which(output_cols_nm == "data")]
-  add_cols_nm <- setdiff(output_cols_nm, ori_cols_nm)
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "New added variable:", add_cols_nm, "\n"))
-  output
+  df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values in nested dataset..."))
+  output <- df %>% 
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  
+  colnames_original <- df[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- output[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- colnames_new[-which(colnames_new == "data")]
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
+  message(paste(emo::ji("white_check_mark"), "Finish summarising! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Summarising time:", time.taken, "mins"))
+  
+  return(output)
 }
+
+
+
