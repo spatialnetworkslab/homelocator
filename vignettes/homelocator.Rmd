@@ -158,9 +158,9 @@ The `summarise_nested()` funciton in `summarise.R` script allows to aggregate mu
 
 ```{r}
 # summarize in nested dataframe 
-df_summarize_nested <-summarise_nested(df_enriched, 
-                                       n_tweets = n(),
-                                       n_locs = n_distinct(GEOID))
+df_summarize_nested <- summarise_nested(df_enriched, 
+                                        n_tweets = n(),
+                                        n_locs = n_distinct(GEOID))
 
 # show result 
 df_summarize_nested %>% head(3)
@@ -188,7 +188,7 @@ The `remove_top_users()` funciton in `remove_top_users.R` script allows to remov
 ```{r}
 # remove top 1% active users
 df_removed_active_users <- remove_top_users(df_summarize_nested, user = "u_id", 
-                                     counts = "n_tweets", topNpct_user = 1) 
+                                            counts = "n_tweets", topNpct_user = 1) 
 
 # show result 
 df_removed_active_users %>% head(3)
@@ -223,24 +223,47 @@ df_filter_nested$data[[1]] %>% head(3)
 ```
 
 
+### Mutate 
+
+
+```{r}
+## let's use pre-discussed functions to filter some users first 
+colnmaes_data <- df_filtered$data[[1]] %>% names()
+colnmaes_to_nest <- colnmaes_data[-which(data_cols_nm == "GEOID")] 
+
+df_cleaned <- df_filtered %>% 
+  summarise_double_nested(., nest_cols = colnmaes_to_nest,
+                          n_tweets_loc = n(), # number of tweets sent at each location
+                          n_hrs_loc = n_distinct(hour), # number of unique hours of sent tweets 
+                          n_days_loc = n_distinct(ymd), # number of unique days of sent tweets 
+                          period_loc = as.numeric(max(created_at) - min(created_at), "days")) %>% # period of tweeting 
+  unnest_verbose(data) %>% 
+  filter_verbose(., user = "u_id",
+                 n_tweets_loc > 10 & n_hrs_loc > 10 & n_days_loc > 10 & period_loc > 10) 
+  
+# show cleaned dataset 
+df_cleaned %>% head(3)
+
+# ok, then let's apply the mutate_nested function to add four new variables: wd_or_wk, time_numeric, rest_or_work, wk.am_or_wk.pm
+df_expanded <- df_cleaned %>% 
+  mutate_nested(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday"),
+                time_numeric = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600, 
+                rest_or_work = if_else(time_numeric >= 9 & time_numeric <= 18, "work", "rest"), 
+                wk.am_or_wk.pm = if_else(time_numeric >= 6 & time_numeric <= 12 & wd_or_wk == "weekend", "weekend_am", "weekend_pm")) 
+
+# show result 
+df_mutated %>% head(3)
+```
 
 
 
+```{r}
+# calculate proportion of categories for four variables: wd_or_wk, rest_or_work, wk.am_or_wk.pm
+df_expanded <- df_expanded %>% 
+  prop_factor_nested(wd_or_wk, rest_or_work, wk.am_or_wk.pm) 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# show result 
+df_mutated %>% head(3)
+```
 
 
