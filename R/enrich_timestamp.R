@@ -7,12 +7,11 @@
 #' 
 #' 
 enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"){
-  
-  if(!is.list(df[ , grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Input dataset is not nested!"))
   }
   
-  colname_nested_data <- names(df[,grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   timestamp <- rlang::sym(timestamp)
  
   if(!is(df[[colname_nested_data]][[1]] %>% pull({{timestamp}}), "POSIXct")){
@@ -37,6 +36,7 @@ enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"
   message(paste(emo::ji("hammer_and_wrench"), "Enriching variables from timestamp..."))
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~enrich_with_progress(.)))
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, ymd."))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)

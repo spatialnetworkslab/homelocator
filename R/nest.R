@@ -45,6 +45,7 @@ unnest_verbose <- function(df, ...){
   output <- suppressWarnings(
     df %>% unnest_legacy(!!!var_expr)
     )
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
@@ -63,12 +64,12 @@ unnest_verbose <- function(df, ...){
 #' 
 nest_double_nest <- function(df, ...){
   
-  if(!is.list(df[ , grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
   
   var_expr <- enquos(..., .named = TRUE)
-  colname_nested_data <- names(df[ , grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
 
   nest_with_progress <- function(data){
     pb$tick()$print()
@@ -84,6 +85,7 @@ nest_double_nest <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
@@ -104,12 +106,12 @@ nest_double_nest <- function(df, ...){
 #' 
 unnest_double_nested <- function(df, ...){
   
-  if(!is.list(df[,grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
   }
   
   var_expr <- enquos(..., .named = TRUE)
-  colname_nested_data <- names(df[ , grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
   unnest_with_progress <- function(data){
     pb$tick()$print()
@@ -124,6 +126,7 @@ unnest_double_nested <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)

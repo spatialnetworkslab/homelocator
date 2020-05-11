@@ -8,7 +8,7 @@
 #' @param keep_other_vars Option to keep or remove other variables of the input dataset
 #' 
 
-validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = F){
+validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", keep_other_vars = F){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }

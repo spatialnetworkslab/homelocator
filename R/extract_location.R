@@ -9,19 +9,20 @@
 #' @param location Name of column that holds unique identifier for each location
 #' 
 
-extract_location <- function(df, score_var, user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F){
+extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc = 1, keep_score = F, ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
   
   user <- rlang::sym(user) 
   location <- rlang::sym(location)
-  nested_data <- names(df[,grepl("data", names(df))])
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
   get_loc_with_progress <- function(data){
     pb$tick()$print()
     get_loc <- data %>%
-      dplyr::arrange(desc(!!!score_var)) %>% 
+      dplyr::arrange(desc(!!!var_expr)) %>% 
       slice(1:show_n_loc) %>%
       pull({{location}}) 
     if(show_n_loc == 1){
@@ -30,27 +31,28 @@ extract_location <- function(df, score_var, user = "u_id", location = "grid_id",
       paste(get_loc, collapse = "; ")
     }
   }
-  #create the progress bar
+  # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Identifying homes..."))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start extracting homes for users..."))
   
   if(keep_score){
     output <- df %>%
-      mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
-      unnest(home) 
-    n_user <- output %>% pull(!!user) %>% n_distinct()
-    message("\n")
-    message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
+      mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) 
   } else{
     output <- df %>%
-      mutate(home = purrr::map(df[[nested_data]], get_loc_with_progress)) %>%
-      dplyr::select(-nested_data) %>%
-      unnest(home) %>% 
+      mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) %>%
+      dplyr::select(-colname_nested_data) %>%
       dplyr::select({{user}}, home)
-    n_user <- output %>% pull(!!user) %>% n_distinct()
-    message("\n")
-    message(paste0(emo::ji("tada"), "Congratulations!! Your have found ", n_user, " users' potential home(s)."))
   }
-  output
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  n_user <- output %>% pull(!!user) %>% n_distinct()
+  message("\n")
+  message(paste(emo::ji("tada"), "Congratulations!! Your have found", n_user, "users' potential home(s)."))
+  message(paste(emo::ji("hourglass"), "Extracting time:", time.taken, "mins"))
+  
+  return(output)
 }

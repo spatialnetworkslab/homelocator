@@ -15,6 +15,7 @@ mutate_verbose <- function(df, ...){
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start adding..."))
   output <- df %>% mutate(!!!var_expr)
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish adding!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
@@ -23,7 +24,7 @@ mutate_verbose <- function(df, ...){
   return(output)
 }
 
-#' Add new variables from list-column
+#' Add new variables in list-column
 #' 
 #' Add new variables and preserves existing from list-column
 #' @param df A nested dataframe 
@@ -32,12 +33,12 @@ mutate_verbose <- function(df, ...){
 
 mutate_nested <- function(df, ...){
   
-  if(!is.list(df[ , grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
   }
   
   var_expr <- enquos(..., .named = TRUE)
-  colname_nested_data <- names(df[ , grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
 
   add_with_progress <- function(data){
     pb$tick()$print()
@@ -55,6 +56,7 @@ mutate_nested <- function(df, ...){
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~add_with_progress(.))) 
   
   end.time <- Sys.time()
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish adding!"))
   
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
@@ -77,12 +79,12 @@ mutate_nested <- function(df, ...){
 #' 
 prop_factor_nested <- function(df, ...){
   
-  if(!is.list(df[ , grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
   }
   
   var_expr <- enquos(...)
-  colname_nested_data <- names(df[ , grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
 
   add_with_progress <- function(data){
     pb$tick()$print()
@@ -111,6 +113,7 @@ prop_factor_nested <- function(df, ...){
     replace(., is.na(.), 0)
   
   end.time <- Sys.time()
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish calculating!"))
   
   colnames_original <- names(df)

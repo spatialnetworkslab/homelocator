@@ -7,13 +7,13 @@
 #' @param counts Name of column that holds the data points frequency for each user         
 #' @param topNpct_user A decimal number that represent the certain percentage of users to remove
 
-remove_top_users <- function(df, user = "u_id", counts = "n_tweets", topNpct_user = 1){
+remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_user = 1){
   
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
   if (!rlang::has_name(df, counts)) {
-    stop(paste(emo::ji("bomb"), "The column of tweets counts for each user does not exist!"))
+    stop(paste(emo::ji("bomb"), "The column of counts of data points for each user does not exist!"))
   }
   
   user <- rlang::sym(user) 

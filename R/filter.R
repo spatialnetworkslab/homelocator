@@ -43,7 +43,7 @@ filter_verbose <- function(df, user = "u_id", ...){
 #' 
 filter_nested <- function(df,  user = "u_id", ...){
   
-  if(!is.list(df[ , grepl("data", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
   }
   
@@ -53,7 +53,7 @@ filter_nested <- function(df,  user = "u_id", ...){
   
   var_expr <- enquos(...)
   user <- rlang::sym(user) 
-  colname_nested_data <- names(df[,grepl("data", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
   #filter
   filter_with_progress <- function(data){
