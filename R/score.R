@@ -2,18 +2,15 @@
 #' 
 #' Add score of each variables 
 #' @param df A nested dataframe by user
-#' @param group_var Variable to be grouped 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
-#' @param keep_ori_vars Choice to keep original variables or not
-#' @param ... Variables or functions 
+#' @param keep_ori_vars Option to keep or drop original varialbes 
+#' @param ... Name-value pairs of expression
 #' 
 #' 
 #' Can we replace this with just mutate_nested? And potentially add transmute_nested counterpart?
 #' 
-score_nested <- function(df, user = "u_id", location = "grid_id", keep_ori_vars = F, ...){
-  adds_exp_enq <- enquos(..., .named = TRUE)
-  
+score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_vars = F, ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
@@ -21,19 +18,20 @@ score_nested <- function(df, user = "u_id", location = "grid_id", keep_ori_vars 
   if (!rlang::has_name(df, location)) {
     stop(paste(emo::ji("bomb"), "Location column does not exist!"))
   }
+  
+  var_expr <- enquos(..., .named = TRUE)
   user <- rlang::sym(user) 
   location <- rlang::sym(location)
   
   df_nest <- df %>%
     nest_legacy(-({{user}}))
   
-  nested_data_nm <- names(df_nest[,grepl("data$", names(df_nest))])
-  user_data <- df_nest[[nested_data_nm]]
+  colname_nested_data <- names(df_nest[ , grepl("^data$", names(df_nest))])
   
   transmute_with_progress <- function(data){
     pb$tick()$print()
     transmute_column <- data %>% 
-      transmute(!!!adds_exp_enq)
+      transmute(!!!var_expr)
     
     data %>% 
       dplyr::select({{location}}) %>% 
@@ -42,73 +40,85 @@ score_nested <- function(df, user = "u_id", location = "grid_id", keep_ori_vars 
   
   add_with_progress <- function(data){
     pb$tick()$print()
-    add_column <- data %>% 
-      mutate(!!!adds_exp_enq)
+    data %>% 
+      mutate(!!!var_expr)
   }
   
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Scoring variables..."))
+  pb <- dplyr::progress_estimated(nrow(df))
+ 
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start scoring ..."))
   
-  if(keep_ori_vars){
-    output <- df_nest %>% mutate({{nested_data_nm}} := purrr::map(df_nest[[nested_data_nm]], ~add_with_progress(.)))
-    
-    ori_cols <- df_nest[[nested_data_nm]][[1]] %>% names()
-    new_cols <- output[[nested_data_nm]][[1]] %>% names()
-    added_cols <- dplyr::setdiff(new_cols, ori_cols) %>% paste(., collapse = ", ")
-    message(paste("\n", emo::ji("white_check_mark"), "Scored variables:", added_cols))
-    output
+  if(keep_original_vars){
+    output <- df_nest %>% 
+      mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~add_with_progress(.)))
   }else{
-    output <- df_nest %>% mutate({{nested_data_nm}} := purrr::map(df_nest[[nested_data_nm]], ~transmute_with_progress(.)))
-    add_cols <- output[[nested_data_nm]][[1]] %>% names()
-    added_cols <- add_cols[-which(add_cols == location)] %>% paste(., collapse = ", ")
-    message("\n")
-    message(paste(emo::ji("white_check_mark"), "Scored variables:", added_cols))
-    output
+    output <- df_nest %>% 
+      mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~transmute_with_progress(.)))
   }
+  
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  colnames_original <- df_nest[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- output[[colname_nested_data]][[1]] %>% names()
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish scoring! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Scoring time:", time.taken, "mins"))
+  
+  return(output)
 }
 
 
-#' sum scored variables 
+#' Sum up scores 
 #' 
-#' Sum up scored variables 
+#' Sum up scores of variables for each location
 #' @param df A  dataframe 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
-#' @param ... Variables or functions 
+#' @param ... A selection of columns to sum
 #' 
 #' 
-#' 
-score_summary <- function(df, user = "u_id", location = "grid_id", ...){
-  
+score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
   
   user <- rlang::sym(user) 
   location <- rlang::sym(location)
-  adds_exp_enq <- enquos(..., .named = TRUE)
+  var_expr <- enquos(...)
   
-  nested_data_nm <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data_nm]]
-  
+  colname_nested_data <- names(df[,grepl("^data$", names(df))])
+ 
   sum_score_with_progress <- function(data){
     pb$tick()$print()
-    data_sub <- data %>% dplyr::select(c({{location}}, !!!adds_exp_enq)) 
+    data_sub <- data %>% dplyr::select({{location}}, !!!var_expr) 
     
-    loc_index <- which(colnames(data_sub) == location)
-    loc <- data_sub %>% dplyr::select({{location}})
-    sum_score <- data_sub %>% mutate(score = rowSums(.[ , -c(loc_index)]))
-    sum_score
+    location_index <- which(colnames(data_sub) == location)
+    data_sub %>% 
+      mutate(score = rowSums(.[ , -c(location_index)]))
   }
    
-  #create the progress bar
+  # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Sum scores..."))
   
-  df %>% mutate(data = purrr::map(user_data, ~sum_score_with_progress(.)))
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start summing scores..."))
+  output <- df %>% 
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~sum_score_with_progress(.)))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  colnames_original <- df[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- output[[colname_nested_data]][[1]] %>% names()
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish summing! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Summing time:", time.taken, "mins"))
+  
+  return(output)
 }
 
 
