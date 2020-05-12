@@ -116,7 +116,7 @@ unnest_double_nested <- function(df, ...){
   unnest_with_progress <- function(data){
     pb$tick()$print()
     suppressWarnings(
-      df %>% unnest_legacy(!!!var_expr)
+      data %>% unnest_legacy(!!!var_expr)
     )
   }
   #create the progress bar
@@ -125,7 +125,9 @@ unnest_double_nested <- function(df, ...){
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.))) %>% 
+    unnest_legacy()
+  
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
   end.time <- Sys.time()
@@ -134,4 +136,15 @@ unnest_double_nested <- function(df, ...){
   
   return(output)
 }
+
+
+
+
+
+
+
+
+
+
+
 
