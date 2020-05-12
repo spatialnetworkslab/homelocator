@@ -27,14 +27,26 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   ## Derive new variables from timestamp
   df_enriched <- enrich_timestamp(df_nested, timestamp = timestamp, tz = tz)
   
+  ## recipe: HMLC
   if(recipe == "HMLC"){
-    recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score)
+    locations <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score)
   } 
-  
+  ## recipe: FREQ
   if(recipe == "FREQ"){
-    recip_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
+    locations <- recip_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
   }
+  ## recipe: OSNA
+  if(recipe == "OSNA"){
+    locations <- recip_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
+  }
+  ## recipe: APDM
+  
+  if(recipe == "APDM"){
+    
+  }
+  return(locations)
 }
+
 
 
 # recipe: homelocator - HMLC
@@ -178,6 +190,67 @@ recip_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "
   # extract locations based on frequency of data points sent on locations
   df_match_loc_condition %>% 
     extract_location(., user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, n_points_loc)
+}
+
+
+# recipe: Online Social Networks Activity - OSNA
+recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
+  
+  user_expr <- rlang::sym(user)
+  timestamp_expr <- rlang::sym(timestamp)
+  location_expr <- rlang::sym(location)
+  
+  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold == "Yes"){
+    topNpct <- 1
+    threshold_n_locs <- 3
+  } else{
+    topNpct <- readline(prompt="How many percentage of top active users to be removed (default = 1)? Your answer: ") %>% as.integer()
+    threshold_n_locs <- readline(prompt="What is the minumn number of unique places should data points be collected from (default = 3)? Your answer: ") %>% as.integer()
+  }
+  # users level 
+  ## pre-condition set on users 
+  df_match_user_condition <- df %>%
+    summarise_nested(., 
+                     n_points = n(),
+                     n_locs = n_distinct({{location_expr}})) %>% 
+    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct) %>% # remove top N percent active users based on frequency
+    filter_verbose(., user = user, n_locs > threshold_n_locs) %>% # remove users with data at less than N places 
+    filter_nested(., user = user, !wday %in% c(1, 7)) %>%  # remove data sent on weekend, 1 for Sunday and 7 for Saturday 
+    mutate_nested(timeframe = if_else(hour >= 2 & hour < 8, "Rest", if_else(hour >= 8 & hour < 19, "Active", "Leisure"))) %>% # add time frame column 
+    filter_nested(., user = user, timeframe != "Active") # home location is focused on Rest and Leisure time frame
+  
+  ## calculate weighted score of data points sent during Leisure and Rest time in different day at different places 
+  colnames_nested_data <- df_match_user_condition$data[[1]] %>% names()
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("GEOID", "ymd", "timeframe"))] # per location per day per timeframe 
+  
+  df_timeframe_nested <- df_match_user_condition %>%
+    summarise_double_nested(., nest_cols = colnmaes_to_nest, 
+                            n_points_timeframe = n()) %>%  # number of data points at the timeframe 
+    spread_nested(., var_key = "timeframe", var_value = "n_points_timeframe") %>% # spread the timeframe to columns 
+    unnest_verbose() %>% # unnest the result, missed column will be automatically added with NA value
+    replace(., is.na(.), 0)  # replace NA with 0
+  
+  # give the weigh to Rest and Leisure time 
+  weight_rest <- mean(0.744, 0.735, 0.737)
+  weight_leisure <- mean(0.362, 0.357, 0.354)
+  
+  df_weighted <- df_timeframe_nested %>% 
+    mutate_verbose(score_ymd_loc = weight_rest * Rest + weight_leisure * Leisure) 
+  
+  # nest by user 
+  df_user_nested <- df_weighted %>% nest_verbose(-u_id) 
+  
+  # calculate the score per location 
+  colnames_nested_data <- df_user_nested$data[[1]] %>% names()
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data == location)] # nest by location 
+  
+  df_scored <- df_user_nested %>% 
+    summarise_double_nested(., nest_cols = colnmaes_to_nest, 
+                            score = sum(score_ymd_loc))
+  
+  # extract location based on score value 
+  extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
 }
 
 
