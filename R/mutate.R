@@ -37,7 +37,7 @@ mutate_nested <- function(df, ...){
     stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
   }
   
-  var_expr <- enquos(..., .named = TRUE)
+  var_expr <- enquos(...)
   colname_nested_data <- names(df[ , grepl("^data$", names(df))])
 
   add_with_progress <- function(data){
@@ -128,43 +128,64 @@ prop_factor_nested <- function(df, ...){
 }
 
 
-#' Mutate inside nested data, but doing so per group 
+#' Add new variable 
 #' 
-#' Add variables as you want/needed 
+#' Add new variable in double nested dataset
 #' @param df A dataframe 
-#' @param group_var The variable to be grouped 
-#' @param mutate_vars The variables you want to add to the dataframe
+#' @param nest_cols A selection of columns to nest in existing list-column
+#' @param ... Name-value pairs of functions
 #' 
-# mutate_nested_by_group <- function(df, group_vars, mutate_vars){
-#   
-#   stopifnot(
-#     is.list(group_vars),
-#     is.list(mutate_vars)
-#   )
-#   
-#   colname_nested_data <- names(df[,grepl("data", names(df))])
-# 
-#   add_bygrp_with_progress <- function(data){
-#     pb$tick()$print()
-#     add_bygrp <- data %>% 
-#       group_by(!!!group_vars) %>%
-#       mutate(!!!mutate_vars) %>%
-#       ungroup() 
-#   }
-#   pb <- dplyr::progress_estimated(nrow(df))
-#   message("\n")
-#   message(paste(emo::ji("hammer_and_wrench"), "Creating variable..."))
-#   
-#   output <- df %>% 
-#     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~add_bygrp_with_progress(.))) 
-#   
-#   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
-#   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
-#   colnames_added <- dplyr::setdiff(colnames_new, colnames_original) %>% paste(., collapse = ", ")
-#   
-#   message("\n")
-#   message(paste(emo::ji("white_check_mark"), "New added variables:", colnames_added))
-#   output
-# }
+mutate_double_nested <- function(df, nest_cols, ...){
+
+  if(nrow(df) == 0){
+    stop(paste(emo::ji("bomb"), "No user left, tune your threshold and try again."))
+  }
+  
+  stopifnot(
+    is.list(df[ , grepl("^data$", names(df))])
+  )
+  
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
+
+  add_variable <- . %>% mutate(!!!var_expr)
+  add_column <- . %>% 
+    mutate(data = purrr::map(data, add_variable)) 
+  
+  
+  # double nest 
+  df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start adding values..."))
+  output <- df %>% 
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  
+  colnames_original <- df[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- output[[colname_nested_data]][[1]] %>% names()
+  colnames_new <- colnames_new[-which(colnames_new == "data")]
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish adding!"))
+  message(paste(emo::ji("white_check_mark"), "There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  
+  return(output)
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
