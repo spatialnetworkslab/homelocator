@@ -44,6 +44,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 load(here("data/test_sample.rda"))
+test_sample <- test_sample %>% mutate(GEOID = as.character(GEOID))
 
 # show test sample 
 test_sample %>% head(3)
@@ -225,11 +226,27 @@ df_filter_nested$data[[1]] %>% head(3)
 
 ### Mutate 
 
+The `mutate_verbose()` function in `filter.R` script works in the same way as [mutate](https://www.rdocumentation.org/packages/dplyr/versions/0.5.0/topics/mutate) function in [tidyverse](https://github.com/tidyverse/tidyverse) but with information of function running time. 
+
+  - `df`: a dataframe 
+  - `...`: name-value pairs of expressions
+
+
+Function `mutate_nested()` works in the similar way as `mutate_verbose()` but it add new variables inside the list-column. 
+
+  - `df`: a nested dataframe 
+  - `...`: name-value pairs of expressions
+
+And function `prop_factor_nested()` allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. 
+
+  - `df`: a nested dataframe 
+  - `var`: name of column to calculate inside the list-column
+
 
 ```{r}
 ## let's use pre-discussed functions to filter some users first 
 colnmaes_data <- df_filtered$data[[1]] %>% names()
-colnmaes_to_nest <- colnmaes_data[-which(data_cols_nm == "GEOID")] 
+colnmaes_to_nest <- colnmaes_data[-which(colnmaes_data == "GEOID")] 
 
 df_cleaned <- df_filtered %>% 
   summarise_double_nested(., nest_cols = colnmaes_to_nest,
@@ -252,7 +269,7 @@ df_expanded <- df_cleaned %>%
                 wk.am_or_wk.pm = if_else(time_numeric >= 6 & time_numeric <= 12 & wd_or_wk == "weekend", "weekend_am", "weekend_pm")) 
 
 # show result 
-df_mutated %>% head(3)
+df_expanded %>% head(3)
 ```
 
 
@@ -263,7 +280,128 @@ df_expanded <- df_expanded %>%
   prop_factor_nested(wd_or_wk, rest_or_work, wk.am_or_wk.pm) 
 
 # show result 
-df_mutated %>% head(3)
+df_expanded %>% head(3)
 ```
+
+
+### Score 
+
+The `score_nested()` function in `score.R` script allows you to give a weighted value for a varialbe in a nested dataframe. 
+
+  - `df`: a nested dataframe by user 
+  - `user`: name of column that holds unique identifier for each user
+  - `location`: name of column that holds unique identifier for each location
+  - `keep_ori_vars`: option to keep or drop original varialbes 
+  - `...`: name-value pairs of expression 
+
+The `score_summary()` function summarises all scored columns and return one single value per row. 
+  
+  - `df`: a dataframe 
+  - `user`: name of column that holds unique identifier for each user
+  - `location`: name of column that holds unique identifier for each location
+  - `...`: name of scored columns 
+
+
+```{r}
+## let's add two more variables before we do the scoring 
+df_expanded <- df_expanded %>% 
+  summarise_nested(n_wdays_loc = n_distinct(wday),
+                   n_months_loc = n_distinct(month))
+
+df_expanded %>% head(3)
+
+df_scored <- df_expanded %>% 
+  score_nested(., user = "u_id", location = "GEOID", keep_ori_vars = F,
+               s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
+               s_n_hrs_loc = 0.1 * (n_hrs_loc/24), 
+               s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
+               s_period_loc = 0.1 * (period_loc/max(period_loc)),
+               s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
+               s_n_months_loc = 0.1 * (n_months_loc/12),
+               s_weekend = 0.1 * (weekend),
+               s_rest = 0.2 * (rest),
+               s_wk_am = 0.1 * (weekend_am))
+
+df_scored %>% head(3)
+df_scored$data[[1]]
+
+### we can replace the score function by mutate function 
+
+df_scored_2 <- df_expanded %>% 
+  nest_verbose(-u_id) %>% 
+  mutate_nested(s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
+                s_n_hrs_loc = 0.1 * (n_hrs_loc/24), 
+                s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
+                s_period_loc = 0.1 * (period_loc/max(period_loc)),
+                s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
+                s_n_months_loc = 0.1 * (n_months_loc/12),
+                s_weekend = 0.1 * (weekend),
+                s_rest = 0.2 * (rest),
+                s_wk_am = 0.1 * (weekend_am))
+
+df_scored_2 %>% head(3)
+df_scored_2$data[[1]]
+```
+
+
+```{r}
+# sum varialbes score for each location 
+df_score_summed <- df_scored %>% 
+  score_summary(., user = "u_id", location = "GEOID", starts_with("s_"))
+
+df_score_summed %>% head(3)
+df_score_summed$data[[3]]
+```
+
+
+
+### Extract locations 
+
+The `extract_location()` function in `extract_location.R` script allows you to sort the locations of each each user based on descending value of selected column, and return the top N location(s) for each user. The extracted locations thus be treated as the most possible home location of the user. 
+
+  - `df`: a nested dataframe by user 
+  - `user`: name of column that holds unique identifier for each user
+  - `location`: name of column that holds unique identifier for each location
+  - `show_n_loc`: a single number that decides the number of locations to be extracted 
+  - `keep_score`: option to keep or remove columns with scored value 
+  - `...`: name of column(s) that used to sort the locations 
+  
+
+```{r}
+# extract homes for users based on score value (each user return 1 most possible home)
+df_home <- df_score_summed %>% 
+  extract_location(., user = "u_id", location = "GEOID", show_n_loc = 1, keep_score = F, score)
+
+df_home %>% head(3)
+
+# extract homes for users and keep scores of locations
+df_home <- df_score_summed %>% 
+  extract_location(., user = "u_id", location = "GEOID", show_n_loc = 1, keep_score = T, score)
+
+df_home %>% head(3)
+df_home$data[[3]]
+```
+
+
+
+### Identify location(s) with embedded recipes 
+
+```{r eval = FALSE}
+# recipe: homelocator -- HMLC
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+                  show_n_loc = 1, recipe = "HMLC")
+
+# recipe: Frequency -- FREQ
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+                  show_n_loc = 1, recipe = "FREQ")
+
+# recipe: Online Social Network Activity -- OSNA
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+                  show_n_loc = 1, recipe = "OSNA")
+```
+
+
+
+
 
 
