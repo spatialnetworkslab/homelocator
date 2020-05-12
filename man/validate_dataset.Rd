@@ -2,13 +2,13 @@
 % Please edit documentation in R/validate_dataset.R
 \name{validate_dataset}
 \alias{validate_dataset}
-\title{Validate used dataset}
+\title{Validate the input dataset}
 \usage{
 validate_dataset(
   df,
   user = "u_id",
   timestamp = "created_at",
-  location = "grid_id",
+  location = "loc_id",
   keep_other_vars = F
 )
 }
@@ -17,12 +17,12 @@ validate_dataset(
 
 \item{user}{Name of column that holds unique identifier for each user}
 
-\item{timestamp}{Name of timestamp column. Should be POSIXct}
+\item{timestamp}{Name of column that holds specific timestamp for each data point and it should be POSIXct}
 
 \item{location}{Name of column that holds unique identifier for each location}
 
-\item{keep_other_vars}{Choice to keep variables or not}
+\item{keep_other_vars}{Option to keep or remove other variables of the input dataset}
 }
 \description{
-To make sure the used dataset contains all three necessary variables: user, location and timestamp
+To make sure the input dataset contains all three necessary variables: user, location and timestamp
 }
