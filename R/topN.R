@@ -1,26 +1,40 @@
-#' select the top entries in each group 
+#' Select top n rows by value 
 #' 
-#' Select the top entries in each group, ordered by wt
-#' @param df A dataframe 
-#' @param n Number of entries to be selected
-#' @param wt The variable to be used for ordering
+#' Select top n rows by value in nested dataframe 
+#' @param df A nested dataframe 
+#' @param n Number of rows to return 
+#' @param wt The variable to use for ordering 
+#' 
+#' 
 top_n_nested <- function(df, n = 2, wt){
-  wt_enq = enquo(wt)
-  nested_data <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data]]
+  wt_expr <- rlang::sym(wt)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
-  top_with_progress <- function(data){
+  top_n_with_progress <- function(data){
     pb$tick()$print()
-    top_var <- data %>% 
-      top_n(n = n, wt = !!wt_enq)
+    data %>% 
+      top_n(n = n, wt = {{wt_expr}})
   }
   
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Selecting top entries in each group..."))
+  pb <- dplyr::progress_estimated(nrow(df))
   
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start selecting top", n, "row(s)...")) 
   output <- df %>%
-    mutate(!!nested_data := purrr::map(df[[nested_data]], ~top_with_progress(.))) 
-  output
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~top_n_with_progress(.))) 
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish selecting top", n, "row(s)!"))
+  message(paste(emo::ji("hourglass"), "Selecting time:", time.taken, "mins"))
+
+  return(output)
 }
+
+
+
+
+
+
+
