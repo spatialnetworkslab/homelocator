@@ -227,7 +227,7 @@ recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "
   df_timeframe_nested <- df_match_user_condition %>%
     summarise_double_nested(., nest_cols = colnmaes_to_nest, 
                             n_points_timeframe = n()) %>%  # number of data points at the timeframe 
-    spread_nested(., var_key = "timeframe", var_value = "n_points_timeframe") %>% # spread the timeframe to columns 
+    spread_nested(., key_var = "timeframe", value_var = "n_points_timeframe") %>% # spread the timeframe to columns 
     unnest_verbose() %>% # unnest the result, missed column will be automatically added with NA value
     replace(., is.na(.), 0)  # replace NA with 0
   
@@ -252,5 +252,9 @@ recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "
   # extract location based on score value 
   extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
 }
+
+
+
+
 
 
