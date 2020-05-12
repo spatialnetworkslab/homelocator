@@ -24,13 +24,12 @@ filter_verbose <- function(df, user = "u_id", ...){
   
   n_new_users <- output %>% pull({{user}}) %>% n_distinct()
   n_removed_users <- n_original_users - n_new_users
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left."))
   
   return(output)
 }
-
-
 
 #' Return rows with matching condition in list-column 
 #' 
@@ -80,6 +79,7 @@ filter_nested <- function(df,  user = "u_id", ...){
     
   n_new_users <- output %>% pull({{user}}) %>% dplyr::n_distinct()
   n_removed_users <- n_original_users - n_new_users
+  message("\n")
   message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left!"))
  

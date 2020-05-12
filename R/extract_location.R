@@ -1,6 +1,6 @@
-#' extract location 
+#' Extract location 
 #' 
-#' Extract most likely home location of each user 
+#' Extract the most likely home location for each user based on choosed column value 
 #' @param df A nested dataframe by user 
 #' @param show_n_loc Number of homes to be shown 
 #' @param keep_score Choice to keep score or not 
