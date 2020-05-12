@@ -1,32 +1,78 @@
-#' arrange in nested dataframe 
+#' Arrange rows by variables
+#' 
+#' Arrange rows by variables in nested dataframe 
 #' @param df A nested dataframe 
-#' @param group_var The variable to be grouped 
-#' @param ... Variables or functions 
+#' @param ... Comma separated list of unquoted variable names
 #' 
 #' 
-arrange_nested <- function(df, group_var, ...){
-  group_var_enq <- rlang::sym(group_var)
-  arrange_exp_enq <- enquos(...)
-  
-  nested_data <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data]]
+arrange_nested <- function(df, ...){
+  var_expr <- enquos(...)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
   arrange_with_progress <- function(data){
     pb$tick()$print()
-    arrange_column <- data %>% 
-      group_by(!!group_var_enq) %>% 
-      arrange(desc(!!!arrange_exp_enq)) %>% 
-      ungroup()
+    data %>% 
+      arrange(desc(!!!var_expr))
   }
   
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Sorting..."))
-  
-  output <- df %>%
-    mutate(!!nested_data := purrr::map(df[[nested_data]], ~arrange_with_progress(.))) 
-}
-  
-  
+  pb <- dplyr::progress_estimated(nrow(df))
  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start sorting..."))
+  output <- df %>%
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~arrange_with_progress(.))) 
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
+  message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  
+  return(output)
+}
+
+
+
+#' Arrange rows by variables
+#' 
+#' Arrange rows by variables in double nested dataframe 
+#' @param df A nested dataframe 
+#' @param nest_cols Name of columns to nest in existing list-column
+#' @param ... Comma separated list of unquoted variable names
+#' 
+arrange_double_nested <- function(df, nest_cols, ...){
+  if(nrow(df) == 0){
+    stop(paste(emo::ji("bomb"), "No user left, tune your threshold and try again."))
+  }
+  
+  stopifnot(
+    is.list(df[ , grepl("^data$", names(df))])
+  )
+  
+  var_expr <- enquos(..., .named = TRUE)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
+  
+  arrange_column <- . %>% arrange(!!!var_expr)
+  
+  arrange_columns <- . %>% 
+    mutate(data = purrr::map(data, arrange_column)) 
+  
+  # double nest 
+  df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
+  
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start sorting..."))
+  
+  output <- df %>% 
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], arrange_columns))
+  
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
+  message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  
+  return(output)
+}
