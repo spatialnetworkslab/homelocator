@@ -1,79 +1,44 @@
-#' spread variable 
+#' Spread a key-value pair across multiple columns
 #' 
-#' Spread variables to tidy dataframe
-#' @param df A dataframe 
-#' @param key_var Key variable to be spreaded 
-#' @param value_var Value variable to be spreaded
+#' Spread a key-value pair across multiple columns in nested dataframe 
+#' @param df A nested dataframe 
+#' @param var_key Column name or position
+#' @param var_value Column name or position
 #' 
 #' 
-#' This was originally called spread2. Qingqing to check why that was?
 #' 
-spread_nested <- function(df, key_var, value_var){
+spread_nested <- function(df, var_key, var_value){
   
-  key_var_enq <- enquo(key_var)
-  value_var_enq <- enquo(value_var)
-  nested_data <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data]]
+  var_key_expr <-  rlang::sym(var_key)
+  var_value_expr <-  rlang::sym(var_value)
+  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
 
-  ori_cols <- names(df[[nested_data]][[1]])
-  
   spread_with_progress <- function(data){
     pb$tick()$print()
-    spread_column <- data %>%
-      spread(key = {{key_var_enq}}, value = {{value_var_enq}}) %>%
+    data %>%
+      spread(key = {{var_key_expr}}, value = {{var_value_expr}}) %>%
       replace(., is.na(.), 0)
   }
 
   #create the progress bar
-  pb <- dplyr::progress_estimated(length(user_data))
-  message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Spread variable:", quo_name(key_var_enq)))
-
+  pb <- dplyr::progress_estimated(nrow(df))
   
+  start.time <- Sys.time()
+  message(paste(emo::ji("hammer_and_wrench"), "Start spreading", var_key, "variable..."))
   output <- df %>%
-    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~spread_with_progress(.)))
-  output
-}
-
-
-#' spread variable 
-#' 
-#' Spread variables to tidy dataframe
-#' @param df A nested dataframe 
-#' @param full_col Full columns in nested data
-#' 
-#' 
-#' 
-mutate_nested_if_missing <- function(df, full_col){
+    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~spread_with_progress(.)))
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
-  nested_data <- names(df[,grepl("data$", names(df))])
-  user_data <- df[[nested_data]]
-  
-
-  fill_with_progress <- function(data){
-    pb$tick()$print()
-    missed_col <- dplyr::setdiff(full_col, names(data))
-
-    if(purrr::is_empty(missed_col)){
-      adds <- data
-    } else{
-      missed_col_enq <- enquo(missed_col)
-      adds <- data %>%
-        mutate({{missed_col}} := 0)
-    }
-  }
-  pb <- dplyr::progress_estimated(length(user_data))
+  colnames_original <- names(df[[colname_nested_data]][[1]])
+  colnames_new <- names(output[[colname_nested_data]][[1]])
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original) 
   message("\n")
-  message(paste(emo::ji("hammer_and_wrench"), "Fill missing variables..."))
-
-  output <- df %>%
-    mutate({{nested_data}} := purrr::map(df[[nested_data]], ~fill_with_progress(.)))
-  output
+  message(paste(emo::ji("white_check_mark"), "Finish spreading! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  message(paste(emo::ji("hourglass"), "Spreading time:", time.taken, "mins"))
+  
+  return(output)
 }
-
-
-
-
 
 
 
