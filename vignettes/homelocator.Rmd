@@ -43,8 +43,7 @@ library(here)
 To explore the basic data manipulation functions of `homelocator`, we'll use a `test_sample` dataset. 
 
 ```{r}
-load(here("data/test_sample.rda"))
-test_sample <- test_sample %>% mutate(GEOID = as.character(GEOID))
+test_sample <- readRDS(here("data/new_test_sample.rds"))
 
 # show test sample 
 test_sample %>% head(3)
@@ -68,7 +67,7 @@ The `validate_dataset()` function in `validate_datset.R` script makes sure your 
 
 ```{r}
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", 
-                                 location = "GEOID", keep_other_vars = FALSE)
+                                 location = "grid_id", keep_other_vars = FALSE)
 
 # show result 
 df_validated %>% head(3)
@@ -85,7 +84,7 @@ The `nest_verbose()` and `unnest_verbose()` functions in `nest.R` script work in
 
 ```{r}
 # nest data
-df_nested <- nest_verbose(df_validated, c("created_at", "GEOID"))
+df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 
 # show result 
 df_nested %>% head(3)
@@ -117,9 +116,9 @@ df_double_nested <- nest_double_nest(df_nested %>% head(100), c("created_at"))
 df_double_nested %>% head(3)
 
 # show result 
-df_double_nested$data[[1]] %>% head(3)
+df_double_nested$data[[3]] %>% head(3)
 
-df_double_nested$data[[1]]$data[[1]] %>% head(3)
+df_double_nested$data[[3]]$data[[2]] %>% head(3)
 
 # unnest nested data 
 df_double_unnested <- df_double_nested %>% 
@@ -144,7 +143,7 @@ The `enrich_timestamp()` in `enrich_timestamp.R` script allows to derive new var
 df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at", tz = "Asia/Singapore")
 
 # show result 
-df_enriched$data[[1]] %>% head(3)
+df_enriched$data[[3]] %>% head(3)
 ```
 
 
@@ -161,7 +160,7 @@ The `summarise_nested()` funciton in `summarise.R` script allows to aggregate mu
 # summarize in nested dataframe 
 df_summarize_nested <- summarise_nested(df_enriched, 
                                         n_tweets = n(),
-                                        n_locs = n_distinct(GEOID))
+                                        n_locs = n_distinct(grid_id))
 
 # show result 
 df_summarize_nested %>% head(3)
@@ -172,8 +171,8 @@ df_summarize_double_nested <- summarise_double_nested(df_enriched %>% head(100),
                                                       n_tweets = n(), n_days = n_distinct(ymd))
 
 # show result 
-df_summarize_double_nested[1, ]
-df_summarize_double_nested[1, ]$data[[1]] %>% head(3)
+df_summarize_double_nested[3, ]
+df_summarize_double_nested[3, ]$data[[1]] %>% head(3)
 ```
 
 
@@ -231,22 +230,16 @@ The `mutate_verbose()` function in `filter.R` script works in the same way as [m
   - `df`: a dataframe 
   - `...`: name-value pairs of expressions
 
-
 Function `mutate_nested()` works in the similar way as `mutate_verbose()` but it add new variables inside the list-column. 
 
   - `df`: a nested dataframe 
   - `...`: name-value pairs of expressions
-
-And function `prop_factor_nested()` allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. 
-
-  - `df`: a nested dataframe 
-  - `var`: name of column to calculate inside the list-column
-
-
+  
+  
 ```{r}
 ## let's use pre-discussed functions to filter some users first 
 colnmaes_data <- df_filtered$data[[1]] %>% names()
-colnmaes_to_nest <- colnmaes_data[-which(colnmaes_data == "GEOID")] 
+colnmaes_to_nest <- colnmaes_data[-which(colnmaes_data == "grid_id")] 
 
 df_cleaned <- df_filtered %>% 
   summarise_double_nested(., nest_cols = colnmaes_to_nest,
@@ -272,7 +265,11 @@ df_expanded <- df_cleaned %>%
 df_expanded %>% head(3)
 ```
 
+The function `prop_factor_nested()` allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. 
 
+  - `df`: a nested dataframe 
+  - `var`: name of column to calculate inside the list-column
+  
 
 ```{r}
 # calculate proportion of categories for four variables: wd_or_wk, rest_or_work, wk.am_or_wk.pm
@@ -311,7 +308,7 @@ df_expanded <- df_expanded %>%
 df_expanded %>% head(3)
 
 df_scored <- df_expanded %>% 
-  score_nested(., user = "u_id", location = "GEOID", keep_ori_vars = F,
+  score_nested(., user = "u_id", location = "grid_id", keep_original_vars = F,
                s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
                s_n_hrs_loc = 0.1 * (n_hrs_loc/24), 
                s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
@@ -347,12 +344,11 @@ df_scored_2$data[[1]]
 ```{r}
 # sum varialbes score for each location 
 df_score_summed <- df_scored %>% 
-  score_summary(., user = "u_id", location = "GEOID", starts_with("s_"))
+  score_summary(., user = "u_id", location = "grid_id", starts_with("s_"))
 
 df_score_summed %>% head(3)
 df_score_summed$data[[3]]
 ```
-
 
 
 ### Extract locations 
@@ -370,16 +366,111 @@ The `extract_location()` function in `extract_location.R` script allows you to s
 ```{r}
 # extract homes for users based on score value (each user return 1 most possible home)
 df_home <- df_score_summed %>% 
-  extract_location(., user = "u_id", location = "GEOID", show_n_loc = 1, keep_score = F, score)
+  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F, score)
 
 df_home %>% head(3)
 
 # extract homes for users and keep scores of locations
 df_home <- df_score_summed %>% 
-  extract_location(., user = "u_id", location = "GEOID", show_n_loc = 1, keep_score = T, score)
+  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = T, score)
 
 df_home %>% head(3)
 df_home$data[[3]]
+```
+
+
+### Spread 
+
+The `spread_nested()` function in `spread.R` script works in the same way as [spread](https://www.rdocumentation.org/packages/tidyr/versions/0.8.3/topics/spread) function in [tidyverse](https://github.com/tidyverse/tidyverse) but for nested dataframe. It allows to spread a Key-Value Pair across multiple columns.
+
+  - `df`: a nested dataframe 
+  - `var_key`: column name or position
+  - `var_value`: column name or position
+
+```{r}
+# let's add one timeframe variable first and calculate the number of data points at each timeframe
+df_timeframe <- df_enriched %>% 
+  mutate_nested(timeframe = if_else(hour >= 2 & hour < 8, "Rest", if_else(hour >= 8 & hour < 19, "Active", "Leisure")))
+
+colnames_nested_data <- df_timeframe$data[[1]] %>% names()
+colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("grid_id", "timeframe"))]
+
+df_timeframe <- df_timeframe %>%
+  head(20) %>% # take first 20 users as example
+  summarise_double_nested(., nest_cols = colnmaes_to_nest, 
+                            n_points_timeframe = n()) 
+df_timeframe$data[[2]]
+
+# spread timeframe in nested dataframe with key is timeframe and value is n_points_timeframe
+df_timeframe_spreaded <- df_timeframe %>% 
+    spread_nested(., key_var = "timeframe", value_var = "n_points_timeframe") 
+
+df_timeframe_spreaded$data[[2]]
+```
+
+
+### Arrange 
+
+The `arrange_nested()` function in `spread.R` script works in the same way as [arrange](https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange) function in [tidyverse](https://github.com/tidyverse/tidyverse) but for nested dataframe. It allows to sort rows by variables. 
+
+  - `df`: a nested dataframe 
+  - `...`: comma separated list of unquoted variable names
+  
+  
+
+```{r}
+df_enriched$data[[3]]  
+
+df_arranged <- df_enriched %>% 
+  arrange_nested(desc(hour)) # arrange the hour in descending order
+
+df_arranged$data[[3]]
+```
+
+The `arrange_double_nested()` funtion works in the similar way as `arrange_nested()` function, but it applys to double nested dataframe. You need to choose the columns to nest inside a nested dataframe and then sort rows by selected column. 
+  
+    - `df`: a nested dataframe 
+    - `nest_cols`: name of columns to nest in existing list-column
+    - `...`: comma separated list of unquoted variable names 
+
+
+```{r}
+# get the name of columns to nest 
+colnames_nested_data <- df_enriched$data[[1]] %>% names()
+colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("grid_id"))]
+
+df_double_arranged <- df_enriched %>% 
+  head(20) %>% # take the first 20 users for example
+  arrange_double_nested(., nest_cols = colnmaes_to_nest, 
+                        desc(created_at)) # sort by time in descending order
+
+
+# original third user
+df_enriched[3, ]
+# third user data points 
+df_enriched$data[[3]]
+# arranged third user
+df_double_arranged[3, ]
+# arranged time 
+df_double_arranged$data[[3]]$data[[2]]
+```
+
+
+
+### Top N 
+
+The `top_n_nested()` function in the `top_n.R` script works in the same way as 
+
+The `arrange_nested()` function in `spread.R` script works in the same way as [top_n](https://dplyr.tidyverse.org/reference/top_n.html) function in [tidyverse](https://github.com/tidyverse/tidyverse) but for nested dataframe. It allows to select the top entries in each group, ordered by wt.
+
+```{r}
+df_enriched$data[[2]]
+
+## get the top 1 row based on hour 
+df_top_1 <- df_enriched %>% 
+  top_n_nested(., n = 1, wt = "hour")
+
+df_top_1$data[[2]]
 ```
 
 
@@ -388,20 +479,16 @@ df_home$data[[3]]
 
 ```{r eval = FALSE}
 # recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "HMLC")
 
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "FREQ")
 
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "GEOID", 
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
 ```
-
-
-
-
 
 
