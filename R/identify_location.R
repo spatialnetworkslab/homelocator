@@ -29,25 +29,27 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   
   ## recipe: HMLC
   if(recipe == "HMLC"){
-    locations <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score)
+    output <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score)
   } 
+  
   ## recipe: FREQ
   if(recipe == "FREQ"){
-    locations <- recip_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
+    output <- recip_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
   }
+  
   ## recipe: OSNA
   if(recipe == "OSNA"){
-    locations <- recip_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
+    output <- recip_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
   }
-  ## recipe: APDM
   
+  ## recipe: APDM
   if(recipe == "APDM"){
-    
+    message(paste(emo::ji("exclamation"), "Please make sure you have loaded the neighbors table before you use APDM recipe.\nThe table should have one column named", location,
+          "and another column named neighbor.\n The neighbor column should be a list-column contains the neighboring locations for", location, "per row."))
+    output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, keep_score = keep_score)
   }
-  return(locations)
+  return(output)
 }
-
-
 
 # recipe: homelocator - HMLC
 recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F) {
@@ -150,7 +152,7 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
 
 
 # recipe: frequency - FREQ
-recip_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
+recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -194,7 +196,7 @@ recip_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "
 
 
 # recipe: Online Social Networks Activity - OSNA
-recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
+recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
@@ -253,3 +255,121 @@ recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "
   extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
 }
 
+
+
+# recipe: Anchor Point Determining Model - APDM
+recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F){
+  user_expr <- rlang::sym(user)
+  timestamp_expr <- rlang::sym(timestamp)
+  location_expr <- rlang::sym(location)
+  ## need to check neighbors dataframe, make sure there are columns of locaiton and neighbor
+  if (!rlang::has_name(df_neighbors, location)) {
+    stop(paste(emo::ji("bomb"), "Location column does not exist!"))
+  }
+  
+  if (!rlang::has_name(df_neighbors, "neighbor")) {
+    stop(paste(emo::ji("bomb"), "Neighbor column does not exist!"))
+  }
+  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold == "Yes"){
+    threshold_n_days_per_month_loc <- 7
+    threshold_n_points_per_month_loc <- 500
+  } else{
+    threshold_n_days_per_month_loc <- readline(prompt="What is the minium active days per month (default = 7)? Your answer: ") %>% as.integer()
+    threshold_n_points_per_month_loc <- readline(prompt="What is the maximum data points sent per month (default = 500)? Your answer: ") %>% as.integer()
+  }
+  ## Removal of places with too high or too low a number of data points made
+  ## respondents who have data points at their top n frequently visited places fewer than 7 days a month will be removed from the database
+  ## respondents are considered to have too many data points if they have more than 500 data points a month in their frequently visited places
+  colnames_nested_data <- df$data[[1]] %>% names()
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c(location, "year", "month"))]
+  df_cleaned <- df %>%
+    summarise_double_nested(., nest_cols = colnmaes_to_nest,
+                            n_days_per_month_loc = n_distinct(day),
+                            n_points_per_month_loc = n()) %>%
+    filter_nested(., user = user,
+                  n_days_per_month_loc >= threshold_n_days_per_month_loc & n_points_per_month_loc <= threshold_n_points_per_month_loc)
+  
+  # get the top 5 most frequently visited location
+  df_user_nested <- df_cleaned %>% unnest_nested(., data)
+  colnames_nested_data <- df_user_nested$data[[1]] %>% names()
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data == location)]
+  df_top5_locs <- df_user_nested %>%
+    summarise_double_nested(., nest_cols = colnmaes_to_nest,
+                            n_days_loc = n_distinct(ymd),
+                            n_points_loc = n()) %>%
+    arrange_nested(., n_days_loc, n_points_loc) %>%
+    top_n_nested(., n = 5, wt = "n_points_loc") %>% 
+    unnest_verbose()
+  
+  # extract the start data point per day for each location 
+  colnames_nested_data <- df_top5_locs$data[[1]] %>% names()
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("ymd"))] # nest to per user per location per day
+  df_with_start_point <- df_top5_locs %>%
+    summarise_double_nested(., nest_cols = colnmaes_to_nest,
+                            start_point = min({{timestamp_expr}})) # get the start data point of a day 
+  
+  # add home or work label to top 5 most frequently visit places: 1 means home and 0 means work
+  time_line <- chron::times("17:00:00") %>% as.numeric() 
+  df_with_home_type <- df_with_start_point %>% 
+    mutate_nested(start_time = format(start_point, format = "%H:%M:%S") %>% chron::times() %>% as.numeric()) %>% 
+    summarise_nested(mean_start_time = mean(start_time), 
+                     sd_start_time = sd(start_time)) %>% 
+    mutate_verbose(location_type = if_else(mean_start_time < time_line & sd_start_time <= 0.175, 0, 1)) %>% # 1 means home and 0 means work
+    filter(location_type != 0) %>% # remove work locations
+    nest_verbose(-{{user_expr}}) %>% 
+    summarise_nested(n_home = n()) # get number of returned home locations
+  
+  ## for one home users, directly extract the location as their homes 
+  df_one_home <- df_with_home_type %>% filter(n_home == 1)
+  
+  output <- extract_location(df_one_home %>% dplyr::select(-n_home), user = user, location = location, show_n_loc = 1, keep_score = keep_score, n_days_loc, n_points_loc)
+  
+  ## for multiple home users, take the top 2 most frequently visit places and do the comparision
+  df_multiple_homes <- df_with_home_type %>% 
+    filter(n_home > 1) %>% 
+    arrange_nested(., desc(n_days_loc, n_points_loc)) # order the location by number of days and number of data points in descending order
+  
+  
+  decide_home <- function(data){
+    homes <- data %>% pull({{location_expr}})
+    home1 <- homes[1]
+    home1_neighbors <- neighbors %>% filter({{location_expr}} == home1) %>% pull(neighbor) %>% unlist() # get the neighboring locations of first home 
+    home2 <- homes[2]
+    # if home 1 and home 2 are neighboring location, extract home1 (one with the higher number of days, and the higher number of data points)
+    if(home2 %in% home1_neighbors){
+      return(home1)
+    } else{
+      n_days_homes <- data %>% pull(n_days_loc)
+      n_days_home1 <- n_days_homes[1]
+      n_days_home2 <- n_days_homes[2]
+      # if the most frequently visited location covers more than 75 percent of the days a user stayed at the two most frequently visited locations, return the place as home
+      if((n_days_home1/(n_days_home1 + n_days_home2)) > 0.75){
+        return(home1)
+      } else{
+        sd_homes <- data %>% pull(sd_start_time)
+        sd_home1 <- sd_homes[1]
+        sd_home2 <- sd_homes[2]
+        # the location with the larger standard deviation is classified as the home 
+        if(sd_home1 > sd_home2){
+          return(home1)
+        } else{
+          return(home2)
+        }
+      }
+    }
+  }
+  
+  if(keep_score){
+    df_multiple_homes %>% 
+      dplyr::select(-n_home) %>% 
+      mutate_verbose(., home = map_chr(data, function(x) decide_home(x))) %>% 
+      bind_rows(., output)
+  } else{
+    df_multiple_homes %>% 
+      mutate_verbose(., home = map_chr(data, function(x) decide_home(x))) %>% 
+      dplyr::select(u_id, home) %>% 
+      bind_rows(., output)
+  }
+  
+}
