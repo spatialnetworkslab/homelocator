@@ -53,6 +53,6 @@ extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc 
   message("\n")
   message(paste(emo::ji("tada"), "Congratulations!! Your have found", n_user, "users' potential home(s)."))
   message(paste(emo::ji("hourglass"), "Extracting time:", time.taken, "mins"))
-  
+  message("\n")
   return(output)
 }

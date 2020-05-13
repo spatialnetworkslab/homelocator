@@ -12,14 +12,20 @@ mutate_verbose <- function(df, ...){
   
   var_expr <- enquos(..., .named = TRUE)
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start adding..."))
+  start.time <- Sys.time()
   output <- df %>% mutate(!!!var_expr)
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish adding!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  colnames_original <- names(df)
+  colnames_new <- names(output)
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)   
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -49,23 +55,22 @@ mutate_nested <- function(df, ...){
   # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
-  message(paste(emo::ji("hammer_and_wrench"), "Start adding variable(s)..."))
   
+  message(paste(emo::ji("hammer_and_wrench"), "Start adding variable(s)..."))
+  start.time <- Sys.time()
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~add_with_progress(.))) 
-  
   end.time <- Sys.time()
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish adding!"))
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
-  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)      
-  message(paste(emo::ji("white_check_mark"), "There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  colnames_added <- dplyr::setdiff(colnames_new, colnames_original)   
   
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -105,24 +110,23 @@ prop_factor_nested <- function(df, ...){
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start calculating proportion..."))
-  
+  start.time <- Sys.time()
   output <- df %>% 
     dplyr::bind_cols(do.call(dplyr::bind_rows, purrr::map(df[[colname_nested_data]], ~add_with_progress(.)))) %>% 
     replace(., is.na(.), 0)
-  
   end.time <- Sys.time()
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish calculating!"))
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
   colnames_original <- names(df)
   colnames_new <- names(output)
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
-  message(paste(emo::ji("white_check_mark"), "There are", length(colnames_added), "new calculated variables:", paste(colnames_added, collapse = ", ")))
   
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish calculating! There are", length(colnames_added), "new calculated variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Calculating time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -156,22 +160,21 @@ mutate_double_nested <- function(df, nest_cols, ...){
   # double nest 
   df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start adding values..."))
+  start.time <- Sys.time()
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
-  
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
   colnames_new <- colnames_new[-which(colnames_new == "data")]
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish adding!"))
-  message(paste(emo::ji("white_check_mark"), "There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
+  
+  message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

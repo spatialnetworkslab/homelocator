@@ -23,8 +23,8 @@ spread_nested <- function(df, key_var, value_var){
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start spreading", key_var, "variable..."))
+  start.time <- Sys.time()
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~spread_with_progress(.)))
   end.time <- Sys.time()
@@ -33,9 +33,11 @@ spread_nested <- function(df, key_var, value_var){
   colnames_original <- names(df[[colname_nested_data]][[1]])
   colnames_new <- names(output[[colname_nested_data]][[1]])
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original) 
+  
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish spreading! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Spreading time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

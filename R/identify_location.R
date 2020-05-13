@@ -222,7 +222,7 @@ recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "
   
   ## calculate weighted score of data points sent during Leisure and Rest time in different day at different places 
   colnames_nested_data <- df_match_user_condition$data[[1]] %>% names()
-  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("GEOID", "ymd", "timeframe"))] # per location per day per timeframe 
+  colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c(location, "ymd", "timeframe"))] # per location per day per timeframe 
   
   df_timeframe_nested <- df_match_user_condition %>%
     summarise_double_nested(., nest_cols = colnmaes_to_nest, 
@@ -252,9 +252,4 @@ recip_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "
   # extract location based on score value 
   extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
 }
-
-
-
-
-
 

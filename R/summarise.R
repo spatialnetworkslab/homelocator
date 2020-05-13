@@ -20,8 +20,8 @@ summarise_nested <- function(df, ...){
   # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
 
+  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values..."))
   start.time <- Sys.time()
-  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values in nested dataset..."))
   output <- df %>%
     mutate(adds = purrr::map(df[[colname_nested_data]], ~summarise_with_progress(.))) %>%
     unnest_legacy(adds)
@@ -31,9 +31,11 @@ summarise_nested <- function(df, ...){
   colnames_original <- names(df)
   colnames_new <- names(output)
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original) 
+  
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish summarising! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Summarising time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -70,21 +72,21 @@ summarise_double_nested <- function(df, nest_cols, ...){
   # double nest 
   df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
   
+  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values..."))
   start.time <- Sys.time()
-  message(paste(emo::ji("hammer_and_wrench"), "Start summarising values in nested dataset..."))
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
-  
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
   colnames_new <- colnames_new[-which(colnames_new == "data")]
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
-  message("\n")
+  
   message(paste(emo::ji("white_check_mark"), "Finish summarising! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Summarising time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

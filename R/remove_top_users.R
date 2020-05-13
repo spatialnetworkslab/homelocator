@@ -21,16 +21,20 @@ remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_use
   
   n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
-  message(paste(emo::ji("hammer_and_wrench"), "Removing top", topNpct_user, "% active users..."))
-  
+  message(paste0(emo::ji("hammer_and_wrench"), " Start removing top ",  topNpct_user, "% top active users..."))
+  start.time <- Sys.time()
   output <- df %>% 
     arrange(desc({{counts}})) %>% 
     dplyr::slice(round(n_original_users*(topNpct_user/100)):n()) 
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
   n_new_users <- output %>% pull({{user}}) %>% n_distinct()
   n_removed_users <- n_original_users - n_new_users
-  message(paste(emo::ji("white_check_mark"), "Removed", n_removed_users, "active users!"))
+  message(paste(emo::ji("white_check_mark"), "Finish removing! Removed", n_removed_users, "active users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left."))
+  message(paste(emo::ji("hourglass"), "Removing time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

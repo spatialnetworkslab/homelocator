@@ -13,13 +13,15 @@ nest_verbose <- function(df, ...){
   
   var_expr <- enquos(..., .named = TRUE)
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
+  start.time <- Sys.time()
   output <- df %>% nest_legacy(!!!var_expr)
-  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
   message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -40,16 +42,16 @@ unnest_verbose <- function(df, ...){
   
   var_expr <- enquos(..., .named = TRUE)
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
+  start.time <- Sys.time()
   output <- suppressWarnings(
-    df %>% unnest_legacy(!!!var_expr)
-    )
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
+    df %>% unnest_legacy(!!!var_expr))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
   message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -81,15 +83,18 @@ nest_double_nest <- function(df, ...){
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
+  
   message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
+  start.time <- Sys.time()
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
   message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -122,17 +127,18 @@ unnest_double_nested <- function(df, ...){
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
+  start.time <- Sys.time()
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.))) %>% 
     unnest_legacy()
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
-  end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

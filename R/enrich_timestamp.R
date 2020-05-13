@@ -32,15 +32,18 @@ enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"
 
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
+  
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Enriching variables from timestamp..."))
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~enrich_with_progress(.)))
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "New added variables: year, month, day, wday, hour, ymd."))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
+  message("\n")
+  message(paste(emo::ji("white_check_mark"), "Finish enriching! New added variables: year, month, day, wday, hour, ymd."))
   message(paste(emo::ji("hourglass"), "Enriching time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }

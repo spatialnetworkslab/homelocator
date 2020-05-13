@@ -28,6 +28,7 @@ arrange_nested <- function(df, ...){
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
   message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -63,16 +64,13 @@ arrange_double_nested <- function(df, nest_cols, ...){
   
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start sorting..."))
-  
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], arrange_columns))
-  
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
-  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
   message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
-  
+  message("\n")
   return(output)
 }

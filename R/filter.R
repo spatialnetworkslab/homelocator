@@ -16,18 +16,21 @@ filter_verbose <- function(df, user = "u_id", ...){
   var_expr <- enquos(...)
   
   n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
+  
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
   message(paste(emo::ji("hammer_and_wrench"), "Start filtering users..."))
-  
-  output <- df %>% 
-    filter(!!!var_expr)
+  start.time <- Sys.time()
+  output <- df %>% filter(!!!var_expr)
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
   n_new_users <- output %>% pull({{user}}) %>% n_distinct()
   n_removed_users <- n_original_users - n_new_users
-  message("\n")
-  message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
+
+  message(paste(emo::ji("white_check_mark"), "Finish filtering! Filterred", n_removed_users, "users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left."))
-  
+  message(paste(emo::ji("hourglass"), "Filtering time:", time.taken, "mins"))
+  message("\n")
   return(output)
 }
 
@@ -61,6 +64,7 @@ filter_nested <- function(df,  user = "u_id", ...){
       filter(!!!var_expr)
   }
   
+  start.time <- Sys.time()
   n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
   message(paste(emo::ji("hammer_and_wrench"), "Start filtering user...")) 
@@ -68,21 +72,24 @@ filter_nested <- function(df,  user = "u_id", ...){
   # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
+  start.time <- Sys.time()
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~filter_with_progress(.))) 
-  
   output_data <- output[[colname_nested_data]]
-  
   #check empty tibble 
   output <- output %>% 
     filter(!(purrr::map_lgl(output_data, plyr::empty)))
-    
+  end.time <- Sys.time()
+  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
   n_new_users <- output %>% pull({{user}}) %>% dplyr::n_distinct()
   n_removed_users <- n_original_users - n_new_users
+  
   message("\n")
-  message(paste(emo::ji("white_check_mark"), "Filter", n_removed_users, "users!"))
+  message(paste(emo::ji("white_check_mark"), "Finish Filtering! Filterred", n_removed_users, "users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left!"))
- 
+  message(paste(emo::ji("hourglass"), "Filtering time:", time.taken, "mins"))
+  message("\n")
   return(output)
 }
 

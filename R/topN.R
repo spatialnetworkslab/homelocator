@@ -19,16 +19,18 @@ top_n_nested <- function(df, n = 2, wt){
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start selecting top", n, "row(s)...")) 
+  start.time <- Sys.time()
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~top_n_with_progress(.))) 
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish selecting top", n, "row(s)!"))
   message(paste(emo::ji("hourglass"), "Selecting time:", time.taken, "mins"))
-
+  message("\n")
+  
   return(output)
 }
 

@@ -47,9 +47,9 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
   #create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
  
-  start.time <- Sys.time()
-  message(paste(emo::ji("hammer_and_wrench"), "Start scoring ..."))
   
+  message(paste(emo::ji("hammer_and_wrench"), "Start scoring ..."))
+  start.time <- Sys.time()
   if(keep_original_vars){
     output <- df_nest %>% 
       mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~add_with_progress(.)))
@@ -57,7 +57,6 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
     output <- df_nest %>% 
       mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~transmute_with_progress(.)))
   }
-  
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
   
@@ -67,6 +66,7 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish scoring! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Scoring time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
@@ -104,8 +104,9 @@ score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
   
-  start.time <- Sys.time()
+  
   message(paste(emo::ji("hammer_and_wrench"), "Start summing scores..."))
+  start.time <- Sys.time()
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~sum_score_with_progress(.)))
   end.time <- Sys.time()
@@ -117,6 +118,7 @@ score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish summing! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Summing time:", time.taken, "mins"))
+  message("\n")
   
   return(output)
 }
