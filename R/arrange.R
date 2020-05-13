@@ -12,7 +12,7 @@ arrange_nested <- function(df, ...){
   arrange_with_progress <- function(data){
     pb$tick()$print()
     data %>% 
-      arrange(desc(!!!var_expr))
+      arrange(!!!var_expr)
   }
   
   #create the progress bar
