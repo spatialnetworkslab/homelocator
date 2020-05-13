@@ -1,6 +1,6 @@
 #' Select top n rows by value 
 #' 
-#' Select top n rows by value in nested dataframe 
+#' Select top n rows in each group, ordered by wt in nested dataframe
 #' @param df A nested dataframe 
 #' @param n Number of rows to return 
 #' @param wt The variable to use for ordering 

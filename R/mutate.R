@@ -22,7 +22,6 @@ mutate_verbose <- function(df, ...){
   colnames_new <- names(output)
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)   
   
-  message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
   message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
   message("\n")
