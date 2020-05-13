@@ -14,5 +14,5 @@ top_n_nested(df, n = 2, wt)
 \item{wt}{The variable to use for ordering}
 }
 \description{
-Select top n rows by value in nested dataframe
+Select top n rows in each group, ordered by wt in nested dataframe
 }
