@@ -489,6 +489,14 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 # recipe: Online Social Network Activity -- OSNA
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
+
+# recipe: Online Social Network Activity -- APDM
+## APDM recipe strictly returns the most likely home location
+## It is important to load the neighbors table before you use the recipe!!
+df_neighbors <- readRDS(here::here("data/neighbors.rds"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  recipe = "APDM", keep_score = F)
 ```
+
 
 
