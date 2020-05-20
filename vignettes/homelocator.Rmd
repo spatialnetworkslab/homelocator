@@ -43,6 +43,7 @@ library(here)
 To explore the basic data manipulation functions of `homelocator`, we'll use a `test_sample` dataset. 
 
 ```{r}
+# load data
 test_sample <- readRDS(here("data/new_test_sample.rds"))
 
 # show test sample 
@@ -110,7 +111,7 @@ The `nest_double_nest()` and `unnest_double_nested()` functions in `nest.R` scri
 
 ```{r}
 # double nest data
-df_double_nested <- nest_double_nest(df_nested %>% head(100), c("created_at"))
+df_double_nested <- nest_nested(df_nested %>% head(100), c("created_at"))
 
 # show result 
 df_double_nested %>% head(3)
@@ -459,9 +460,7 @@ df_double_arranged$data[[3]]$data[[2]]
 
 ### Top N 
 
-The `top_n_nested()` function in the `top_n.R` script works in the same way as 
-
-The `arrange_nested()` function in `spread.R` script works in the same way as [top_n](https://dplyr.tidyverse.org/reference/top_n.html) function in [tidyverse](https://github.com/tidyverse/tidyverse) but for nested dataframe. It allows to select the top entries in each group, ordered by wt.
+The `top_n_nested()` function in the `top_n.R` script works in the same way as [top_n](https://dplyr.tidyverse.org/reference/top_n.html) function in [tidyverse](https://github.com/tidyverse/tidyverse) but for nested dataframe. It allows to select the top entries in each group, ordered by wt.
 
 ```{r}
 df_enriched$data[[2]]
@@ -477,25 +476,50 @@ df_top_1$data[[2]]
 
 ### Identify location(s) with embedded recipes 
 
+
+To use the embedded recipes identifying the home location for users, you can use `identify_location()` function in `identify_location.R` script. 
+
+  - `df`: a dataframe with columns for the user id, location, timestamp
+  - `user`: name of column that holds unique identifier for each user
+  - `timestamp`: name of timestamp column. Should be POSIXct
+  - `location`: name of column that holds unique identifier for each location
+  - `tz`: a character string containing the time zone to convert to and it should be recognized in R
+  - `recipe`: embeded algorithms to identify the most possible home locations for users           
+  - `show_n_loc`: number of potential homes to extract
+  - `keep_score`: option to keep or remove calculated result/score per user per location
+
+
+Current available recipes: 
+
+- `recipe_HMLC`: 
+  - Weighs data points across multiple time frames to ‘score’ potentially meaningful locations for each user 
+- `recipe_FREQ`
+  - Selects the most frequently 'visited' location assuming a user is active mainly around their home location. 
+- `recipe_OSNA`: [Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+  - Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
+- `recipe_APDM`: [Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+  - Calculates the average and standard deviation of start time data points by a single user, in a single location. 
+
+
 ```{r eval = FALSE}
 # recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
 
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "FREQ")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
 
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "OSNA")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to load the neighbors table before you use the recipe!!
 df_neighbors <- readRDS(here::here("data/neighbors.rds"))
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  recipe = "APDM", keep_score = F)
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", recipe = "APDM", keep_score = F)
 ```
 
 

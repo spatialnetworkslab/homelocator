@@ -7,13 +7,14 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param timestamp Name of timestamp column. Should be POSIXct
 #' @param location Name of column that holds unique identifier for each location
-#' @param recipe Different methods to identify home locations
-#' @param show_n_loc Number of potential homes to be shown
-#' @param rm_pct Percentage of the top active users that to be removed
-#' 
+#' @param tz A character string containing the time zone to convert to and it should be recognized in R
+#' @param recipe  Embeded algorithms to identify the most possible home locations for users           
+#' @param show_n_loc Number of potential homes to extract
+#' @param keep_score Option to keep or remove calculated result/score per user per location
 #' 
 #' @export
-identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", tz = "Asia/Singapore", recipe, show_n_loc = 1, keep_score = F){
+identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", tz = "Asia/Singapore", 
+                              recipe, show_n_loc = 1, keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
