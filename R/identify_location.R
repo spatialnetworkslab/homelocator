@@ -35,7 +35,7 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   
   ## recipe: FREQ
   if(recipe == "FREQ"){
-    output <- recip_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
+    output <- recipe_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
   }
   
   ## recipe: OSNA
@@ -263,7 +263,7 @@ recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
-  ## need to check neighbors dataframe, make sure there are columns of locaiton and neighbor
+  ## need to check neighbors dataframe, make sure there are columns of locaiton and neighbor, the name of location column should be the same as in the dataset
   if (!rlang::has_name(df_neighbors, location)) {
     stop(paste(emo::ji("bomb"), "Location column does not exist!"))
   }
@@ -335,7 +335,7 @@ recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at
   decide_home <- function(data){
     homes <- data %>% pull({{location_expr}})
     home1 <- homes[1]
-    home1_neighbors <- neighbors %>% filter({{location_expr}} == home1) %>% pull(neighbor) %>% unlist() # get the neighboring locations of first home 
+    home1_neighbors <- df_neighbors %>% filter({{location_expr}} == home1) %>% pull(neighbor) %>% unlist() # get the neighboring locations of first home 
     home2 <- homes[2]
     # if home 1 and home 2 are neighboring location, extract home1 (one with the higher number of days, and the higher number of data points)
     if(home2 %in% home1_neighbors){
