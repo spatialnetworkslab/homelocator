@@ -40,7 +40,7 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   
   ## recipe: OSNA
   if(recipe == "OSNA"){
-    output <- recip_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
+    output <- recipe_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
   }
   
   ## recipe: APDM
