@@ -517,10 +517,9 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at",
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to load the neighbors table before you use the recipe!!
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
 df_neighbors <- readRDS(here::here("data/neighbors.rds"))
 identify_location(test_sample, user = "u_id", timestamp = "created_at", 
                   location = "grid_id", recipe = "APDM", keep_score = F)
 ```
-
-
-
