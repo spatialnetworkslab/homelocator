@@ -23,9 +23,11 @@ library(homelocator)
 
 # Introduction
 
-<p align="justify">The `homelocator` library is designed for identifying meaningful locations of user based on the spatial and temporal features contained within the mobility data, such as social media data, mobile phone data and so on.</p>
+<p align="justify">Identifying meaningful locations, such as home and/or work locations from mobile technology is an essential step in the field of mobility analysis. The `homelocator` library is designed for identifying meaningful locations of user based on the spatio-temporally features contained within the mobility data, such as social media data, mobile phone data, mobile app data and so on.</p>
 
-<p align="justify">The main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes' to identify meaningful locations according to their research requirements and so they are able to achieve an apples-to-apples comparison across approaches.</p>
+<p align="justify">Although there is a myriad of different approaches to inferring meaningful locaitons in the last 10 years, a consensus or single best approach has not emerged in the current state-of-the-art. The actual algorithms used are not always discussed in detail in publications and the source codes are seldom released in public, which makes comparing algorithms as well as reproducing work difficult.</p>
+
+<p align="justify">So, the main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes', or use the existing embeded "recipes" to identify meaningful locations according to their research requirements so that they are able to achieve an apples-to-apples comparison across approaches.</p>
 
 <p align="justify">We hope that through packages like `homelocator`, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.</p>
 
@@ -44,7 +46,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 # load data
-test_sample <- readRDS(here("data/new_test_sample.rds"))
+test_sample <- readRDS(here("data/test_sample.rds"))
 
 # show test sample 
 test_sample %>% head(3)
@@ -110,16 +112,16 @@ The `nest_double_nest()` and `unnest_double_nested()` functions in `nest.R` scri
  
 
 ```{r}
-# double nest data
+# double nest data (e.g., nesting column: created_at)
 df_double_nested <- nest_nested(df_nested %>% head(100), c("created_at"))
 
 # show result 
 df_double_nested %>% head(3)
 
 # show result 
-df_double_nested$data[[3]] %>% head(3)
+df_double_nested$data[[1]] %>% head(3)
 
-df_double_nested$data[[3]]$data[[2]] %>% head(3)
+df_double_nested$data[[1]]$data[[1]] %>% head(3)
 
 # unnest nested data 
 df_double_unnested <- df_double_nested %>% 
@@ -140,11 +142,14 @@ The `enrich_timestamp()` in `enrich_timestamp.R` script creates additional varia
   - `tz`: a character string containing the time zone to convert to. This should be one of the time zones [recognized by R](https://stat.ethz.ch/R-manual/R-devel/library/base/html/timezones.html). The default `tz` is set to `Asia/Singapore`.
 
 ```{r}
+#original variables 
+df_nested[1, ] %>% unnest(cols = c(data)) %>% head(3)
+
 # create new variables from "created_at" timestamp column 
 df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at", tz = "Asia/Singapore")
 
 # show result 
-df_enriched$data[[3]] %>% head(3)
+df_enriched[1, ] %>% unnest(cols = c(data)) %>% head(3)
 ```
 
 ### Summarize in nested and double nested dataframe 
@@ -157,6 +162,7 @@ The `summarise_nested()` function in the `summarise.R` script works similar to d
 
 ```{r}
 # summarize in nested dataframe 
+# e.g., summarise total number of tweets and total number of places per user
 df_summarize_nested <- summarise_nested(df_enriched, 
                                         n_tweets = n(),
                                         n_locs = n_distinct(grid_id))
@@ -164,14 +170,16 @@ df_summarize_nested <- summarise_nested(df_enriched,
 # show result 
 df_summarize_nested %>% head(3)
 
-# summarize in double nested dataframe (take first 100 users for example)
+# summarize in double nested dataframe 
+# take first 100 users for example
+# e.g summarise total number of tweets and totla number of distinct days 
 df_summarize_double_nested <- summarise_double_nested(df_enriched %>% head(100), 
-                                                      nest_cols = c("created_at", "ymd"), 
-                                                      n_tweets = n(), n_days = n_distinct(ymd))
+                    nest_cols = c("created_at", "ymd", "year", "month", "day", "wday", "hour"), 
+                    n_tweets = n(), n_days = n_distinct(ymd))
 
 # show result 
-df_summarize_double_nested[3, ]
-df_summarize_double_nested[3, ]$data[[1]] %>% head(3)
+df_summarize_double_nested[1, ]
+df_summarize_double_nested[1, ]$data[[1]] %>% head(3)
 ```
 
 
@@ -184,7 +192,7 @@ The `remove_top_users()` function in `remove_top_users.R` script allows to remov
   - `topNpct_user`: a decimal number that represent the certain percentage of users to remove
 
 ```{r}
-# remove top 1% active users
+# remove top 1% active users (e.g based on the frequency of tweets sent by users)
 df_removed_active_users <- remove_top_users(df_summarize_nested, user = "u_id", 
                                             counts = "n_tweets", topNpct_user = 1) 
 
@@ -262,13 +270,16 @@ df_expanded <- df_cleaned %>%
 df_expanded %>% head(3)
 ```
 
-The function `prop_factor_nested()` allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. For example, [ADD EXAMPLE TO EXPLAIN USE]
+The function `prop_factor_nested()` allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. For example, inside the list-column, the variable `wd_or_wk` has two categories named weekend or weekday, when you call `prop_factor_nested()` function, it calculates the proportion of weekend and weekday separately, and the results are then expanded to two new columns called `weekday` and `weekend` adding to the dataframe. 
 
   - `df`: a nested dataframe 
   - `var`: name of column to calculate inside the list-column
   
 
 ```{r}
+# categories for a variable inside the list-column: e.g weekend or weekday
+df_expanded$data[[1]] %>% head(3)
+
 # calculate proportion of categories for four variables: wd_or_wk, rest_or_work, wk.am_or_wk.pm
 df_expanded <- df_expanded %>% 
   prop_factor_nested(wd_or_wk, rest_or_work, wk.am_or_wk.pm) 
@@ -303,6 +314,7 @@ df_expanded <- df_expanded %>%
 
 df_expanded %>% head(3)
 
+# when calculating scores, you can give weight to different variables, but the total weight should add up to 1
 df_scored <- df_expanded %>% 
   score_nested(., user = "u_id", location = "grid_id", keep_original_vars = F,
                s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
@@ -319,7 +331,6 @@ df_scored %>% head(3)
 df_scored$data[[1]]
 
 ### we can replace the score function by mutate function 
-
 df_scored_2 <- df_expanded %>% 
   nest_verbose(-u_id) %>% 
   mutate_nested(s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
@@ -343,7 +354,7 @@ df_score_summed <- df_scored %>%
   score_summary(., user = "u_id", location = "grid_id", starts_with("s_"))
 
 df_score_summed %>% head(3)
-df_score_summed$data[[3]]
+df_score_summed$data[[1]]
 ```
 ==
 [NOTE FROM ATE: STILL NEED TO READ BELOW THIS LINE]
