@@ -15,10 +15,12 @@
 #' @export
 identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", tz = "Asia/Singapore", 
                               recipe, show_n_loc = 1, keep_score = F){
+  
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
   
+  tictoc::tic("Location Identification")
   ## Validate the input dataset 
   df_valided <- validate_dataset(df, user = user, timestamp = timestamp, location = location)
   
@@ -49,6 +51,7 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
           "and another column named neighbor.\n The neighbor column should be a list-column contains the neighboring locations for", location, "per row."))
     output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, keep_score = keep_score)
   }
+  tictoc::toc()
   return(output)
 }
 
