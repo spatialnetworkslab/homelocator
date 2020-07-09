@@ -24,11 +24,13 @@ identify_location(
 
 \item{location}{Name of column that holds unique identifier for each location}
 
-\item{recipe}{Different methods to identify home locations}
+\item{tz}{A character string containing the time zone to convert to and it should be recognized in R}
 
-\item{show_n_loc}{Number of potential homes to be shown}
+\item{recipe}{Embeded algorithms to identify the most possible home locations for users}
 
-\item{rm_pct}{Percentage of the top active users that to be removed}
+\item{show_n_loc}{Number of potential homes to extract}
+
+\item{keep_score}{Option to keep or remove calculated result/score per user per location}
 }
 \description{
 This function infers the most possible home locations for users with "recipe".
