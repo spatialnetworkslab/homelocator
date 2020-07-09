@@ -16,14 +16,20 @@ mutate_verbose <- function(df, ...){
   start.time <- Sys.time()
   output <- df %>% mutate(!!!var_expr)
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- names(df)
   colnames_new <- names(output)
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)   
   
   message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -60,7 +66,7 @@ mutate_nested <- function(df, ...){
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~add_with_progress(.))) 
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
@@ -68,7 +74,13 @@ mutate_nested <- function(df, ...){
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -115,7 +127,7 @@ prop_factor_nested <- function(df, ...){
     dplyr::bind_cols(do.call(dplyr::bind_rows, purrr::map(df[[colname_nested_data]], ~add_with_progress(.)))) %>% 
     replace(., is.na(.), 0)
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- names(df)
   colnames_new <- names(output)
@@ -124,7 +136,13 @@ prop_factor_nested <- function(df, ...){
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish calculating! There are", length(colnames_added), "new calculated variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Calculating time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Calculating time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Calculating time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -164,7 +182,7 @@ mutate_double_nested <- function(df, nest_cols, ...){
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
@@ -172,7 +190,13 @@ mutate_double_nested <- function(df, nest_cols, ...){
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
   
   message(paste(emo::ji("white_check_mark"), "Finish adding! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Adding time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)

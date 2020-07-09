@@ -28,7 +28,7 @@ spread_nested <- function(df, key_var, value_var){
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~spread_with_progress(.)))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- names(df[[colname_nested_data]][[1]])
   colnames_new <- names(output[[colname_nested_data]][[1]])
@@ -36,7 +36,13 @@ spread_nested <- function(df, key_var, value_var){
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish spreading! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Spreading time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <-  round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Spreading time:", time.taken, "mins"))
+  } else{
+    message(paste(emo::ji("hourglass"), "Spreading time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)

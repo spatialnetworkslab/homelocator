@@ -29,13 +29,20 @@ remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_use
     arrange(desc({{counts}})) %>% 
     dplyr::slice(round(n_original_users*(topNpct_user/100)):n()) 
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   n_new_users <- output %>% pull({{user}}) %>% n_distinct()
   n_removed_users <- n_original_users - n_new_users
   message(paste(emo::ji("white_check_mark"), "Finish removing! Removed", n_removed_users, "active users!"))
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_new_users, "users left."))
-  message(paste(emo::ji("hourglass"), "Removing time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <-  round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Removing time:", time.taken, "mins"))
+  } else{
+    message(paste(emo::ji("hourglass"), "Removing time:", time.taken, "secs"))
+  }
+  
   message("\n")
   
   return(output)

@@ -58,14 +58,20 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
       mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~transmute_with_progress(.)))
   }
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- df_nest[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish scoring! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Scoring time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <-  round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Scoring time:", time.taken, "mins"))
+  } else{
+    message(paste(emo::ji("hourglass"), "Scoring time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -110,14 +116,20 @@ score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~sum_score_with_progress(.)))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   colnames_original <- df[[colname_nested_data]][[1]] %>% names()
   colnames_new <- output[[colname_nested_data]][[1]] %>% names()
   colnames_added <- dplyr::setdiff(colnames_new, colnames_original)
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish summing! There are", length(colnames_added), "new added variables:", paste(colnames_added, collapse = ", ")))
-  message(paste(emo::ji("hourglass"), "Summing time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <-  round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Summing time:", time.taken, "mins"))
+  } else{
+    message(paste(emo::ji("hourglass"), "Summing time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)

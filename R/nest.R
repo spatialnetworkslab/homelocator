@@ -17,10 +17,16 @@ nest_verbose <- function(df, ...){
   start.time <- Sys.time()
   output <- df %>% nest_legacy(!!!var_expr)
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
-  message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -47,10 +53,16 @@ unnest_verbose <- function(df, ...){
   output <- suppressWarnings(
     df %>% unnest_legacy(!!!var_expr))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
-  message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -83,11 +95,17 @@ unnest_nested <- function(df, ...){
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
-  message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -127,11 +145,17 @@ nest_nested <- function(df, ...){
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish nesting!"))
-  message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Nesting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -171,11 +195,17 @@ unnest_double_nested <- function(df, ...){
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.))) %>% 
     unnest_legacy()
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish unnesting!"))
-  message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Unnesting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)

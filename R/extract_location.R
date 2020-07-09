@@ -47,12 +47,18 @@ extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc 
       dplyr::select({{user}}, home)
   }
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
   n_user <- output %>% pull(!!user) %>% n_distinct()
   message("\n")
   message(paste(emo::ji("tada"), "Congratulations!! Your have found", n_user, "users' potential home(s)."))
-  message(paste(emo::ji("hourglass"), "Extracting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Extracting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Extracting time:", time.taken, "secs"))
+  }
   message("\n")
   return(output)
 }

@@ -23,11 +23,17 @@ arrange_nested <- function(df, ...){
   output <- df %>%
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~arrange_with_progress(.))) 
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
-  
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
+
   message("\n")
   message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
-  message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  }else{
+    message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "secs"))
+  }
   message("\n")
   
   return(output)
@@ -66,10 +72,17 @@ arrange_double_nested <- function(df, nest_cols, ...){
   output <- df %>% 
     mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], arrange_columns))
   end.time <- Sys.time()
-  time.taken <-  difftime(end.time, start.time, units = "mins") %>% round(., 2)
-  
+  time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
+
   message(paste(emo::ji("white_check_mark"), "Finish sorting!"))
-  message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  
+  if(time.taken > 60){
+    time.taken <- round(time.taken/60, 2)
+    message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "mins"))
+  } else{
+    message(paste(emo::ji("hourglass"), "Sorting time:", time.taken, "secs"))
+  }
+  
   message("\n")
   return(output)
 }
