@@ -1,0 +1,133 @@
+---
+output: github_document
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# homelocator
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## Overview 
+
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature.
+
+## Installation
+
+You can install the released version of homelocator from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("homelocator")
+```
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("spatialnetworkslab/homelocator")
+```
+## Example
+
+These are some basic examples that show you how to use common functions in the package. 
+
+### Validate input dataset
+
+You need to make sure the input dataset includes three essential attributes: 
+
+  - a unique identifier for the person or user 
+  - a unique identifier for the spatial locaiton for the data point 
+  - a timestamp that relects the time the data point was created 
+
+You can use `validate_dataset()` to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset. 
+
+
+```{r echo=FALSE, results='hide', message=F}
+# Load other needed libraries
+devtools::load_all(".")
+library(tidyverse)
+library(emo)
+library(lubridate)
+library(here)
+```
+
+
+```{r validate}
+library(homelocator)
+test_sample <- readRDS(here("data/test_sample.rds"))
+df_validated <- validate_dataset(test_sample, 
+                 user = "u_id", timestamp = "created_at", location = "grid_id")
+head(df_validated)
+```
+
+
+
+### Nesting users for parallel computing 
+
+To speed up computing progress, you can nest the validated dataset by user so that the subsequent location inference can be applied to each user at the same time. 
+
+```{r nesting}
+df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
+head(df_nested)
+```
+
+
+### Enrich variables from timestamp
+
+Add additional needed varialbes derived from the timestamp column. These are often used/needed as intermediate variables in home location algorithms, such as year, month, day, day of the week and hour of the day, etc. 
+
+
+```{r}
+enrich_timestamp(df_nested, timestamp = "created_at")
+```
+
+
+### Use built-in recipes 
+
+Current available recipes, where `HMLC` is the default recipe used in `identify_location`: 
+
+- `HMLC`: 
+  - Weighs data points across multiple time frames to ‘score’ potentially meaningful locations for each user 
+- `FREQ`
+  - Selects the most frequently 'visited' location assuming a user is active mainly around their home location. 
+- `OSNA`: [Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+  - Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
+- `APDM`: [Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+  - Calculates the average and standard deviation of start time data points by a single user, in a single location. 
+
+
+```{r eval=F}
+# default recipe: homelocator -- HMLC
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+
+
+# recipe: Frequency -- FREQ
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
+
+
+# recipe: Online Social Network Activity -- OSNA
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
+
+
+# recipe: Online Social Network Activity -- APDM
+## APDM recipe strictly returns the most likely home location
+## It is important to load the neighbors table before you use the recipe!!
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+
+df_neighbors <- readRDS(here("data/neighbors.rds"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", recipe = "APDM")
+```
+
+
+
