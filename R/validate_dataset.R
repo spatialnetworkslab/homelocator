@@ -1,6 +1,10 @@
-#' Validate the input dataset 
+#' Validate input dataset 
 #' 
-#' To make sure the input dataset contains all three necessary variables: user, location and timestamp
+#' To make sure the input dataset contains all three necessary variables: 
+#' a unique identifier for the person or user
+#' a unique identifier for the spatial locaiton for the data point 
+#' and a timestamp that relects the time the data point was created 
+#' 
 #' @param df A dataframe with columns for the user id, location, timestamp
 #' @param user Name of column that holds unique identifier for each user
 #' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct

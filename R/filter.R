@@ -34,10 +34,10 @@ filter_verbose <- function(df, user = "u_id", ...){
   return(output)
 }
 
-#' Return rows with matching condition in list-column 
+#' Return rows with matching condition within nested dataframe 
 #' 
 #'   
-#' Filter finds rows where conditions are true in list-column
+#' Filter finds rows where conditions are true within nested dataframe 
 #' @param df A nested dataframe 
 #' @param user Name of column that holds unique identifier for each user
 #' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.

@@ -1,6 +1,6 @@
-#' Aggregate multiple values to a single value 
+#' Aggregate multiple values to a single value within a nested tibble
 #' 
-#' Aggregate multiple values to a single value of existing table by name-value paired summary function
+#' Aggregate multiple values to a single value of existing table by name-value paired summary function within a nested tibble
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of summary functions.
 #' 
@@ -41,7 +41,7 @@ summarise_nested <- function(df, ...){
 }
 
 
-#' Aggregate multiple values to a single value 
+#' Aggregate multiple values to a single value in a double-nested tibble
 #' 
 #' Create a list-column in existing list-column and aggregate multiple values in created list-column to a single value by name-value paired summary function
 #' @param df A nested dataframe 

@@ -1,6 +1,8 @@
-#' Remove users
+#' Remove top N percent of active users based on the frequency of data points per user
 #' 
-#' Remove certain percent of top active users based on the total number of data points  
+#' Remove top N percent of active users based on the frequency of data points per user. 
+#' Although the majority of users are real people, some accounts are run by algorithms or 'bots', whereas others can be considered as spam accounts. 
+#' Removing a certain top N percent of active users is an oft-used approach to remove such accounts and reduce the number of such users in the final dataset. 
 #' 
 #' @param df A dataframe with columns for the user id, counts point per user 
 #' @param user Name of column that holds unique identifier for each user

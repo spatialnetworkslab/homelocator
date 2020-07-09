@@ -1,6 +1,6 @@
-#' score of variables 
+#' Give a weighted value for one or more variables in a nested dataframe
 #' 
-#' Add score of each variables 
+#' Give a weighted value for one or more variables in a nested dataframe
 #' @param df A nested dataframe by user
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
@@ -72,9 +72,9 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
 }
 
 
-#' Sum up scores 
+#' Summarises all scored columns and return one single summary score per row
 #' 
-#' Sum up scores of variables for each location
+#' summarises all scored columns and return one single summary score per row
 #' @param df A  dataframe 
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location

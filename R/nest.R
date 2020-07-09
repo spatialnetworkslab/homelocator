@@ -27,7 +27,7 @@ nest_verbose <- function(df, ...){
 }
 
 
-#' Unnest a list column
+#' Unnest dataframe
 #' 
 #' Unnesting makes each element of the list its own row.
 #' @param df A dataframe
@@ -57,7 +57,7 @@ unnest_verbose <- function(df, ...){
 }
 
 
-#' Unnest in nested dataframe 
+#' Unnest within a nested dataframe 
 #' 
 #' Flatten list-column to regular columns inside a nested dataframe
 unnest_nested <- function(df, ...){
@@ -95,7 +95,7 @@ unnest_nested <- function(df, ...){
 
 
 
-#' Nest nested dataframe 
+#' Nest within a nested dataframe 
 #' 
 #' Double nesting creates a list-column of nested dataframe
 #' @param df A nested dataframe 
@@ -139,7 +139,7 @@ nest_nested <- function(df, ...){
 
 
 
-#' Nunest dataframe
+#' Unnest within a double-nested dataframe
 #' 
 #' Unnesting makes each element of the list its own row.
 #' @param df A nested dataframe

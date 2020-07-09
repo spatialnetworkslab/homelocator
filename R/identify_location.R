@@ -1,6 +1,6 @@
-#' Identify home locations for users
+#' Identify home locations for users with built-in recipes
 #' 
-#' This function infers the most possible home locations for users with "recipe". 
+#' This function infers the most possible home locations for users with built-in recipes. 
 #' The "recipe" can be either embeded "recipe" - HMLC, OSNA, APDM, FREQ, or self created "recipe". 
 #' 
 #' @param df A dataframe with columns for the user id, location, timestamp

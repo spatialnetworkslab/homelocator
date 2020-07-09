@@ -1,4 +1,4 @@
-#' Extract location 
+#' Extract identified home locations for users  
 #' 
 #' Extract the most likely home location for each user based on choosed column value 
 #' @param df A nested dataframe by user 

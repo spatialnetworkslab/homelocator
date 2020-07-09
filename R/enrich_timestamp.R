@@ -1,6 +1,6 @@
-#' Create variables 
+#' Create new variables dervied from timestamp
 #' 
-#' Create new variables from existing timestamp
+#' Create new variables from existing timestamp, which are often used/needed as intermediate variables in home location algorithms. 
 #' @param df A nested dataframe 
 #' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct
 #' @param tz A character string containing the time zone to convert to and it should be recognized in R. 

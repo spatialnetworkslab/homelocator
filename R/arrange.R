@@ -1,6 +1,6 @@
-#' Arrange rows by variables
+#' Arrange rows by variables within a nested dataframe
 #' 
-#' Arrange rows by variables in nested dataframe 
+#' Arrange rows by variables within a nested dataframe
 #' @param df A nested dataframe 
 #' @param ... Comma separated list of unquoted variable names
 #' 
@@ -34,10 +34,9 @@ arrange_nested <- function(df, ...){
 }
 
 
-
-#' Arrange rows by variables
+#' Arrange rows by variables within a double-nested dataframe
 #' 
-#' Arrange rows by variables in double nested dataframe 
+#' Arrange rows by variables within a double-nested dataframe
 #' @param df A nested dataframe 
 #' @param nest_cols Name of columns to nest in existing list-column
 #' @param ... Comma separated list of unquoted variable names

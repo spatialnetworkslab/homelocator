@@ -29,9 +29,9 @@ mutate_verbose <- function(df, ...){
   return(output)
 }
 
-#' Add new variables in list-column
+#' Add new variables within a nested dataframe
 #' 
-#' Add new variables and preserves existing from list-column
+#' Add new variables and preserves existing within a nested dataframe
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of expressions
 #'
@@ -74,9 +74,9 @@ mutate_nested <- function(df, ...){
   return(output)
 }
 
-#' Calculate relative frequency 
+#' Calculate the proportion of categories for a variable within a nested dataframe
 #' 
-#' Calculate relative frequency per category of the variable and spread categories to columns
+#' Calculate the proportion of categories for a variable within a nested dataframe and convert each categories to a new variable adding to the dataframe
 #' @param df A nested dataframe 
 #' @param var Name of column to calculate 
 #' 
@@ -131,9 +131,9 @@ prop_factor_nested <- function(df, ...){
 }
 
 
-#' Add new variable 
+#' Add new variable within a double-nested dataframe
 #' 
-#' Add new variable in double nested dataset
+#' Add new variable within a double-nested dataframe
 #' @param df A dataframe 
 #' @param nest_cols A selection of columns to nest in existing list-column
 #' @param ... Name-value pairs of functions
