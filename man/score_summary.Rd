@@ -2,7 +2,7 @@
 % Please edit documentation in R/score.R
 \name{score_summary}
 \alias{score_summary}
-\title{Sum up scores}
+\title{Summarises all scored columns and return one single summary score per row}
 \usage{
 score_summary(df, user = "u_id", location = "loc_id", ...)
 }
@@ -16,5 +16,5 @@ score_summary(df, user = "u_id", location = "loc_id", ...)
 \item{...}{A selection of columns to sum}
 }
 \description{
-Sum up scores of variables for each location
+summarises all scored columns and return one single summary score per row
 }

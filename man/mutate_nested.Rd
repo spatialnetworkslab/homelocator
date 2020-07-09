@@ -2,7 +2,7 @@
 % Please edit documentation in R/mutate.R
 \name{mutate_nested}
 \alias{mutate_nested}
-\title{Add new variables in list-column}
+\title{Add new variables within a nested dataframe}
 \usage{
 mutate_nested(df, ...)
 }
@@ -12,5 +12,5 @@ mutate_nested(df, ...)
 \item{...}{Name-value pairs of expressions}
 }
 \description{
-Add new variables and preserves existing from list-column
+Add new variables and preserves existing within a nested dataframe
 }

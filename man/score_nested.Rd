@@ -2,7 +2,7 @@
 % Please edit documentation in R/score.R
 \name{score_nested}
 \alias{score_nested}
-\title{score of variables}
+\title{Give a weighted value for one or more variables in a nested dataframe}
 \usage{
 score_nested(
   df,
@@ -26,5 +26,5 @@ Can we replace this with just mutate_nested? And potentially add transmute_neste
 \item{keep_ori_vars}{Option to keep or drop original varialbes}
 }
 \description{
-Add score of each variables
+Give a weighted value for one or more variables in a nested dataframe
 }

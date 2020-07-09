@@ -2,7 +2,7 @@
 % Please edit documentation in R/nest.R
 \name{nest_nested}
 \alias{nest_nested}
-\title{Nest nested dataframe}
+\title{Nest within a nested dataframe}
 \usage{
 nest_nested(df, ...)
 }

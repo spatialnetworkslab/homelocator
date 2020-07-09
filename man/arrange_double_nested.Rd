@@ -2,7 +2,7 @@
 % Please edit documentation in R/arrange.R
 \name{arrange_double_nested}
 \alias{arrange_double_nested}
-\title{Arrange rows by variables}
+\title{Arrange rows by variables within a double-nested dataframe}
 \usage{
 arrange_double_nested(df, nest_cols, ...)
 }
@@ -14,5 +14,5 @@ arrange_double_nested(df, nest_cols, ...)
 \item{...}{Comma separated list of unquoted variable names}
 }
 \description{
-Arrange rows by variables in double nested dataframe
+Arrange rows by variables within a double-nested dataframe
 }

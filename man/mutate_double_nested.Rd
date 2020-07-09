@@ -2,7 +2,7 @@
 % Please edit documentation in R/mutate.R
 \name{mutate_double_nested}
 \alias{mutate_double_nested}
-\title{Add new variable}
+\title{Add new variable within a double-nested dataframe}
 \usage{
 mutate_double_nested(df, nest_cols, ...)
 }
@@ -14,5 +14,5 @@ mutate_double_nested(df, nest_cols, ...)
 \item{...}{Name-value pairs of functions}
 }
 \description{
-Add new variable in double nested dataset
+Add new variable within a double-nested dataframe
 }

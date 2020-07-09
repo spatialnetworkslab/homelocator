@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarise.R
 \name{summarise_double_nested}
 \alias{summarise_double_nested}
-\title{Aggregate multiple values to a single value}
+\title{Aggregate multiple values to a single value in a double-nested tibble}
 \usage{
 summarise_double_nested(df, nest_cols, ...)
 }

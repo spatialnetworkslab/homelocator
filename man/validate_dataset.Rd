@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate_dataset.R
 \name{validate_dataset}
 \alias{validate_dataset}
-\title{Validate the input dataset}
+\title{Validate input dataset}
 \usage{
 validate_dataset(
   df,
@@ -24,5 +24,8 @@ validate_dataset(
 \item{keep_other_vars}{Option to keep or remove other variables of the input dataset}
 }
 \description{
-To make sure the input dataset contains all three necessary variables: user, location and timestamp
+To make sure the input dataset contains all three necessary variables:
+a unique identifier for the person or user
+a unique identifier for the spatial locaiton for the data point
+and a timestamp that relects the time the data point was created
 }

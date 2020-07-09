@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarise.R
 \name{summarise_nested}
 \alias{summarise_nested}
-\title{Aggregate multiple values to a single value}
+\title{Aggregate multiple values to a single value within a nested tibble}
 \usage{
 summarise_nested(df, ...)
 }
@@ -12,5 +12,5 @@ summarise_nested(df, ...)
 \item{...}{Name-value pairs of summary functions.}
 }
 \description{
-Aggregate multiple values to a single value of existing table by name-value paired summary function
+Aggregate multiple values to a single value of existing table by name-value paired summary function within a nested tibble
 }

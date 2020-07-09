@@ -2,7 +2,7 @@
 % Please edit documentation in R/nest.R
 \name{unnest_nested}
 \alias{unnest_nested}
-\title{Unnest in nested dataframe}
+\title{Unnest within a nested dataframe}
 \usage{
 unnest_nested(df, ...)
 }

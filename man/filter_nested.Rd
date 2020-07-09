@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter.R
 \name{filter_nested}
 \alias{filter_nested}
-\title{Return rows with matching condition in list-column}
+\title{Return rows with matching condition within nested dataframe}
 \usage{
 filter_nested(df, user = "u_id", ...)
 }
@@ -14,5 +14,5 @@ filter_nested(df, user = "u_id", ...)
 \item{...}{Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.}
 }
 \description{
-Filter finds rows where conditions are true in list-column
+Filter finds rows where conditions are true within nested dataframe
 }

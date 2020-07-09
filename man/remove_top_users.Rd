@@ -2,7 +2,7 @@
 % Please edit documentation in R/remove_top_users.R
 \name{remove_top_users}
 \alias{remove_top_users}
-\title{Remove users}
+\title{Remove top N percent of active users based on the frequency of data points per user}
 \usage{
 remove_top_users(df, user = "u_id", counts = "n_points", topNpct_user = 1)
 }
@@ -16,5 +16,7 @@ remove_top_users(df, user = "u_id", counts = "n_points", topNpct_user = 1)
 \item{topNpct_user}{A decimal number that represent the certain percentage of users to remove}
 }
 \description{
-Remove certain percent of top active users based on the total number of data points
+Remove top N percent of active users based on the frequency of data points per user.
+Although the majority of users are real people, some accounts are run by algorithms or 'bots', whereas others can be considered as spam accounts.
+Removing a certain top N percent of active users is an oft-used approach to remove such accounts and reduce the number of such users in the final dataset.
 }

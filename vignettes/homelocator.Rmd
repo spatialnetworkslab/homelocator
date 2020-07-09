@@ -1,7 +1,7 @@
 ---
 title: "homelocator" 
-date: "Last compiled on `r format(Sys.time(), '%d %b, %Y')`"
-author: Qingqing Chen, Ate Poorthuis
+# date: "Last compiled on `r format(Sys.time(), '%d %b, %Y')`"
+# author: Qingqing Chen, Ate Poorthuis
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{homelocator}
@@ -16,8 +16,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+
+```{r echo=FALSE, results='hide'}
 devtools::load_all(".")
+```
+
+```{r setup}
 library(homelocator)
 ```
 
@@ -27,7 +31,7 @@ library(homelocator)
 
 <p align="justify">Although there is a myriad of different approaches to inferring meaningful locaitons in the last 10 years, a consensus or single best approach has not emerged in the current state-of-the-art. The actual algorithms used are not always discussed in detail in publications and the source codes are seldom released in public, which makes comparing algorithms as well as reproducing work difficult.</p>
 
-<p align="justify">So, the main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes', or use the existing embeded "recipes" to identify meaningful locations according to their research requirements so that they are able to achieve an apples-to-apples comparison across approaches.</p>
+<p align="justify">So, the main objective for developing this package is to provide a consistent framework and interface for the adoption of different approaches so that researchers are able to write structured, algorithmic 'recipes', or use the existing embeded "recipes" to identify meaningful locations according to their research requirements. With this package, users are able to achieve an apples-to-apples comparison across approaches.</p>
 
 <p align="justify">We hope that through packages like `homelocator`, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.</p>
 
@@ -298,7 +302,7 @@ The `score_nested()` function in `score.R` script allows you to give a weighted 
   - `keep_ori_vars`: option to keep or drop original varialbes 
   - `...`: name-value pairs of expression 
 
-The `score_summary()` function summarises all scored columns and return one single summary score  per row.
+The `score_summary()` function summarises all scored columns and return one single summary score per row.
   
   - `df`: a dataframe 
   - `user`: name of column that holds unique identifier for each user

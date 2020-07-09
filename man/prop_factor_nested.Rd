@@ -2,7 +2,7 @@
 % Please edit documentation in R/mutate.R
 \name{prop_factor_nested}
 \alias{prop_factor_nested}
-\title{Calculate relative frequency}
+\title{Calculate the proportion of categories for a variable within a nested dataframe}
 \usage{
 prop_factor_nested(df, ...)
 }
@@ -12,5 +12,5 @@ prop_factor_nested(df, ...)
 \item{var}{Name of column to calculate}
 }
 \description{
-Calculate relative frequency per category of the variable and spread categories to columns
+Calculate the proportion of categories for a variable within a nested dataframe and convert each categories to a new variable adding to the dataframe
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/enrich_timestamp.R
 \name{enrich_timestamp}
 \alias{enrich_timestamp}
-\title{Create variables}
+\title{Create new variables dervied from timestamp}
 \usage{
 enrich_timestamp(df, timestamp = "created_at", tz = "Asia/Singapore")
 }
@@ -14,5 +14,5 @@ enrich_timestamp(df, timestamp = "created_at", tz = "Asia/Singapore")
 \item{tz}{A character string containing the time zone to convert to and it should be recognized in R.}
 }
 \description{
-Create new variables from existing timestamp
+Create new variables from existing timestamp, which are often used/needed as intermediate variables in home location algorithms.
 }

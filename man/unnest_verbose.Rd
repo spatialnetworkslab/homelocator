@@ -2,7 +2,7 @@
 % Please edit documentation in R/nest.R
 \name{unnest_verbose}
 \alias{unnest_verbose}
-\title{Unnest a list column}
+\title{Unnest dataframe}
 \usage{
 unnest_verbose(df, ...)
 }

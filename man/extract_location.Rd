@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract_location.R
 \name{extract_location}
 \alias{extract_location}
-\title{Extract location}
+\title{Extract identified home locations for users}
 \usage{
 extract_location(
   df,

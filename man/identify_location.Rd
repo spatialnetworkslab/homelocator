@@ -2,7 +2,7 @@
 % Please edit documentation in R/identify_location.R
 \name{identify_location}
 \alias{identify_location}
-\title{Identify home locations for users}
+\title{Identify home locations for users with built-in recipes}
 \usage{
 identify_location(
   df,
@@ -33,6 +33,6 @@ identify_location(
 \item{keep_score}{Option to keep or remove calculated result/score per user per location}
 }
 \description{
-This function infers the most possible home locations for users with "recipe".
+This function infers the most possible home locations for users with built-in recipes.
 The "recipe" can be either embeded "recipe" - HMLC, OSNA, APDM, FREQ, or self created "recipe".
 }
