@@ -2,17 +2,17 @@
 % Please edit documentation in R/enrich_timestamp.R
 \name{enrich_timestamp}
 \alias{enrich_timestamp}
-\title{Derive new variables}
+\title{Create new variables dervied from timestamp}
 \usage{
-enrich_timestamp(df, timestamp, tz = "Asia/Singapore")
+enrich_timestamp(df, timestamp = "created_at", tz = "Asia/Singapore")
 }
 \arguments{
 \item{df}{A nested dataframe}
 
-\item{timestamp}{Name of timestamp column. Should be POSIXct}
+\item{timestamp}{Name of column that holds specific timestamp for each data point and it should be POSIXct}
 
-\item{tz}{Time zone of timestamp}
+\item{tz}{A character string containing the time zone to convert to and it should be recognized in R.}
 }
 \description{
-Add basic needed variables derived from timestamp
+Create new variables from existing timestamp, which are often used/needed as intermediate variables in home location algorithms.
 }

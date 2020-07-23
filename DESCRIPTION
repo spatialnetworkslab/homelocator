@@ -1,9 +1,9 @@
 Package: homelocator
 Type: Package
 Title: Inferring Home Locations for Social Media Users 
-Version: 0.0.0.9000
+Version: 0.1.0
 Description: Inferring users' potential home(s) based on location and timestampe information from social media data.
-Author: 
+Authors@R:
     c(person(given = "Qingqing",
              family = "Chen",
              role = c("aut", "cre"),
@@ -11,9 +11,9 @@ Author:
       person(given = "Ate",
              family = "Poorthuis",
              role = c("aut"),
-             email = "ate_poorthuis@sutd.edu.sg"))
+             email = "ate.poorthuis@kuleuven.be"))
 License: MIT + file LICENSE
-Maintainer: The package maintainer <qingqing_chen@sutd.edu.sg>
+Maintainer: Qingqing Chen <qingqing_chen@sutd.edu.sg>
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -24,7 +24,10 @@ Imports:
     readr (>= 1.3.1),
     rlang (>= 0.4.5),
     tidyverse (>= 1.3.0),
-    dplyr (>= 0.8.5)
+    dplyr (>= 0.8.5),
+    here (>= 0.1),
+    tictoc (>= 1.0),
+    usethis (>= 1.6.0)
 Suggests:
     devtools,
     furrr,
@@ -33,6 +36,7 @@ Suggests:
     rmarkdown,
     testthat
 URL: https://github.com/spatialnetworkslab/homelocator
+BugReports: https://github.com/spatialnetworkslab/homelocator/issues
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0

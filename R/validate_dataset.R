@@ -1,14 +1,18 @@
-#' Validate used dataset
+#' Validate input dataset 
 #' 
-#' To make sure the used dataset contains all three necessary variables: user, location and timestamp
+#' To make sure the input dataset contains all three necessary variables: 
+#' a unique identifier for the person or user
+#' a unique identifier for the spatial locaiton for the data point 
+#' and a timestamp that relects the time the data point was created 
+#' 
 #' @param df A dataframe with columns for the user id, location, timestamp
 #' @param user Name of column that holds unique identifier for each user
-#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct
 #' @param location Name of column that holds unique identifier for each location
-#' @param keep_other_vars Choice to keep variables or not
+#' @param keep_other_vars Option to keep or remove other variables of the input dataset
 #' 
 
-validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = F){
+validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", keep_other_vars = F){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
   }
@@ -33,14 +37,15 @@ validate_dataset <- function(df, user = "u_id", timestamp = "created_at", locati
 
   unique_users <- df %>% pull({{user}}) %>% n_distinct()
   message(paste(emo::ji("tada"), "Congratulations!! Your dataset has passed validation."))
-  message(paste(emo::ji("bust_in_silhouette"), "There are", unique_users, "unique users in your dataset. Now you can start your journey identifying their meaningful location(s)!"))
+  message(paste(emo::ji("bust_in_silhouette"), "There are", unique_users, "unique users in your dataset."))
+  message(paste(emo::ji("earth_asia"), "Now start your journey identifying their meaningful location(s)!"))
   message(paste(emo::ji("clap"), "Good luck!"))
+  message("\n")
 
   if(keep_other_vars) {
     df
   } else {
-    df %>%
-      dplyr::select(c({{user}}, {{location}}, {{timestamp}}))
+    df %>% dplyr::select(c({{user}}, {{location}}, {{timestamp}}))
   }
 }
 

@@ -1,76 +1,177 @@
-# Homelocator
-## Introduction
-User's locations are important to many applications such as event detection, epidemic dispersion, targeted advertisment, news recommendation and so on. In this package, we estimate users' home location with location and timestamped Twitter data at neighborhood-level. Our algorithm analyzes score of severial variables that can represent users' tweetting behavior. Ultimately, we would like to be able to predict the home location of each user based on the score of locations cumulated by variables we considered. 
 
-## Install
-### Build package 
-``` devtools::build()```
+# homelocator
 
-### Install package 
-```devtools:install()```
+<!-- badges: start -->
 
-### Load package 
-``` Ctrl/Cmd + Shift + L``` or ```devtools::load_all()```
+<!-- badges: end -->
+
+## Overview
+
+The goal of `homelocator` is to provide a consistent framework and
+interface for the adoption of different approaches for identifying
+meaningful locations for users. With the package, you are able to write
+structured, algorithmic ‘recipes’ to identify meaningful locations
+according to your research requirements. The package also has a number
+of built-in ‘recipes’ that have been translated from approaches in the
+existing literature.
+
+## Installation
+
+You can install the released version of homelocator from
+[CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("homelocator")
+```
+
+And the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("spatialnetworkslab/homelocator")
+```
+
+## Example
+
+These are some basic examples that show you how to use common functions
+in the package.
+
+### Validate input dataset
+
+You need to make sure the input dataset includes three essential
+attributes:
+
+  - a unique identifier for the person or user
+  - a unique identifier for the spatial locaiton for the data point
+  - a timestamp that relects the time the data point was created
+
+You can use `validate_dataset()` to validate your input dataset before
+starting identifying meaningful locations. In this function, you need to
+specify the names of three essential attribute that used in your
+dataset.
+
+``` r
+library(homelocator)
+test_sample <- readRDS(here("data/test_sample.rds"))
+df_validated <- validate_dataset(test_sample, 
+                 user = "u_id", timestamp = "created_at", location = "grid_id")
+#> 🎉 Congratulations!! Your dataset has passed validation.
+#> 👤 There are 3000 unique users in your dataset.
+#> 🌏 Now start your journey identifying their meaningful location(s)!
+#> 👏 Good luck!
+#> 
+head(df_validated)
+#> # A tibble: 6 x 3
+#>   u_id     grid_id created_at         
+#>   <chr>      <int> <dttm>             
+#> 1 26295661     566 2013-03-05 22:03:15
+#> 2 69400017    1012 2013-06-11 14:12:45
+#> 3 16294855    1188 2013-04-30 18:47:58
+#> 4 40275983     254 2014-02-15 16:14:01
+#> 5 91759535    1233 2014-03-05 14:57:07
+#> 6 81298067    1296 2015-04-22 05:30:41
+```
+
+### Nesting users for parallel computing
+
+To speed up computing progress, you can nest the validated dataset by
+user so that the subsequent location inference can be applied to each
+user at the same time.
+
+``` r
+df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
+#> 🛠 Start nesting...
+#> ✅ Finish nesting!
+#> ⌛ Nesting time: 0.01 mins
+#> 
+head(df_nested)
+#> # A tibble: 6 x 2
+#>   u_id     data                
+#>   <chr>    <list>              
+#> 1 26295661 <tibble [406 × 2]>  
+#> 2 69400017 <tibble [79 × 2]>   
+#> 3 16294855 <tibble [5,889 × 2]>
+#> 4 40275983 <tibble [67 × 2]>   
+#> 5 91759535 <tibble [1,823 × 2]>
+#> 6 81298067 <tibble [191 × 2]>
+```
+
+### Enrich variables from timestamp
+
+Add additional needed varialbes derived from the timestamp column. These
+are often used/needed as intermediate variables in home location
+algorithms, such as year, month, day, day of the week and hour of the
+day, etc.
+
+``` r
+enrich_timestamp(df_nested, timestamp = "created_at")
+#> 🛠 Enriching variables from timestamp...
+#> 
+#> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
+#> ⌛ Enriching time: 0.05 mins
+#> 
+#> # A tibble: 3,000 x 2
+#>    u_id     data                
+#>    <chr>    <list>              
+#>  1 26295661 <tibble [406 × 8]>  
+#>  2 69400017 <tibble [79 × 8]>   
+#>  3 16294855 <tibble [5,889 × 8]>
+#>  4 40275983 <tibble [67 × 8]>   
+#>  5 91759535 <tibble [1,823 × 8]>
+#>  6 81298067 <tibble [191 × 8]>  
+#>  7 45267153 <tibble [57 × 8]>   
+#>  8 37588593 <tibble [4,475 × 8]>
+#>  9 81235774 <tibble [335 × 8]>  
+#> 10 67861300 <tibble [29 × 8]>   
+#> # … with 2,990 more rows
+```
+
+### Use built-in recipes
+
+Current available recipes, where `HMLC` is the default recipe used in
+`identify_location`:
+
+  - `HMLC`:
+      - Weighs data points across multiple time frames to ‘score’
+        potentially meaningful locations for each user
+  - `FREQ`
+      - Selects the most frequently ‘visited’ location assuming a user
+        is active mainly around their home location.
+  - `OSNA`: [Efstathiades et
+    al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+      - Finds the most ‘popular’ location during ‘rest’, ‘active’ and
+        ‘leisure time. Here we focus on ’rest’ and ‘leisure’ time to
+        find the most possible home location for each user.
+  - `APDM`: [Ahas et
+    al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+      - Calculates the average and standard deviation of start time data
+        points by a single user, in a single location.
+
+<!-- end list -->
+
+``` r
+# default recipe: homelocator -- HMLC
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
 
 
-## Other algorithms for home location estimation
-### Based on geo-tagged data 
-- [Jie Lin et al.2016]: Four approaches have been proposed and evaluated to address the problem of automatic identification of a Twitter user’s home location based on the spatiotemporal information of his/her geo-tagged tweets. The three deterministic approaches, WMFV, W-MEAN, and W-MEDIAN, identify the home location of each Twitter user by find- ing the weighted most visited cluster, the weighted mean center of geo-tagged tweets, and the weighted median cen- ter of geo-tagged tweets of that user, respectively. In contrast, SVM formulates the problem as a binary classification task within a machine learning framework. The results show that the WMFV and SVM methods provide more satisfactory performance in predicting home locations compared with the W-MEDIAN and W-MEAN methods.
-
-- [Efstathiades et al.2015]: proposed an approach to infer the precise home location of a Twitter user by taking the most popular location of that user's geo-tagged tweets during the so-called "Rest" and "Leisure" timeframes. Noticing that tweets generated during the Rest timeframe are more likely sent from home than those during the Leisure timeframe, they increased the popularity of a place if the tweet was generated during Rest time by assigning a higher weight value.
-
-- [Rein Ahas et al.]: to develop and to test the model for determining meaningful locations of mobile phone users as locations of homes and work-places using passive mobile positioning data and anchor point model. Passive mobile positioning data is secondary data concerning the location of call activities or handovers in network cells that is automatically stored in the memory of service providers.
-
-- [Pilleriine Kamenjuk et al.]: mapping changes of residence using data from passive mobile positioning and an anchor point model to better understanding long-term mobility. The study concludes that the modst important considerations in monitoring change of residence using passive mobile position data include the continuity of the time-series data, the varing structure of the mobile tower network and the diversified nature of human mobility. 
-
-### Based on social network 
-- [Davis et al. 2011]: presented a simple but effective approach for inferring a user's city-level by taking the most-frequently seen location of that user's friends.
-
-- [Jurgens et al.2013]: calculated each user's home location as the geometric median of their friend's locations. To overcome the problem of a user having too few friends with known location information, locations are inferred with an interative procedure which uses the estimated locations as ground truth in the next round of location estimation.
-
-- [Compton et al. 2014]: improved Jurgens’s (2013) method by weighting each user’s friends’ locations based on how many times the user interacted with them and restricting the geographic dispersion of each user’s network during each update to prevent erroneous locations being propagated through subsequent iterations.
-
-- [McGee et al. 2013]: divided a user's relationships into 10 partitions.
-
-- [Shiori Hironaka et al.]: Analyze the function of network-based home location estimation with iteration while using the social network based on following relationship on Twitter
-  - **Spatial Label Propagation (SLP)**: a way of applying the home location estimation method using the labels of the adjacent nodes iteratively
-  
-- [Jinpeng Chen et al.]: Estimate a Twitter user's city-level location based on the user's following network, user-centric data, and tie strength
-  - **Social Tie Factor Graph (STFG) model**: In STFG, relationships between users and locations are modeled as nodes, while attributes and correlations are modeled as factors
-  
-- [Rui Li et al.]: propose a **unified discriminative influence model (UDI)** for profiling users' locations. UDI intergrates signals observed from both social network (friends) and user-centric data (tweets) in a unified probabilistic framework. 
+# recipe: Frequency -- FREQ
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
 
 
-### Based on tweets contents 
-- [JALAL MAHMUD et al.]: Inferring the home location of Twitter users at different granularities, including city, state, time zone, or geographic region, using the content of users’ tweets and their tweeting behavior. The algorithm uses an ensemble of statistical and heuristic classifiers to predict locations
-  - content-based statistical classifier uses a **Bayesian model** of local word distributions to predict location
-  - behavior-based time zone classifier uses **novel temporal behavior-based features** 
-
-- [Cheng et al.2010] describe a **city-level** location estimation algorithm that is based on identifying local words from tweets and building **statistical predictive models** from them 
-
-- [Hecht et al.2011] built **Bayesian probabilistic models** from words in tweets for estimating the country- and state-level location of Twitter users.
-
-- [Kinsella et al.2011]: used language model-based approaches to estimate Twitter users' home locations at the granularity levels of country, state, city, and ZIP code. The prediction accuracy decreased as the granularity of location increased. 
-
-- [Chandar et al. 2011] described location estimation using the **conversation relationship** of Twitter users in addition to the text content used in the conversation
-
-- [Zhiyuan Cheng et al.]: propose and evaluate a probabilistic framework for estimating a Twitter user’s **city-level** location based purely on the content of the user’s tweets, even in the absence of any other geospatial cues
-  - reliance purely on tweet content
-  - a classification component for automatically identifying words in tweets with a strong local geo-scope
-  - a **lattice-based neighborhood smoothing model** for refining a user's location estimate 
-  
-- [Eisenstein et al. 2011] built **geographic topic models** to predict the location of Twitter users in terms of regions and states.
-
-- [Chang et al. 2012] described content-based location detection method using **Gaussian Mixture Model (GMM)** and **the Maximum Likelihood Estimation (MLE)**. Their method also eliminates noisy data from tweet content using the notion of nonlocalness and geometric localness.
-
-- [Mahmud et al.2014]: proposed a hierarchical location estimator, in which a Twitter user’s time zone, region, or state was determined first by high-level classifier, to predict a city-level location at a lower level. They reported that all three hierarchical classifiers are superior to the single-level one for city prediction, which is due to the fact that fewer cities need to be discriminated at the lower level in their two-level hierarchical system.
+# recipe: Online Social Network Activity -- OSNA
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
 
 
+# recipe: Online Social Network Activity -- APDM
+## APDM recipe strictly returns the most likely home location
+## It is important to load the neighbors table before you use the recipe!!
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
 
-
-
-
-
-
-
-
+df_neighbors <- readRDS(here("data/neighbors.rds"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", 
+                  location = "grid_id", recipe = "APDM")
+```
