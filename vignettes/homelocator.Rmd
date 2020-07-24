@@ -1,7 +1,5 @@
 ---
 title: "homelocator" 
-# date: "Last compiled on `r format(Sys.time(), '%d %b, %Y')`"
-# author: Qingqing Chen, Ate Poorthuis
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{homelocator}
