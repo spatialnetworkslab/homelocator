@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-data
-*.csv
-inst/doc
 .DS_Store
+data/
+data-raw
+
