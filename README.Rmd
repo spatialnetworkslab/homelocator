@@ -21,17 +21,10 @@ The goal of `homelocator` is to provide a consistent framework and interface for
 
 ## Installation
 
-You can install the released version of homelocator from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of homelocator with:
 
 ``` r
-install.packages("homelocator")
-```
-
-And the development version from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("spatialnetworkslab/homelocator")
+install.packages("~/Desktop/homelocator/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
 ```
 ## Example
 
@@ -75,6 +68,7 @@ To speed up computing progress, you can nest the validated dataset by user so th
 ```{r nesting}
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 head(df_nested)
+head(df_nested$data[[1]])
 ```
 
 
@@ -84,7 +78,8 @@ Add additional needed varialbes derived from the timestamp column. These are oft
 
 
 ```{r}
-enrich_timestamp(df_nested, timestamp = "created_at")
+df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
+head(df_enriched$data[[1]])
 ```
 
 

@@ -17,18 +17,10 @@ existing literature.
 
 ## Installation
 
-You can install the released version of homelocator from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the released version of homelocator with:
 
 ``` r
-install.packages("homelocator")
-```
-
-And the development version from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("spatialnetworkslab/homelocator")
+install.packages("~/Desktop/homelocator/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
 ```
 
 ## Example
@@ -64,12 +56,12 @@ head(df_validated)
 #> # A tibble: 6 x 3
 #>   u_id     grid_id created_at         
 #>   <chr>      <int> <dttm>             
-#> 1 26295661     566 2013-03-05 22:03:15
-#> 2 69400017    1012 2013-06-11 14:12:45
-#> 3 16294855    1188 2013-04-30 18:47:58
-#> 4 40275983     254 2014-02-15 16:14:01
-#> 5 91759535    1233 2014-03-05 14:57:07
-#> 6 81298067    1296 2015-04-22 05:30:41
+#> 1 39592393    1376 2014-03-01 11:57:54
+#> 2 68320978     944 2014-11-19 06:58:04
+#> 3 85194110     789 2012-10-01 10:38:43
+#> 4 66559308    1615 2014-08-07 02:58:43
+#> 5 40221447     849 2012-11-13 11:32:36
+#> 6 54795328     999 2013-08-01 10:06:44
 ```
 
 ### Nesting users for parallel computing
@@ -82,18 +74,28 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.01 mins
+#> ⌛ Nesting time: 0.351 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
 #>   u_id     data                
 #>   <chr>    <list>              
-#> 1 26295661 <tibble [406 × 2]>  
-#> 2 69400017 <tibble [79 × 2]>   
-#> 3 16294855 <tibble [5,889 × 2]>
-#> 4 40275983 <tibble [67 × 2]>   
-#> 5 91759535 <tibble [1,823 × 2]>
-#> 6 81298067 <tibble [191 × 2]>
+#> 1 39592393 <tibble [100 × 2]>  
+#> 2 68320978 <tibble [835 × 2]>  
+#> 3 85194110 <tibble [805 × 2]>  
+#> 4 66559308 <tibble [3,305 × 2]>
+#> 5 40221447 <tibble [6,641 × 2]>
+#> 6 54795328 <tibble [79 × 2]>
+head(df_nested$data[[1]])
+#> # A tibble: 6 x 2
+#>   created_at          grid_id
+#>   <dttm>                <int>
+#> 1 2014-03-01 11:57:54    1376
+#> 2 2012-11-09 14:30:22    1065
+#> 3 2012-09-10 16:01:20     936
+#> 4 2012-07-29 15:20:56     935
+#> 5 2014-02-27 10:22:11     755
+#> 6 2013-02-20 11:41:07     755
 ```
 
 ### Enrich variables from timestamp
@@ -104,26 +106,22 @@ algorithms, such as year, month, day, day of the week and hour of the
 day, etc.
 
 ``` r
-enrich_timestamp(df_nested, timestamp = "created_at")
+df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.05 mins
+#> ⌛ Enriching time: 4.18 secs
 #> 
-#> # A tibble: 3,000 x 2
-#>    u_id     data                
-#>    <chr>    <list>              
-#>  1 26295661 <tibble [406 × 8]>  
-#>  2 69400017 <tibble [79 × 8]>   
-#>  3 16294855 <tibble [5,889 × 8]>
-#>  4 40275983 <tibble [67 × 8]>   
-#>  5 91759535 <tibble [1,823 × 8]>
-#>  6 81298067 <tibble [191 × 8]>  
-#>  7 45267153 <tibble [57 × 8]>   
-#>  8 37588593 <tibble [4,475 × 8]>
-#>  9 81235774 <tibble [335 × 8]>  
-#> 10 67861300 <tibble [29 × 8]>   
-#> # … with 2,990 more rows
+head(df_enriched$data[[1]])
+#> # A tibble: 6 x 8
+#>   created_at          grid_id  year month   day  wday  hour ymd       
+#>   <dttm>                <int> <dbl> <dbl> <int> <dbl> <int> <date>    
+#> 1 2014-03-01 11:57:54    1376  2014     3     1     7    11 2014-03-01
+#> 2 2012-11-09 14:30:22    1065  2012    11     9     6    14 2012-11-09
+#> 3 2012-09-10 16:01:20     936  2012     9    10     2    16 2012-09-10
+#> 4 2012-07-29 15:20:56     935  2012     7    29     1    15 2012-07-29
+#> 5 2014-02-27 10:22:11     755  2014     2    27     5    10 2014-02-27
+#> 6 2013-02-20 11:41:07     755  2013     2    20     4    11 2013-02-20
 ```
 
 ### Use built-in recipes
