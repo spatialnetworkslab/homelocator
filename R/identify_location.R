@@ -55,7 +55,7 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   return(output)
 }
 
-# recipe: homelocator - HMLC
+#' recipe: homelocator - HMLC
 recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F) {
   
   user_expr <- rlang::sym(user)
@@ -155,7 +155,7 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
 }
 
 
-# recipe: frequency - FREQ
+#' recipe: frequency - FREQ
 recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
@@ -199,7 +199,7 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
 }
 
 
-# recipe: Online Social Networks Activity - OSNA
+#' recipe: Online Social Networks Activity - OSNA
 recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   
   user_expr <- rlang::sym(user)
@@ -261,7 +261,7 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
 
 
 
-# recipe: Anchor Point Determining Model - APDM
+#' recipe: Anchor Point Determining Model - APDM
 recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
