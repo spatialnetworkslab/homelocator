@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inferring Home Locations for Social Media Users  • homelocator</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cerulean/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -50,14 +50,7 @@
   <a href="reference/index.html">Reference</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/spatialnetworkslab/homelocator/">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
-      </ul>
+<ul class="nav navbar-nav navbar-right"></ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -82,11 +75,8 @@
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p>You can install the released version of homelocator from <a href="https://CRAN.R-project.org">CRAN</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"homelocator"</span>)</pre></div>
-<p>And the development version from <a href="https://github.com/">GitHub</a> with:</p>
-<div class="sourceCode" id="cb2"><pre class="r"><span class="co"># install.packages("devtools")</span>
-<span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"spatialnetworkslab/homelocator"</span>)</pre></div>
+<p>You can install the released version of homelocator with:</p>
+<div class="sourceCode" id="cb1"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"~/Desktop/homelocator/homelocator_0.1.0.tar.gz"</span>, <span class="kw">repos</span><span class="kw">=</span><span class="kw">NULL</span>, <span class="kw">type</span><span class="kw">=</span><span class="st">"source"</span>)</pre></div>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
@@ -102,7 +92,7 @@
 <li>a timestamp that relects the time the data point was created</li>
 </ul>
 <p>You can use <code><a href="reference/validate_dataset.html">validate_dataset()</a></code> to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset.</p>
-<div class="sourceCode" id="cb3"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">homelocator</span>)
+<div class="sourceCode" id="cb2"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">homelocator</span>)
 <span class="no">test_sample</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span>(<span class="fu">here</span>(<span class="st">"data/test_sample.rds"</span>))
 <span class="no">df_validated</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/validate_dataset.html">validate_dataset</a></span>(<span class="no">test_sample</span>,
                  <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>, <span class="kw">location</span> <span class="kw">=</span> <span class="st">"grid_id"</span>)
@@ -115,57 +105,63 @@
 <span class="co">#&gt; # A tibble: 6 x 3</span>
 <span class="co">#&gt;   u_id     grid_id created_at         </span>
 <span class="co">#&gt;   &lt;chr&gt;      &lt;int&gt; &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 26295661     566 2013-03-05 22:03:15</span>
-<span class="co">#&gt; 2 69400017    1012 2013-06-11 14:12:45</span>
-<span class="co">#&gt; 3 16294855    1188 2013-04-30 18:47:58</span>
-<span class="co">#&gt; 4 40275983     254 2014-02-15 16:14:01</span>
-<span class="co">#&gt; 5 91759535    1233 2014-03-05 14:57:07</span>
-<span class="co">#&gt; 6 81298067    1296 2015-04-22 05:30:41</span></pre></div>
+<span class="co">#&gt; 1 39592393    1376 2014-03-01 11:57:54</span>
+<span class="co">#&gt; 2 68320978     944 2014-11-19 06:58:04</span>
+<span class="co">#&gt; 3 85194110     789 2012-10-01 10:38:43</span>
+<span class="co">#&gt; 4 66559308    1615 2014-08-07 02:58:43</span>
+<span class="co">#&gt; 5 40221447     849 2012-11-13 11:32:36</span>
+<span class="co">#&gt; 6 54795328     999 2013-08-01 10:06:44</span></pre></div>
 </div>
 <div id="nesting-users-for-parallel-computing" class="section level3">
 <h3 class="hasAnchor">
 <a href="#nesting-users-for-parallel-computing" class="anchor"></a>Nesting users for parallel computing</h3>
 <p>To speed up computing progress, you can nest the validated dataset by user so that the subsequent location inference can be applied to each user at the same time.</p>
-<div class="sourceCode" id="cb4"><pre class="r"><span class="no">df_nested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span>(<span class="no">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"created_at"</span>, <span class="st">"grid_id"</span>))
+<div class="sourceCode" id="cb3"><pre class="r"><span class="no">df_nested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span>(<span class="no">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"created_at"</span>, <span class="st">"grid_id"</span>))
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.01 mins</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.351 secs</span>
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_nested</span>)
 <span class="co">#&gt; # A tibble: 6 x 2</span>
 <span class="co">#&gt;   u_id     data                </span>
 <span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;              </span>
-<span class="co">#&gt; 1 26295661 &lt;tibble [406 × 2]&gt;  </span>
-<span class="co">#&gt; 2 69400017 &lt;tibble [79 × 2]&gt;   </span>
-<span class="co">#&gt; 3 16294855 &lt;tibble [5,889 × 2]&gt;</span>
-<span class="co">#&gt; 4 40275983 &lt;tibble [67 × 2]&gt;   </span>
-<span class="co">#&gt; 5 91759535 &lt;tibble [1,823 × 2]&gt;</span>
-<span class="co">#&gt; 6 81298067 &lt;tibble [191 × 2]&gt;</span></pre></div>
+<span class="co">#&gt; 1 39592393 &lt;tibble [100 × 2]&gt;  </span>
+<span class="co">#&gt; 2 68320978 &lt;tibble [835 × 2]&gt;  </span>
+<span class="co">#&gt; 3 85194110 &lt;tibble [805 × 2]&gt;  </span>
+<span class="co">#&gt; 4 66559308 &lt;tibble [3,305 × 2]&gt;</span>
+<span class="co">#&gt; 5 40221447 &lt;tibble [6,641 × 2]&gt;</span>
+<span class="co">#&gt; 6 54795328 &lt;tibble [79 × 2]&gt;</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]])
+<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt;   created_at          grid_id</span>
+<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt;</span>
+<span class="co">#&gt; 1 2014-03-01 11:57:54    1376</span>
+<span class="co">#&gt; 2 2012-11-09 14:30:22    1065</span>
+<span class="co">#&gt; 3 2012-09-10 16:01:20     936</span>
+<span class="co">#&gt; 4 2012-07-29 15:20:56     935</span>
+<span class="co">#&gt; 5 2014-02-27 10:22:11     755</span>
+<span class="co">#&gt; 6 2013-02-20 11:41:07     755</span></pre></div>
 </div>
 <div id="enrich-variables-from-timestamp" class="section level3">
 <h3 class="hasAnchor">
 <a href="#enrich-variables-from-timestamp" class="anchor"></a>Enrich variables from timestamp</h3>
 <p>Add additional needed varialbes derived from the timestamp column. These are often used/needed as intermediate variables in home location algorithms, such as year, month, day, day of the week and hour of the day, etc.</p>
-<div class="sourceCode" id="cb5"><pre class="r"><span class="fu"><a href="reference/enrich_timestamp.html">enrich_timestamp</a></span>(<span class="no">df_nested</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>)
+<div class="sourceCode" id="cb4"><pre class="r"><span class="no">df_enriched</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/enrich_timestamp.html">enrich_timestamp</a></span>(<span class="no">df_nested</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>)
 <span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 0.05 mins</span>
+<span class="co">#&gt; ⌛ Enriching time: 4.18 secs</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; # A tibble: 3,000 x 2</span>
-<span class="co">#&gt;    u_id     data                </span>
-<span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;              </span>
-<span class="co">#&gt;  1 26295661 &lt;tibble [406 × 8]&gt;  </span>
-<span class="co">#&gt;  2 69400017 &lt;tibble [79 × 8]&gt;   </span>
-<span class="co">#&gt;  3 16294855 &lt;tibble [5,889 × 8]&gt;</span>
-<span class="co">#&gt;  4 40275983 &lt;tibble [67 × 8]&gt;   </span>
-<span class="co">#&gt;  5 91759535 &lt;tibble [1,823 × 8]&gt;</span>
-<span class="co">#&gt;  6 81298067 &lt;tibble [191 × 8]&gt;  </span>
-<span class="co">#&gt;  7 45267153 &lt;tibble [57 × 8]&gt;   </span>
-<span class="co">#&gt;  8 37588593 &lt;tibble [4,475 × 8]&gt;</span>
-<span class="co">#&gt;  9 81235774 &lt;tibble [335 × 8]&gt;  </span>
-<span class="co">#&gt; 10 67861300 &lt;tibble [29 × 8]&gt;   </span>
-<span class="co">#&gt; # … with 2,990 more rows</span></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_enriched</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]])
+<span class="co">#&gt; # A tibble: 6 x 8</span>
+<span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span>
+<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt; 1 2014-03-01 11:57:54    1376  2014     3     1     7    11 2014-03-01</span>
+<span class="co">#&gt; 2 2012-11-09 14:30:22    1065  2012    11     9     6    14 2012-11-09</span>
+<span class="co">#&gt; 3 2012-09-10 16:01:20     936  2012     9    10     2    16 2012-09-10</span>
+<span class="co">#&gt; 4 2012-07-29 15:20:56     935  2012     7    29     1    15 2012-07-29</span>
+<span class="co">#&gt; 5 2014-02-27 10:22:11     755  2014     2    27     5    10 2014-02-27</span>
+<span class="co">#&gt; 6 2013-02-20 11:41:07     755  2013     2    20     4    11 2013-02-20</span></pre></div>
 </div>
 <div id="use-built-in-recipes" class="section level3">
 <h3 class="hasAnchor">
@@ -197,7 +193,7 @@
 </ul>
 </li>
 </ul>
-<!-- end list --><div class="sourceCode" id="cb6"><pre class="r"><span class="co"># default recipe: homelocator -- HMLC</span>
+<!-- end list --><div class="sourceCode" id="cb5"><pre class="r"><span class="co"># default recipe: homelocator -- HMLC</span>
 <span class="fu"><a href="reference/identify_location.html">identify_location</a></span>(<span class="no">test_sample</span>, <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>,
                   <span class="kw">location</span> <span class="kw">=</span> <span class="st">"grid_id"</span>, <span class="kw">show_n_loc</span> <span class="kw">=</span> <span class="fl">1</span>, <span class="kw">recipe</span> <span class="kw">=</span> <span class="st">"HMLC"</span>)
 
@@ -227,16 +223,7 @@
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="links">
-<h2>Links</h2>
-<ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/spatialnetworkslab/homelocator/">https://​github.com/​spatialnetworkslab/​homelocator/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/spatialnetworkslab/homelocator/issues">https://​github.com/​spatialnetworkslab/​homelocator/​issues</a>
-</li>
-</ul>
-</div>
-<div class="license">
+    <div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
@@ -246,8 +233,8 @@
 <div class="developers">
 <h2>Developers</h2>
 <ul class="list-unstyled">
-<li>Qingqing Chen <br><small class="roles"> Author, maintainer </small>  </li>
-<li>Ate Poorthuis <br><small class="roles"> Author </small>  </li>
+<li>First Last <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>First Last <br><small class="roles"> Author </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -256,7 +243,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Qingqing Chen, Ate Poorthuis.</p>
+  <p>Developed by First Last, First Last.</p>
 </div>
 
 <div class="pkgdown">
