@@ -17,14 +17,14 @@ knitr::opts_chunk$set(
 
 ## Overview 
 
-The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo/demo.mov`. 
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `homelocator-package/demo.mov`. 
 
 ## Installation
 
 You can install the released version of homelocator with:
 
 ``` r
-install.packages("~/Desktop/homelocator/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
+install.packages("~/Downloads/homelocator-package/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
 ```
 ## Example
 
@@ -43,7 +43,6 @@ You can use `validate_dataset()` to validate your input dataset before starting 
 
 ```{r echo=FALSE, results='hide', message=F}
 # Load other needed libraries
-devtools::load_all(".")
 library(tidyverse)
 library(emo)
 library(lubridate)
@@ -52,6 +51,7 @@ library(here)
 
 
 ```{r validate}
+devtools::load_all(".")
 library(homelocator)
 test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
 df_validated <- validate_dataset(test_sample, 

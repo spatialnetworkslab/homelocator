@@ -14,14 +14,14 @@ structured, algorithmic ‘recipes’ to identify meaningful locations
 according to your research requirements. The package also has a number
 of built-in ‘recipes’ that have been translated from approaches in the
 existing literature. A walkthrough demo video can be found in
-`demo/demo.mov`.
+`homelocator-package/demo.mov`.
 
 ## Installation
 
 You can install the released version of homelocator with:
 
 ``` r
-install.packages("~/Desktop/homelocator/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
+install.packages("~/Downloads/homelocator-package/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
 ```
 
 ## Example
@@ -44,6 +44,9 @@ specify the names of three essential attribute that used in your
 dataset.
 
 ``` r
+devtools::load_all(".")
+#> Loading homelocator
+#> Welcome to homelocator package!
 library(homelocator)
 test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
 df_validated <- validate_dataset(test_sample, 
@@ -75,7 +78,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.327 secs
+#> ⌛ Nesting time: 0.343 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -111,7 +114,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 2.412 secs
+#> ⌛ Enriching time: 2.462 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
