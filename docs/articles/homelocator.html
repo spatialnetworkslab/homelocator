@@ -97,16 +97,16 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <a href="#test-data" class="anchor"></a>Test Data</h1>
 <p>To explore the basic data manipulation functions of <code>homelocator</code>, we’ll use a <code>test_sample</code> dataset.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co"># load data</span>
-<span class="no">test_sample</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span>(<span class="fu">here</span>(<span class="st">"data/test_sample.rds"</span>))
+<span class="no">test_sample</span> <span class="kw">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data/test_sample.csv"</span>), <span class="kw">col_types</span> <span class="kw">=</span> <span class="fu">cols</span>(<span class="kw">grid_id</span> <span class="kw">=</span> <span class="fu">col_character</span>()))
 
 <span class="co"># show test sample </span>
 <span class="no">test_sample</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     created_at          grid_id</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 39592393 2014-03-01 11:57:54    1376</span>
-<span class="co">#&gt; 2 68320978 2014-11-19 06:58:04     944</span>
-<span class="co">#&gt; 3 85194110 2012-10-01 10:38:43     789</span></pre></body></html></div>
+<span class="co">#&gt;       u_id created_at          grid_id</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;dttm&gt;              &lt;chr&gt;  </span>
+<span class="co">#&gt; 1 10380249 2015-02-25 07:03:51 400    </span>
+<span class="co">#&gt; 2 52229026 2014-05-20 05:17:21 1204   </span>
+<span class="co">#&gt; 3 83978717 2013-10-24 03:13:22 814</span></pre></body></html></div>
 <p><span style="color:red"><em>Note:</em></span> <em>if you use your own dataset, please make sure that you have converted the timestamps to the appropriate local time zone.</em></p>
 </div>
 <div id="usage" class="section level1">
@@ -140,11 +140,11 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co"># show result </span>
 <span class="no">df_validated</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     grid_id created_at         </span>
-<span class="co">#&gt;   &lt;chr&gt;      &lt;int&gt; &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 39592393    1376 2014-03-01 11:57:54</span>
-<span class="co">#&gt; 2 68320978     944 2014-11-19 06:58:04</span>
-<span class="co">#&gt; 3 85194110     789 2012-10-01 10:38:43</span></pre></body></html></div>
+<span class="co">#&gt;       u_id grid_id created_at         </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;dttm&gt;             </span>
+<span class="co">#&gt; 1 10380249 400     2015-02-25 07:03:51</span>
+<span class="co">#&gt; 2 52229026 1204    2014-05-20 05:17:21</span>
+<span class="co">#&gt; 3 83978717 814     2013-10-24 03:13:22</span></pre></body></html></div>
 </div>
 <div id="nest-and-unnest" class="section level3">
 <h3 class="hasAnchor">
@@ -160,42 +160,42 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="no">df_nested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/nest_verbose.html">nest_verbose</a></span>(<span class="no">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"created_at"</span>, <span class="st">"grid_id"</span>))
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.346 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.342 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_nested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 39592393 &lt;tibble [100 × 2]&gt;</span>
-<span class="co">#&gt; 2 68320978 &lt;tibble [835 × 2]&gt;</span>
-<span class="co">#&gt; 3 85194110 &lt;tibble [805 × 2]&gt;</span>
+<span class="co">#&gt;       u_id data              </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;            </span>
+<span class="co">#&gt; 1 10380249 &lt;tibble [216 × 2]&gt;</span>
+<span class="co">#&gt; 2 52229026 &lt;tibble [827 × 2]&gt;</span>
+<span class="co">#&gt; 3 83978717 &lt;tibble [562 × 2]&gt;</span>
 
 <span class="co"># show result </span>
 <span class="no">df_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
 <span class="co">#&gt;   created_at          grid_id</span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 2014-03-01 11:57:54    1376</span>
-<span class="co">#&gt; 2 2012-11-09 14:30:22    1065</span>
-<span class="co">#&gt; 3 2012-09-10 16:01:20     936</span>
+<span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;  </span>
+<span class="co">#&gt; 1 2015-02-25 07:03:51 400    </span>
+<span class="co">#&gt; 2 2015-09-29 14:42:34 561    </span>
+<span class="co">#&gt; 3 2014-12-30 20:49:03 366</span>
 
 <span class="co"># unnest data</span>
 <span class="no">df_unnested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_verbose.html">unnest_verbose</a></span>(<span class="no">df_nested</span>, <span class="no">data</span>)
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.08 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.157 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_unnested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     created_at          grid_id</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 39592393 2014-03-01 11:57:54    1376</span>
-<span class="co">#&gt; 2 39592393 2012-11-09 14:30:22    1065</span>
-<span class="co">#&gt; 3 39592393 2012-09-10 16:01:20     936</span></pre></body></html></div>
+<span class="co">#&gt;       u_id created_at          grid_id</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;dttm&gt;              &lt;chr&gt;  </span>
+<span class="co">#&gt; 1 10380249 2015-02-25 07:03:51 400    </span>
+<span class="co">#&gt; 2 10380249 2015-09-29 14:42:34 561    </span>
+<span class="co">#&gt; 3 10380249 2014-12-30 20:49:03 366</span></pre></body></html></div>
 </div>
 <div id="double-nest-and-double-unnest" class="section level3">
 <h3 class="hasAnchor">
@@ -212,34 +212,34 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 1.157 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 1.11 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_double_nested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 39592393 &lt;tibble [44 × 2]&gt; </span>
-<span class="co">#&gt; 2 68320978 &lt;tibble [109 × 2]&gt;</span>
-<span class="co">#&gt; 3 85194110 &lt;tibble [72 × 2]&gt;</span>
+<span class="co">#&gt;       u_id data              </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;            </span>
+<span class="co">#&gt; 1 10380249 &lt;tibble [69 × 2]&gt; </span>
+<span class="co">#&gt; 2 52229026 &lt;tibble [105 × 2]&gt;</span>
+<span class="co">#&gt; 3 83978717 &lt;tibble [74 × 2]&gt;</span>
 
 <span class="co"># show result </span>
 <span class="no">df_double_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
 <span class="co">#&gt;   grid_id data            </span>
-<span class="co">#&gt;     &lt;int&gt; &lt;list&gt;          </span>
-<span class="co">#&gt; 1    1376 &lt;tibble [5 × 1]&gt;</span>
-<span class="co">#&gt; 2    1065 &lt;tibble [2 × 1]&gt;</span>
-<span class="co">#&gt; 3     936 &lt;tibble [9 × 1]&gt;</span>
+<span class="co">#&gt;   &lt;chr&gt;   &lt;list&gt;          </span>
+<span class="co">#&gt; 1 400     &lt;tibble [3 × 1]&gt;</span>
+<span class="co">#&gt; 2 561     &lt;tibble [7 × 1]&gt;</span>
+<span class="co">#&gt; 3 366     &lt;tibble [2 × 1]&gt;</span>
 
 <span class="no">df_double_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]]$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 1</span>
 <span class="co">#&gt;   created_at         </span>
 <span class="co">#&gt;   &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 2014-03-01 11:57:54</span>
-<span class="co">#&gt; 2 2014-04-18 09:34:26</span>
-<span class="co">#&gt; 3 2012-08-05 11:14:29</span>
+<span class="co">#&gt; 1 2015-02-25 07:03:51</span>
+<span class="co">#&gt; 2 2015-03-04 17:44:32</span>
+<span class="co">#&gt; 3 2015-02-23 07:36:40</span>
 
 <span class="co"># unnest nested data </span>
 <span class="no">df_double_unnested</span> <span class="kw">&lt;-</span> <span class="no">df_double_nested</span> <span class="kw">%&gt;%</span>
@@ -248,17 +248,17 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.515 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.495 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_double_unnested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     grid_id created_at         </span>
-<span class="co">#&gt;   &lt;chr&gt;      &lt;int&gt; &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 39592393    1376 2014-03-01 11:57:54</span>
-<span class="co">#&gt; 2 39592393    1376 2014-04-18 09:34:26</span>
-<span class="co">#&gt; 3 39592393    1376 2012-08-05 11:14:29</span></pre></body></html></div>
+<span class="co">#&gt;       u_id grid_id created_at         </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;dttm&gt;             </span>
+<span class="co">#&gt; 1 10380249 400     2015-02-25 07:03:51</span>
+<span class="co">#&gt; 2 10380249 400     2015-03-04 17:44:32</span>
+<span class="co">#&gt; 3 10380249 400     2015-02-23 07:36:40</span></pre></body></html></div>
 </div>
 <div id="enrich-timestamp" class="section level3">
 <h3 class="hasAnchor">
@@ -275,28 +275,28 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co">#original variables </span>
 <span class="no">df_nested</span>[<span class="fl">1</span>, ] <span class="kw">%&gt;%</span> <span class="fu">unnest</span>(<span class="kw">cols</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">data</span>)) <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     created_at          grid_id</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 39592393 2014-03-01 11:57:54    1376</span>
-<span class="co">#&gt; 2 39592393 2012-11-09 14:30:22    1065</span>
-<span class="co">#&gt; 3 39592393 2012-09-10 16:01:20     936</span>
+<span class="co">#&gt;       u_id created_at          grid_id</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;dttm&gt;              &lt;chr&gt;  </span>
+<span class="co">#&gt; 1 10380249 2015-02-25 07:03:51 400    </span>
+<span class="co">#&gt; 2 10380249 2015-09-29 14:42:34 561    </span>
+<span class="co">#&gt; 3 10380249 2014-12-30 20:49:03 366</span>
 
 <span class="co"># create new variables from "created_at" timestamp column </span>
 <span class="no">df_enriched</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/enrich_timestamp.html">enrich_timestamp</a></span>(<span class="no">df_nested</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>, <span class="kw">tz</span> <span class="kw">=</span> <span class="st">"Asia/Singapore"</span>)
 <span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 3.863 secs</span>
+<span class="co">#&gt; ⌛ Enriching time: 2.242 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_enriched</span>[<span class="fl">1</span>, ] <span class="kw">%&gt;%</span> <span class="fu">unnest</span>(<span class="kw">cols</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">data</span>)) <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 9</span>
-<span class="co">#&gt;   u_id     created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 39592393 2014-03-01 11:57:54    1376  2014     3     1     7    11 2014-03-01</span>
-<span class="co">#&gt; 2 39592393 2012-11-09 14:30:22    1065  2012    11     9     6    14 2012-11-09</span>
-<span class="co">#&gt; 3 39592393 2012-09-10 16:01:20     936  2012     9    10     2    16 2012-09-10</span></pre></body></html></div>
+<span class="co">#&gt;       u_id created_at          grid_id  year month   day  wday  hour ymd       </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt; 1 10380249 2015-02-25 07:03:51 400      2015     2    25     4     7 2015-02-25</span>
+<span class="co">#&gt; 2 10380249 2015-09-29 14:42:34 561      2015     9    29     3    14 2015-09-29</span>
+<span class="co">#&gt; 3 10380249 2014-12-30 20:49:03 366      2014    12    30     3    20 2014-12-31</span></pre></body></html></div>
 </div>
 <div id="summarize-in-nested-and-double-nested-dataframe" class="section level3">
 <h3 class="hasAnchor">
@@ -318,17 +318,17 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_tweets, n_locs</span>
-<span class="co">#&gt; ⌛ Summarising time: 0.655 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 0.662 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_summarize_nested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 4</span>
-<span class="co">#&gt;   u_id     data               n_tweets n_locs</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;                &lt;int&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1 39592393 &lt;tibble [100 × 8]&gt;      100     44</span>
-<span class="co">#&gt; 2 68320978 &lt;tibble [835 × 8]&gt;      835    109</span>
-<span class="co">#&gt; 3 85194110 &lt;tibble [805 × 8]&gt;      805     72</span>
+<span class="co">#&gt;       u_id data               n_tweets n_locs</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;                &lt;int&gt;  &lt;int&gt;</span>
+<span class="co">#&gt; 1 10380249 &lt;tibble [216 × 8]&gt;      216     69</span>
+<span class="co">#&gt; 2 52229026 &lt;tibble [827 × 8]&gt;      827    105</span>
+<span class="co">#&gt; 3 83978717 &lt;tibble [562 × 8]&gt;      562     74</span>
 
 <span class="co"># summarize in double nested dataframe </span>
 <span class="co"># take first 100 users for example</span>
@@ -338,22 +338,22 @@ We hope that through packages like <code>homelocator</code>, future work that re
                     <span class="kw">n_tweets</span> <span class="kw">=</span> <span class="fu">n</span>(), <span class="kw">n_days</span> <span class="kw">=</span> <span class="fu">n_distinct</span>(<span class="no">ymd</span>))
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_tweets, n_days</span>
-<span class="co">#&gt; ⌛ Summarising time: 1.654 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 1.551 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_summarize_double_nested</span>[<span class="fl">1</span>, ]
 <span class="co">#&gt; # A tibble: 1 x 2</span>
-<span class="co">#&gt;   u_id     data             </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;           </span>
-<span class="co">#&gt; 1 39592393 &lt;tibble [44 × 4]&gt;</span>
+<span class="co">#&gt;       u_id data             </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           </span>
+<span class="co">#&gt; 1 10380249 &lt;tibble [69 × 4]&gt;</span>
 <span class="no">df_summarize_double_nested</span>[<span class="fl">1</span>, ]$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 4</span>
 <span class="co">#&gt;   grid_id data             n_tweets n_days</span>
-<span class="co">#&gt;     &lt;int&gt; &lt;list&gt;              &lt;int&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1    1376 &lt;tibble [5 × 7]&gt;        5      5</span>
-<span class="co">#&gt; 2    1065 &lt;tibble [2 × 7]&gt;        2      2</span>
-<span class="co">#&gt; 3     936 &lt;tibble [9 × 7]&gt;        9      9</span></pre></body></html></div>
+<span class="co">#&gt;   &lt;chr&gt;   &lt;list&gt;              &lt;int&gt;  &lt;int&gt;</span>
+<span class="co">#&gt; 1 400     &lt;tibble [3 × 7]&gt;        3      3</span>
+<span class="co">#&gt; 2 561     &lt;tibble [7 × 7]&gt;        7      6</span>
+<span class="co">#&gt; 3 366     &lt;tibble [2 × 7]&gt;        2      2</span></pre></body></html></div>
 </div>
 <div id="remove-active-users" class="section level3">
 <h3 class="hasAnchor">
@@ -383,11 +383,11 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co"># show result </span>
 <span class="no">df_removed_active_users</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 4</span>
-<span class="co">#&gt;   u_id     data                 n_tweets n_locs</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;                  &lt;int&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [2,571 × 8]&gt;     2571    130</span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [2,553 × 8]&gt;     2553    172</span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [2,547 × 8]&gt;     2547    248</span></pre></body></html></div>
+<span class="co">#&gt;       u_id data                 n_tweets n_locs</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;                  &lt;int&gt;  &lt;int&gt;</span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [2,161 × 8]&gt;     2161    129</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [2,133 × 8]&gt;     2133    136</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [2,115 × 8]&gt;     2115    107</span></pre></body></html></div>
 </div>
 <div id="filter" class="section level3">
 <h3 class="hasAnchor">
@@ -406,48 +406,48 @@ We hope that through packages like <code>homelocator</code>, future work that re
                               <span class="no">n_tweets</span> <span class="kw">&gt;</span> <span class="fl">10</span> <span class="kw">&amp;</span> <span class="no">n_locs</span> <span class="kw">&gt;</span> <span class="fl">10</span>)
 <span class="co">#&gt; 👤 There are 2971 users at this moment.</span>
 <span class="co">#&gt; 🛠 Start filtering users...</span>
-<span class="co">#&gt; ✅ Finish filtering! Filterred 1070 users!</span>
-<span class="co">#&gt; 👤 There are 1901 users left.</span>
+<span class="co">#&gt; ✅ Finish filtering! Filterred 1019 users!</span>
+<span class="co">#&gt; 👤 There are 1952 users left.</span>
 <span class="co">#&gt; ⌛ Filtering time: 0.001 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_filtered</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 4</span>
-<span class="co">#&gt;   u_id     data                 n_tweets n_locs</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;                  &lt;int&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [2,571 × 8]&gt;     2571    130</span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [2,553 × 8]&gt;     2553    172</span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [2,547 × 8]&gt;     2547    248</span>
+<span class="co">#&gt;       u_id data                 n_tweets n_locs</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;                  &lt;int&gt;  &lt;int&gt;</span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [2,161 × 8]&gt;     2161    129</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [2,133 × 8]&gt;     2133    136</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [2,115 × 8]&gt;     2115    107</span>
 
 <span class="co"># filter tweets that sent on weekends and during daytime (8am to 6pm)</span>
 <span class="no">df_filter_nested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/filter_nested.html">filter_nested</a></span>(<span class="no">df_filtered</span>, <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>,
                                   !<span class="no">wday</span> <span class="kw">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>, <span class="fl">7</span>), <span class="co"># 1 means Sunday and 7 means Saturday</span>
                                   !<span class="no">hour</span> <span class="kw">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="fl">8</span>, <span class="fl">18</span>, <span class="fl">1</span>))
-<span class="co">#&gt; 👤 There are 1901 users at this moment.</span>
+<span class="co">#&gt; 👤 There are 1952 users at this moment.</span>
 <span class="co">#&gt; 🛠 Start filtering user...</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ✅ Finish Filtering! Filterred 21 users!</span>
-<span class="co">#&gt; 👤 There are 1880 users left!</span>
-<span class="co">#&gt; ⌛ Filtering time: 0.853 secs</span>
+<span class="co">#&gt; ✅ Finish Filtering! Filterred 1 users!</span>
+<span class="co">#&gt; 👤 There are 1951 users left!</span>
+<span class="co">#&gt; ⌛ Filtering time: 0.749 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_filter_nested</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 4</span>
-<span class="co">#&gt;   u_id     data               n_tweets n_locs</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;                &lt;int&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [644 × 8]&gt;     2571    130</span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [334 × 8]&gt;     2553    172</span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [414 × 8]&gt;     2547    248</span>
+<span class="co">#&gt;       u_id data                 n_tweets n_locs</span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;                  &lt;int&gt;  &lt;int&gt;</span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [1,148 × 8]&gt;     2161    129</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [1,243 × 8]&gt;     2133    136</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [1,200 × 8]&gt;     2115    107</span>
 
 <span class="no">df_filter_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 8</span>
 <span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 2013-02-14 05:16:32    1177  2013     2    14     5     5 2013-02-14</span>
-<span class="co">#&gt; 2 2013-05-24 22:24:06    1237  2013     5    24     6    22 2013-05-24</span>
-<span class="co">#&gt; 3 2013-04-16 21:52:39    1177  2013     4    16     3    21 2013-04-16</span></pre></body></html></div>
+<span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt; 1 2014-05-22 06:03:33 746      2014     5    22     5     6 2014-05-22</span>
+<span class="co">#&gt; 2 2015-01-29 21:50:09 747      2015     1    29     5    21 2015-01-30</span>
+<span class="co">#&gt; 3 2013-10-04 07:50:03 746      2013    10     4     6     7 2013-10-04</span></pre></body></html></div>
 </div>
 <div id="mutate" class="section level3">
 <h3 class="hasAnchor">
@@ -481,27 +481,27 @@ We hope that through packages like <code>homelocator</code>, future work that re
                  <span class="no">n_tweets_loc</span> <span class="kw">&gt;</span> <span class="fl">10</span> <span class="kw">&amp;</span> <span class="no">n_hrs_loc</span> <span class="kw">&gt;</span> <span class="fl">10</span> <span class="kw">&amp;</span> <span class="no">n_days_loc</span> <span class="kw">&gt;</span> <span class="fl">10</span> <span class="kw">&amp;</span> <span class="no">period_loc</span> <span class="kw">&gt;</span> <span class="fl">10</span>)
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 4 new added variables: n_tweets_loc, n_hrs_loc, n_days_loc, period_loc</span>
-<span class="co">#&gt; ⌛ Summarising time: 28.554 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 29.375 secs</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.03 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.031 secs</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; 👤 There are 1901 users at this moment.</span>
+<span class="co">#&gt; 👤 There are 1952 users at this moment.</span>
 <span class="co">#&gt; 🛠 Start filtering users...</span>
-<span class="co">#&gt; ✅ Finish filtering! Filterred 1046 users!</span>
-<span class="co">#&gt; 👤 There are 855 users left.</span>
-<span class="co">#&gt; ⌛ Filtering time: 0.003 secs</span>
+<span class="co">#&gt; ✅ Finish filtering! Filterred 1091 users!</span>
+<span class="co">#&gt; 👤 There are 861 users left.</span>
+<span class="co">#&gt; ⌛ Filtering time: 0.002 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show cleaned dataset </span>
 <span class="no">df_cleaned</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 9</span>
-<span class="co">#&gt;   u_id  n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
-<span class="co">#&gt; 1 9485…     2571    130    1177 &lt;tib…         1679        22         67</span>
-<span class="co">#&gt; 2 9485…     2571    130    1239 &lt;tib…          231        21         47</span>
-<span class="co">#&gt; 3 9485…     2571    130    1238 &lt;tib…          199        20         35</span>
+<span class="co">#&gt;     u_id n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
+<span class="co">#&gt;    &lt;dbl&gt;    &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
+<span class="co">#&gt; 1 2.36e7     2161    129 746     &lt;tib…          951        24        108</span>
+<span class="co">#&gt; 2 2.36e7     2161    129 747     &lt;tib…          700        23        103</span>
+<span class="co">#&gt; 3 2.36e7     2161    129 805     &lt;tib…          154        23         72</span>
 <span class="co">#&gt; # … with 1 more variable: period_loc &lt;dbl&gt;</span>
 
 <span class="co"># ok, then let's apply the mutate_nested function to add four new variables: wd_or_wk, time_numeric, rest_or_work, wk.am_or_wk.pm</span>
@@ -513,17 +513,17 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish adding! There are 4 new added variables: wd_or_wk, time_numeric, rest_or_work, wk.am_or_wk.pm</span>
-<span class="co">#&gt; ⌛ Adding time: 1.675 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.893 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_expanded</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 9</span>
-<span class="co">#&gt;   u_id  n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
-<span class="co">#&gt; 1 9485…     2571    130    1177 &lt;tib…         1679        22         67</span>
-<span class="co">#&gt; 2 9485…     2571    130    1239 &lt;tib…          231        21         47</span>
-<span class="co">#&gt; 3 9485…     2571    130    1238 &lt;tib…          199        20         35</span>
+<span class="co">#&gt;     u_id n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
+<span class="co">#&gt;    &lt;dbl&gt;    &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
+<span class="co">#&gt; 1 2.36e7     2161    129 746     &lt;tib…          951        24        108</span>
+<span class="co">#&gt; 2 2.36e7     2161    129 747     &lt;tib…          700        23        103</span>
+<span class="co">#&gt; 3 2.36e7     2161    129 805     &lt;tib…          154        23         72</span>
 <span class="co">#&gt; # … with 1 more variable: period_loc &lt;dbl&gt;</span></pre></body></html></div>
 <p>The function <code><a href="../reference/prop_factor_nested.html">prop_factor_nested()</a></code> allows you to calculate the proportion of categories for a variable inside the list-column and convert each categories to a new variable adding to the dataframe. For example, inside the list-column, the variable <code>wd_or_wk</code> has two categories named weekend or weekday, when you call <code><a href="../reference/prop_factor_nested.html">prop_factor_nested()</a></code> function, it calculates the proportion of weekend and weekday separately, and the results are then expanded to two new columns called <code>weekday</code> and <code>weekend</code> adding to the dataframe.</p>
 <ul>
@@ -537,9 +537,9 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; # A tibble: 3 x 11</span>
 <span class="co">#&gt;   created_at           year month   day  wday  hour ymd        wd_or_wk</span>
 <span class="co">#&gt;   &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;     &lt;chr&gt;   </span>
-<span class="co">#&gt; 1 2013-04-08 10:51:14  2013     4     8     2    10 2013-04-08 weekday </span>
-<span class="co">#&gt; 2 2013-05-22 13:33:45  2013     5    22     4    13 2013-05-22 weekday </span>
-<span class="co">#&gt; 3 2013-04-18 13:13:38  2013     4    18     5    13 2013-04-18 weekday </span>
+<span class="co">#&gt; 1 2014-05-22 06:03:33  2014     5    22     5     6 2014-05-22 weekday </span>
+<span class="co">#&gt; 2 2014-08-17 16:25:30  2014     8    17     1    16 2014-08-18 weekend </span>
+<span class="co">#&gt; 3 2013-10-04 07:50:03  2013    10     4     6     7 2013-10-04 weekday </span>
 <span class="co">#&gt; # … with 3 more variables: time_numeric &lt;dbl&gt;, rest_or_work &lt;chr&gt;,</span>
 <span class="co">#&gt; #   wk.am_or_wk.pm &lt;chr&gt;</span>
 
@@ -549,17 +549,17 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start calculating proportion...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish calculating! There are 6 new calculated variables: rest, weekday, weekend, weekend_am, weekend_pm, work</span>
-<span class="co">#&gt; ⌛ Calculating time: 20.17 secs</span>
+<span class="co">#&gt; ⌛ Calculating time: 19.165 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
 <span class="no">df_expanded</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 15</span>
-<span class="co">#&gt;   u_id  n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
-<span class="co">#&gt; 1 9485…     2571    130    1177 &lt;tib…         1679        22         67</span>
-<span class="co">#&gt; 2 9485…     2571    130    1239 &lt;tib…          231        21         47</span>
-<span class="co">#&gt; 3 9485…     2571    130    1238 &lt;tib…          199        20         35</span>
+<span class="co">#&gt;     u_id n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
+<span class="co">#&gt;    &lt;dbl&gt;    &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
+<span class="co">#&gt; 1 2.36e7     2161    129 746     &lt;tib…          951        24        108</span>
+<span class="co">#&gt; 2 2.36e7     2161    129 747     &lt;tib…          700        23        103</span>
+<span class="co">#&gt; 3 2.36e7     2161    129 805     &lt;tib…          154        23         72</span>
 <span class="co">#&gt; # … with 7 more variables: period_loc &lt;dbl&gt;, rest &lt;dbl&gt;, weekday &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   weekend &lt;dbl&gt;, weekend_am &lt;dbl&gt;, weekend_pm &lt;dbl&gt;, work &lt;dbl&gt;</span></pre></body></html></div>
 </div>
@@ -597,16 +597,16 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_wdays_loc, n_months_loc</span>
-<span class="co">#&gt; ⌛ Summarising time: 0.424 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 0.411 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_expanded</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 17</span>
-<span class="co">#&gt;   u_id  n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
-<span class="co">#&gt; 1 9485…     2571    130    1177 &lt;tib…         1679        22         67</span>
-<span class="co">#&gt; 2 9485…     2571    130    1239 &lt;tib…          231        21         47</span>
-<span class="co">#&gt; 3 9485…     2571    130    1238 &lt;tib…          199        20         35</span>
+<span class="co">#&gt;     u_id n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc</span>
+<span class="co">#&gt;    &lt;dbl&gt;    &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;</span>
+<span class="co">#&gt; 1 2.36e7     2161    129 746     &lt;tib…          951        24        108</span>
+<span class="co">#&gt; 2 2.36e7     2161    129 747     &lt;tib…          700        23        103</span>
+<span class="co">#&gt; 3 2.36e7     2161    129 805     &lt;tib…          154        23         72</span>
 <span class="co">#&gt; # … with 9 more variables: period_loc &lt;dbl&gt;, rest &lt;dbl&gt;, weekday &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   weekend &lt;dbl&gt;, weekend_am &lt;dbl&gt;, weekend_pm &lt;dbl&gt;, work &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   n_wdays_loc &lt;int&gt;, n_months_loc &lt;int&gt;</span>
@@ -626,24 +626,26 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start scoring ...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish scoring! There are 9 new added variables: s_n_tweets_loc, s_n_hrs_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_weekend, s_rest, s_wk_am</span>
-<span class="co">#&gt; ⌛ Scoring time: 2.867 secs</span>
+<span class="co">#&gt; ⌛ Scoring time: 2.572 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_scored</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [4 × 10]&gt; </span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [4 × 10]&gt; </span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [12 × 10]&gt;</span>
+<span class="co">#&gt;       u_id data             </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           </span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [6 × 10]&gt;</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [4 × 10]&gt;</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [3 × 10]&gt;</span>
 <span class="no">df_scored</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]]
-<span class="co">#&gt; # A tibble: 4 x 10</span>
+<span class="co">#&gt; # A tibble: 6 x 10</span>
 <span class="co">#&gt;   grid_id s_n_tweets_loc s_n_hrs_loc s_n_days_loc s_period_loc s_n_wdays_loc</span>
-<span class="co">#&gt;     &lt;int&gt;          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
-<span class="co">#&gt; 1    1177         0.1         0.0917       0.1          0.0721           0.1</span>
-<span class="co">#&gt; 2    1239         0.0138      0.0875       0.0701       0.0248           0.1</span>
-<span class="co">#&gt; 3    1238         0.0119      0.0833       0.0522       0.0461           0.1</span>
-<span class="co">#&gt; 4    1237         0.0146      0.0708       0.0642       0.1              0.1</span>
+<span class="co">#&gt;   &lt;chr&gt;            &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 746            0.1          0.1          0.1          0.0516           0.1</span>
+<span class="co">#&gt; 2 747            0.0736       0.0958       0.0954       0.0515           0.1</span>
+<span class="co">#&gt; 3 805            0.0162       0.0958       0.0667       0.0517           0.1</span>
+<span class="co">#&gt; 4 685            0.00305      0.0667       0.0231       0.0515           0.1</span>
+<span class="co">#&gt; 5 523            0.00736      0.05         0.0287       0.1              0.1</span>
+<span class="co">#&gt; 6 806            0.00221      0.0667       0.0157       0.0298           0.1</span>
 <span class="co">#&gt; # … with 4 more variables: s_n_months_loc &lt;dbl&gt;, s_weekend &lt;dbl&gt;, s_rest &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   s_wk_am &lt;dbl&gt;</span>
 
@@ -661,29 +663,31 @@ We hope that through packages like <code>homelocator</code>, future work that re
                 <span class="kw">s_wk_am</span> <span class="kw">=</span> <span class="fl">0.1</span> * (<span class="no">weekend_am</span>))
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.061 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.067 secs</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish adding! There are 9 new added variables: s_n_tweets_loc, s_n_hrs_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_weekend, s_rest, s_wk_am</span>
-<span class="co">#&gt; ⌛ Adding time: 0.339 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.284 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_scored_2</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [4 × 25]&gt; </span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [4 × 25]&gt; </span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [12 × 25]&gt;</span>
+<span class="co">#&gt;       u_id data             </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           </span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [6 × 25]&gt;</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [4 × 25]&gt;</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [3 × 25]&gt;</span>
 <span class="no">df_scored_2</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]]
-<span class="co">#&gt; # A tibble: 4 x 25</span>
+<span class="co">#&gt; # A tibble: 6 x 25</span>
 <span class="co">#&gt;   n_tweets n_locs grid_id data  n_tweets_loc n_hrs_loc n_days_loc period_loc</span>
-<span class="co">#&gt;      &lt;int&gt;  &lt;int&gt;   &lt;int&gt; &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;</span>
-<span class="co">#&gt; 1     2571    130    1177 &lt;tib…         1679        22         67       308.</span>
-<span class="co">#&gt; 2     2571    130    1239 &lt;tib…          231        21         47       106.</span>
-<span class="co">#&gt; 3     2571    130    1238 &lt;tib…          199        20         35       197.</span>
-<span class="co">#&gt; 4     2571    130    1237 &lt;tib…          245        17         43       427.</span>
+<span class="co">#&gt;      &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;lis&gt;        &lt;int&gt;     &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;</span>
+<span class="co">#&gt; 1     2161    129 746     &lt;tib…          951        24        108       522.</span>
+<span class="co">#&gt; 2     2161    129 747     &lt;tib…          700        23        103       521.</span>
+<span class="co">#&gt; 3     2161    129 805     &lt;tib…          154        23         72       522.</span>
+<span class="co">#&gt; 4     2161    129 685     &lt;tib…           29        16         25       521.</span>
+<span class="co">#&gt; 5     2161    129 523     &lt;tib…           70        12         31      1011.</span>
+<span class="co">#&gt; 6     2161    129 806     &lt;tib…           21        16         17       301.</span>
 <span class="co">#&gt; # … with 17 more variables: rest &lt;dbl&gt;, weekday &lt;dbl&gt;, weekend &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   weekend_am &lt;dbl&gt;, weekend_pm &lt;dbl&gt;, work &lt;dbl&gt;, n_wdays_loc &lt;int&gt;,</span>
 <span class="co">#&gt; #   n_months_loc &lt;int&gt;, s_n_tweets_loc &lt;dbl&gt;, s_n_hrs_loc &lt;dbl&gt;,</span>
@@ -695,24 +699,26 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summing scores...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summing! There are 1 new added variables: score</span>
-<span class="co">#&gt; ⌛ Summing time: 2.244 secs</span>
+<span class="co">#&gt; ⌛ Summing time: 1.883 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_score_summed</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [4 × 11]&gt; </span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [4 × 11]&gt; </span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [12 × 11]&gt;</span>
+<span class="co">#&gt;       u_id data             </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           </span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [6 × 11]&gt;</span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [4 × 11]&gt;</span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [3 × 11]&gt;</span>
 <span class="no">df_score_summed</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]]
-<span class="co">#&gt; # A tibble: 4 x 11</span>
+<span class="co">#&gt; # A tibble: 6 x 11</span>
 <span class="co">#&gt;   grid_id s_n_tweets_loc s_n_hrs_loc s_n_days_loc s_period_loc s_n_wdays_loc</span>
-<span class="co">#&gt;     &lt;int&gt;          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
-<span class="co">#&gt; 1    1177         0.1         0.0917       0.1          0.0721           0.1</span>
-<span class="co">#&gt; 2    1239         0.0138      0.0875       0.0701       0.0248           0.1</span>
-<span class="co">#&gt; 3    1238         0.0119      0.0833       0.0522       0.0461           0.1</span>
-<span class="co">#&gt; 4    1237         0.0146      0.0708       0.0642       0.1              0.1</span>
+<span class="co">#&gt;   &lt;chr&gt;            &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 746            0.1          0.1          0.1          0.0516           0.1</span>
+<span class="co">#&gt; 2 747            0.0736       0.0958       0.0954       0.0515           0.1</span>
+<span class="co">#&gt; 3 805            0.0162       0.0958       0.0667       0.0517           0.1</span>
+<span class="co">#&gt; 4 685            0.00305      0.0667       0.0231       0.0515           0.1</span>
+<span class="co">#&gt; 5 523            0.00736      0.05         0.0287       0.1              0.1</span>
+<span class="co">#&gt; 6 806            0.00221      0.0667       0.0157       0.0298           0.1</span>
 <span class="co">#&gt; # … with 5 more variables: s_n_months_loc &lt;dbl&gt;, s_weekend &lt;dbl&gt;, s_rest &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   s_wk_am &lt;dbl&gt;, score &lt;dbl&gt;</span></pre></body></html></div>
 </div>
@@ -739,50 +745,41 @@ We hope that through packages like <code>homelocator</code>, future work that re
   <span class="fu"><a href="../reference/extract_location.html">extract_location</a></span>(<span class="no">.</span>, <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>, <span class="kw">location</span> <span class="kw">=</span> <span class="st">"grid_id"</span>, <span class="kw">show_n_loc</span> <span class="kw">=</span> <span class="fl">1</span>, <span class="kw">keep_score</span> <span class="kw">=</span> <span class="no">F</span>, <span class="no">score</span>)
 <span class="co">#&gt; 🛠 Start extracting homes for users...</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; 🎉 Congratulations!! Your have found 855 users' potential home(s).</span>
-<span class="co">#&gt; ⌛ Extracting time: 0.795 secs</span>
+<span class="co">#&gt; 🎉 Congratulations!! Your have found 861 users' potential home(s).</span>
+<span class="co">#&gt; ⌛ Extracting time: 0.525 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_home</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 2</span>
-<span class="co">#&gt;   u_id     home </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;</span>
-<span class="co">#&gt; 1 94856810 1177 </span>
-<span class="co">#&gt; 2 22984886 1193 </span>
-<span class="co">#&gt; 3 31322054 326</span>
+<span class="co">#&gt;       u_id home </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;chr&gt;</span>
+<span class="co">#&gt; 1 23630208 746  </span>
+<span class="co">#&gt; 2 91138721 361  </span>
+<span class="co">#&gt; 3 73756686 680</span>
 
 <span class="co"># extract homes for users and keep scores of locations</span>
 <span class="no">df_home</span> <span class="kw">&lt;-</span> <span class="no">df_score_summed</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/extract_location.html">extract_location</a></span>(<span class="no">.</span>, <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>, <span class="kw">location</span> <span class="kw">=</span> <span class="st">"grid_id"</span>, <span class="kw">show_n_loc</span> <span class="kw">=</span> <span class="fl">1</span>, <span class="kw">keep_score</span> <span class="kw">=</span> <span class="no">T</span>, <span class="no">score</span>)
 <span class="co">#&gt; 🛠 Start extracting homes for users...</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; 🎉 Congratulations!! Your have found 855 users' potential home(s).</span>
-<span class="co">#&gt; ⌛ Extracting time: 0.615 secs</span>
+<span class="co">#&gt; 🎉 Congratulations!! Your have found 861 users' potential home(s).</span>
+<span class="co">#&gt; ⌛ Extracting time: 0.522 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_home</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="fl">3</span>)
 <span class="co">#&gt; # A tibble: 3 x 3</span>
-<span class="co">#&gt;   u_id     data               home </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;             &lt;chr&gt;</span>
-<span class="co">#&gt; 1 94856810 &lt;tibble [4 × 11]&gt;  1177 </span>
-<span class="co">#&gt; 2 22984886 &lt;tibble [4 × 11]&gt;  1193 </span>
-<span class="co">#&gt; 3 31322054 &lt;tibble [12 × 11]&gt; 326</span>
+<span class="co">#&gt;       u_id data              home </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;            &lt;chr&gt;</span>
+<span class="co">#&gt; 1 23630208 &lt;tibble [6 × 11]&gt; 746  </span>
+<span class="co">#&gt; 2 91138721 &lt;tibble [4 × 11]&gt; 361  </span>
+<span class="co">#&gt; 3 73756686 &lt;tibble [3 × 11]&gt; 680</span>
 <span class="no">df_home</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">3</span>]]
-<span class="co">#&gt; # A tibble: 12 x 11</span>
-<span class="co">#&gt;    grid_id s_n_tweets_loc s_n_hrs_loc s_n_days_loc s_period_loc s_n_wdays_loc</span>
-<span class="co">#&gt;      &lt;int&gt;          &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
-<span class="co">#&gt;  1     326        0.1          0.1         0.1           0.0668        0.1   </span>
-<span class="co">#&gt;  2     437        0.00339      0.0458      0.00830       0.0625        0.1   </span>
-<span class="co">#&gt;  3     289        0.0474       0.0958      0.0431        0.0592        0.1   </span>
-<span class="co">#&gt;  4    1141        0.0149       0.0667      0.00553       0.0150        0.1   </span>
-<span class="co">#&gt;  5     327        0.0340       0.0917      0.0419        0.0646        0.1   </span>
-<span class="co">#&gt;  6    1076        0.0210       0.075       0.0312        0.0725        0.1   </span>
-<span class="co">#&gt;  7    1011        0.00447      0.0542      0.0103        0.0967        0.1   </span>
-<span class="co">#&gt;  8     399        0.00420      0.0458      0.00909       0.0548        0.1   </span>
-<span class="co">#&gt;  9    1077        0.0133       0.0542      0.0209        0.0694        0.1   </span>
-<span class="co">#&gt; 10     254        0.00515      0.0542      0.0119        0.1           0.1   </span>
-<span class="co">#&gt; 11     364        0.00230      0.05        0.00672       0.0546        0.0857</span>
-<span class="co">#&gt; 12     827        0.00501      0.0542      0.00870       0.0104        0.0857</span>
+<span class="co">#&gt; # A tibble: 3 x 11</span>
+<span class="co">#&gt;   grid_id s_n_tweets_loc s_n_hrs_loc s_n_days_loc s_period_loc s_n_wdays_loc</span>
+<span class="co">#&gt;   &lt;chr&gt;            &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 619             0.0258      0.0875       0.0527       0.0877           0.1</span>
+<span class="co">#&gt; 2 680             0.1         0.0958       0.1          0.0717           0.1</span>
+<span class="co">#&gt; 3 618             0.0712      0.0917       0.0876       0.1              0.1</span>
 <span class="co">#&gt; # … with 5 more variables: s_n_months_loc &lt;dbl&gt;, s_weekend &lt;dbl&gt;, s_rest &lt;dbl&gt;,</span>
 <span class="co">#&gt; #   s_wk_am &lt;dbl&gt;, score &lt;dbl&gt;</span></pre></body></html></div>
 </div>
@@ -804,7 +801,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish adding! There are 1 new added variables: timeframe</span>
-<span class="co">#&gt; ⌛ Adding time: 1.033 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.85 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">colnames_nested_data</span> <span class="kw">&lt;-</span> <span class="no">df_timeframe</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>()
@@ -816,22 +813,22 @@ We hope that through packages like <code>homelocator</code>, future work that re
                             <span class="kw">n_points_timeframe</span> <span class="kw">=</span> <span class="fu">n</span>())
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 1 new added variables: n_points_timeframe</span>
-<span class="co">#&gt; ⌛ Summarising time: 0.416 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 0.27 secs</span>
 <span class="co">#&gt; </span>
 <span class="no">df_timeframe</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">2</span>]]
 <span class="co">#&gt; # A tibble: 142 x 4</span>
 <span class="co">#&gt;    grid_id timeframe data               n_points_timeframe</span>
-<span class="co">#&gt;      &lt;int&gt; &lt;chr&gt;     &lt;list&gt;                          &lt;int&gt;</span>
-<span class="co">#&gt;  1     944 Rest      &lt;tibble [3 × 7]&gt;                    3</span>
-<span class="co">#&gt;  2     565 Rest      &lt;tibble [21 × 7]&gt;                  21</span>
-<span class="co">#&gt;  3     518 Active    &lt;tibble [265 × 7]&gt;                265</span>
-<span class="co">#&gt;  4     565 Active    &lt;tibble [110 × 7]&gt;                110</span>
-<span class="co">#&gt;  5     945 Active    &lt;tibble [10 × 7]&gt;                  10</span>
-<span class="co">#&gt;  6     429 Rest      &lt;tibble [3 × 7]&gt;                    3</span>
-<span class="co">#&gt;  7     481 Active    &lt;tibble [3 × 7]&gt;                    3</span>
-<span class="co">#&gt;  8    1014 Rest      &lt;tibble [11 × 7]&gt;                  11</span>
-<span class="co">#&gt;  9     524 Active    &lt;tibble [2 × 7]&gt;                    2</span>
-<span class="co">#&gt; 10     883 Rest      &lt;tibble [6 × 7]&gt;                    6</span>
+<span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;     &lt;list&gt;                          &lt;int&gt;</span>
+<span class="co">#&gt;  1 1204    Rest      &lt;tibble [304 × 7]&gt;                304</span>
+<span class="co">#&gt;  2 1204    Active    &lt;tibble [127 × 7]&gt;                127</span>
+<span class="co">#&gt;  3 767     Rest      &lt;tibble [6 × 7]&gt;                    6</span>
+<span class="co">#&gt;  4 1442    Rest      &lt;tibble [1 × 7]&gt;                    1</span>
+<span class="co">#&gt;  5 531     Leisure   &lt;tibble [1 × 7]&gt;                    1</span>
+<span class="co">#&gt;  6 1133    Rest      &lt;tibble [1 × 7]&gt;                    1</span>
+<span class="co">#&gt;  7 1262    Rest      &lt;tibble [2 × 7]&gt;                    2</span>
+<span class="co">#&gt;  8 1204    Leisure   &lt;tibble [97 × 7]&gt;                  97</span>
+<span class="co">#&gt;  9 488     Active    &lt;tibble [1 × 7]&gt;                    1</span>
+<span class="co">#&gt; 10 1197    Rest      &lt;tibble [1 × 7]&gt;                    1</span>
 <span class="co">#&gt; # … with 132 more rows</span>
 
 <span class="co"># spread timeframe in nested dataframe with key is timeframe and value is n_points_timeframe</span>
@@ -840,23 +837,23 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start spreading timeframe variable...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish spreading! There are 3 new added variables: Active, Leisure, Rest</span>
-<span class="co">#&gt; ⌛ Spreading time: 0.708 secs</span>
+<span class="co">#&gt; ⌛ Spreading time: 0.458 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_timeframe_spreaded</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">2</span>]]
 <span class="co">#&gt; # A tibble: 142 x 5</span>
-<span class="co">#&gt;    grid_id data             Active Leisure  Rest</span>
-<span class="co">#&gt;      &lt;int&gt; &lt;list&gt;            &lt;int&gt;   &lt;int&gt; &lt;int&gt;</span>
-<span class="co">#&gt;  1     172 &lt;tibble [2 × 7]&gt;      0       0     2</span>
-<span class="co">#&gt;  2     195 &lt;tibble [1 × 7]&gt;      0       0     1</span>
-<span class="co">#&gt;  3     254 &lt;tibble [1 × 7]&gt;      1       0     0</span>
-<span class="co">#&gt;  4     366 &lt;tibble [3 × 7]&gt;      3       0     0</span>
-<span class="co">#&gt;  5     400 &lt;tibble [1 × 7]&gt;      1       0     0</span>
-<span class="co">#&gt;  6     429 &lt;tibble [3 × 7]&gt;      0       0     3</span>
-<span class="co">#&gt;  7     429 &lt;tibble [1 × 7]&gt;      0       1     0</span>
-<span class="co">#&gt;  8     430 &lt;tibble [1 × 7]&gt;      0       0     1</span>
-<span class="co">#&gt;  9     430 &lt;tibble [1 × 7]&gt;      1       0     0</span>
-<span class="co">#&gt; 10     437 &lt;tibble [1 × 7]&gt;      1       0     0</span>
+<span class="co">#&gt;    grid_id data              Active Leisure  Rest</span>
+<span class="co">#&gt;    &lt;chr&gt;   &lt;list&gt;             &lt;int&gt;   &lt;int&gt; &lt;int&gt;</span>
+<span class="co">#&gt;  1 1010    &lt;tibble [1 × 7]&gt;       0       0     1</span>
+<span class="co">#&gt;  2 1010    &lt;tibble [1 × 7]&gt;       1       0     0</span>
+<span class="co">#&gt;  3 1011    &lt;tibble [19 × 7]&gt;      0       0    19</span>
+<span class="co">#&gt;  4 1011    &lt;tibble [2 × 7]&gt;       0       2     0</span>
+<span class="co">#&gt;  5 1011    &lt;tibble [2 × 7]&gt;       2       0     0</span>
+<span class="co">#&gt;  6 1012    &lt;tibble [2 × 7]&gt;       0       2     0</span>
+<span class="co">#&gt;  7 1014    &lt;tibble [1 × 7]&gt;       1       0     0</span>
+<span class="co">#&gt;  8 1064    &lt;tibble [1 × 7]&gt;       0       0     1</span>
+<span class="co">#&gt;  9 1065    &lt;tibble [1 × 7]&gt;       0       0     1</span>
+<span class="co">#&gt; 10 1075    &lt;tibble [2 × 7]&gt;       2       0     0</span>
 <span class="co">#&gt; # … with 132 more rows</span></pre></body></html></div>
 </div>
 <div id="arrange" class="section level3">
@@ -870,44 +867,44 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <code>...</code>: comma separated list of unquoted variable names</li>
 </ul>
 <div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="no">df_enriched</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">3</span>]]
-<span class="co">#&gt; # A tibble: 805 x 8</span>
+<span class="co">#&gt; # A tibble: 562 x 8</span>
 <span class="co">#&gt;    created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;    &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt;  1 2012-10-01 10:38:43     789  2012    10     1     2    10 2012-10-01</span>
-<span class="co">#&gt;  2 2014-07-13 13:15:09     789  2014     7    13     1    13 2014-07-13</span>
-<span class="co">#&gt;  3 2014-10-05 13:58:42     789  2014    10     5     1    13 2014-10-05</span>
-<span class="co">#&gt;  4 2014-10-04 11:21:08     789  2014    10     4     7    11 2014-10-04</span>
-<span class="co">#&gt;  5 2014-07-12 14:01:03     789  2014     7    12     7    14 2014-07-12</span>
-<span class="co">#&gt;  6 2014-10-09 13:04:23     789  2014    10     9     5    13 2014-10-09</span>
-<span class="co">#&gt;  7 2014-10-08 13:11:30     789  2014    10     8     4    13 2014-10-08</span>
-<span class="co">#&gt;  8 2012-09-23 03:35:23     789  2012     9    23     1     3 2012-09-23</span>
-<span class="co">#&gt;  9 2014-12-04 13:36:52    1357  2014    12     4     5    13 2014-12-04</span>
-<span class="co">#&gt; 10 2012-09-28 13:26:29     789  2012     9    28     6    13 2012-09-28</span>
-<span class="co">#&gt; # … with 795 more rows</span>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2013-10-24 03:13:22 814      2013    10    24     5     3 2013-10-24</span>
+<span class="co">#&gt;  2 2013-12-07 22:04:55 1195     2013    12     7     7    22 2013-12-08</span>
+<span class="co">#&gt;  3 2013-12-10 06:02:13 1195     2013    12    10     3     6 2013-12-10</span>
+<span class="co">#&gt;  4 2013-10-31 11:47:29 1195     2013    10    31     5    11 2013-10-31</span>
+<span class="co">#&gt;  5 2013-12-07 09:14:32 1195     2013    12     7     7     9 2013-12-07</span>
+<span class="co">#&gt;  6 2013-12-09 23:47:01 1195     2013    12     9     2    23 2013-12-10</span>
+<span class="co">#&gt;  7 2013-12-20 06:38:37 1195     2013    12    20     6     6 2013-12-20</span>
+<span class="co">#&gt;  8 2013-11-24 08:57:44 1195     2013    11    24     1     8 2013-11-24</span>
+<span class="co">#&gt;  9 2013-11-28 08:11:38 1195     2013    11    28     5     8 2013-11-28</span>
+<span class="co">#&gt; 10 2013-11-29 02:53:14 1039     2013    11    29     6     2 2013-11-29</span>
+<span class="co">#&gt; # … with 552 more rows</span>
 
 <span class="no">df_arranged</span> <span class="kw">&lt;-</span> <span class="no">df_enriched</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/arrange_nested.html">arrange_nested</a></span>(<span class="fu">desc</span>(<span class="no">hour</span>)) <span class="co"># arrange the hour in descending order</span>
 <span class="co">#&gt; 🛠 Start sorting...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish sorting!</span>
-<span class="co">#&gt; ⌛ Sorting time: 0.694 secs</span>
+<span class="co">#&gt; ⌛ Sorting time: 0.584 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_arranged</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">3</span>]]
-<span class="co">#&gt; # A tibble: 805 x 8</span>
+<span class="co">#&gt; # A tibble: 562 x 8</span>
 <span class="co">#&gt;    created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;    &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt;  1 2012-09-27 23:22:35     789  2012     9    27     5    23 2012-09-27</span>
-<span class="co">#&gt;  2 2012-10-05 23:07:04     789  2012    10     5     6    23 2012-10-05</span>
-<span class="co">#&gt;  3 2012-09-28 23:27:17     789  2012     9    28     6    23 2012-09-28</span>
-<span class="co">#&gt;  4 2012-09-29 23:00:40     789  2012     9    29     7    23 2012-09-29</span>
-<span class="co">#&gt;  5 2012-09-28 23:07:44     789  2012     9    28     6    23 2012-09-28</span>
-<span class="co">#&gt;  6 2012-10-03 23:09:29     789  2012    10     3     4    23 2012-10-03</span>
-<span class="co">#&gt;  7 2012-09-30 23:21:58     789  2012     9    30     1    23 2012-09-30</span>
-<span class="co">#&gt;  8 2012-09-26 23:21:46     789  2012     9    26     4    23 2012-09-26</span>
-<span class="co">#&gt;  9 2012-10-05 23:37:46     789  2012    10     5     6    23 2012-10-05</span>
-<span class="co">#&gt; 10 2014-07-15 23:37:08     852  2014     7    15     3    23 2014-07-15</span>
-<span class="co">#&gt; # … with 795 more rows</span></pre></body></html></div>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2013-12-09 23:47:01 1195     2013    12     9     2    23 2013-12-10</span>
+<span class="co">#&gt;  2 2013-10-18 23:40:02 1195     2013    10    18     6    23 2013-10-19</span>
+<span class="co">#&gt;  3 2013-12-09 23:59:41 1195     2013    12     9     2    23 2013-12-10</span>
+<span class="co">#&gt;  4 2013-10-19 23:17:16 1195     2013    10    19     7    23 2013-10-20</span>
+<span class="co">#&gt;  5 2013-12-15 23:22:36 1195     2013    12    15     1    23 2013-12-16</span>
+<span class="co">#&gt;  6 2013-12-17 23:08:36 1195     2013    12    17     3    23 2013-12-18</span>
+<span class="co">#&gt;  7 2013-11-28 23:14:34 1195     2013    11    28     5    23 2013-11-29</span>
+<span class="co">#&gt;  8 2013-12-16 23:12:19 1195     2013    12    16     2    23 2013-12-17</span>
+<span class="co">#&gt;  9 2013-12-09 23:52:23 820      2013    12     9     2    23 2013-12-10</span>
+<span class="co">#&gt; 10 2013-10-26 23:18:50 1195     2013    10    26     7    23 2013-10-27</span>
+<span class="co">#&gt; # … with 552 more rows</span></pre></body></html></div>
 <p>The <code><a href="../reference/arrange_double_nested.html">arrange_double_nested()</a></code> function works in the similar way as <code><a href="../reference/arrange_nested.html">arrange_nested()</a></code> function, but it applies to a double nested data frame. You need to choose the columns to nest inside a nested dataframe and then sort rows by selected column.</p>
 <pre><code>- `df`: a nested dataframe 
 - `nest_cols`: name of columns to nest in existing list-column
@@ -922,64 +919,74 @@ We hope that through packages like <code>homelocator</code>, future work that re
                         <span class="fu">desc</span>(<span class="no">created_at</span>)) <span class="co"># sort by time in descending order</span>
 <span class="co">#&gt; 🛠 Start sorting...</span>
 <span class="co">#&gt; ✅ Finish sorting!</span>
-<span class="co">#&gt; ⌛ Sorting time: 0.333 secs</span>
+<span class="co">#&gt; ⌛ Sorting time: 0.122 secs</span>
 <span class="co">#&gt; </span>
 
 
 <span class="co"># original third user</span>
 <span class="no">df_enriched</span>[<span class="fl">3</span>, ]
 <span class="co">#&gt; # A tibble: 1 x 2</span>
-<span class="co">#&gt;   u_id     data              </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;            </span>
-<span class="co">#&gt; 1 85194110 &lt;tibble [805 × 8]&gt;</span>
+<span class="co">#&gt;       u_id data              </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;            </span>
+<span class="co">#&gt; 1 83978717 &lt;tibble [562 × 8]&gt;</span>
 <span class="co"># third user data points </span>
 <span class="no">df_enriched</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">3</span>]]
-<span class="co">#&gt; # A tibble: 805 x 8</span>
+<span class="co">#&gt; # A tibble: 562 x 8</span>
 <span class="co">#&gt;    created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;    &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt;  1 2012-10-01 10:38:43     789  2012    10     1     2    10 2012-10-01</span>
-<span class="co">#&gt;  2 2014-07-13 13:15:09     789  2014     7    13     1    13 2014-07-13</span>
-<span class="co">#&gt;  3 2014-10-05 13:58:42     789  2014    10     5     1    13 2014-10-05</span>
-<span class="co">#&gt;  4 2014-10-04 11:21:08     789  2014    10     4     7    11 2014-10-04</span>
-<span class="co">#&gt;  5 2014-07-12 14:01:03     789  2014     7    12     7    14 2014-07-12</span>
-<span class="co">#&gt;  6 2014-10-09 13:04:23     789  2014    10     9     5    13 2014-10-09</span>
-<span class="co">#&gt;  7 2014-10-08 13:11:30     789  2014    10     8     4    13 2014-10-08</span>
-<span class="co">#&gt;  8 2012-09-23 03:35:23     789  2012     9    23     1     3 2012-09-23</span>
-<span class="co">#&gt;  9 2014-12-04 13:36:52    1357  2014    12     4     5    13 2014-12-04</span>
-<span class="co">#&gt; 10 2012-09-28 13:26:29     789  2012     9    28     6    13 2012-09-28</span>
-<span class="co">#&gt; # … with 795 more rows</span>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2013-10-24 03:13:22 814      2013    10    24     5     3 2013-10-24</span>
+<span class="co">#&gt;  2 2013-12-07 22:04:55 1195     2013    12     7     7    22 2013-12-08</span>
+<span class="co">#&gt;  3 2013-12-10 06:02:13 1195     2013    12    10     3     6 2013-12-10</span>
+<span class="co">#&gt;  4 2013-10-31 11:47:29 1195     2013    10    31     5    11 2013-10-31</span>
+<span class="co">#&gt;  5 2013-12-07 09:14:32 1195     2013    12     7     7     9 2013-12-07</span>
+<span class="co">#&gt;  6 2013-12-09 23:47:01 1195     2013    12     9     2    23 2013-12-10</span>
+<span class="co">#&gt;  7 2013-12-20 06:38:37 1195     2013    12    20     6     6 2013-12-20</span>
+<span class="co">#&gt;  8 2013-11-24 08:57:44 1195     2013    11    24     1     8 2013-11-24</span>
+<span class="co">#&gt;  9 2013-11-28 08:11:38 1195     2013    11    28     5     8 2013-11-28</span>
+<span class="co">#&gt; 10 2013-11-29 02:53:14 1039     2013    11    29     6     2 2013-11-29</span>
+<span class="co">#&gt; # … with 552 more rows</span>
 <span class="co"># arranged third user</span>
 <span class="no">df_double_arranged</span>[<span class="fl">3</span>, ]
 <span class="co">#&gt; # A tibble: 1 x 2</span>
-<span class="co">#&gt;   u_id     data             </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;           </span>
-<span class="co">#&gt; 1 85194110 &lt;tibble [72 × 2]&gt;</span>
+<span class="co">#&gt;       u_id data             </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           </span>
+<span class="co">#&gt; 1 83978717 &lt;tibble [74 × 2]&gt;</span>
 <span class="co"># arranged time </span>
 <span class="no">df_double_arranged</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">3</span>]]$<span class="no">data</span><span class="kw">[[</span><span class="fl">2</span>]]
-<span class="co">#&gt; # A tibble: 1 x 7</span>
-<span class="co">#&gt;   created_at           year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 2014-12-04 13:36:52  2014    12     4     5    13 2014-12-04</span></pre></body></html></div>
+<span class="co">#&gt; # A tibble: 434 x 7</span>
+<span class="co">#&gt;    created_at           year month   day  wday  hour ymd       </span>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2013-12-20 06:38:37  2013    12    20     6     6 2013-12-20</span>
+<span class="co">#&gt;  2 2013-12-20 05:33:54  2013    12    20     6     5 2013-12-20</span>
+<span class="co">#&gt;  3 2013-12-20 04:41:13  2013    12    20     6     4 2013-12-20</span>
+<span class="co">#&gt;  4 2013-12-20 04:36:26  2013    12    20     6     4 2013-12-20</span>
+<span class="co">#&gt;  5 2013-12-20 04:35:07  2013    12    20     6     4 2013-12-20</span>
+<span class="co">#&gt;  6 2013-12-20 04:29:29  2013    12    20     6     4 2013-12-20</span>
+<span class="co">#&gt;  7 2013-12-20 01:09:56  2013    12    20     6     1 2013-12-20</span>
+<span class="co">#&gt;  8 2013-12-20 00:28:00  2013    12    20     6     0 2013-12-20</span>
+<span class="co">#&gt;  9 2013-12-19 21:19:39  2013    12    19     5    21 2013-12-20</span>
+<span class="co">#&gt; 10 2013-12-19 21:09:39  2013    12    19     5    21 2013-12-20</span>
+<span class="co">#&gt; # … with 424 more rows</span></pre></body></html></div>
 </div>
 <div id="top-n" class="section level3">
 <h3 class="hasAnchor">
 <a href="#top-n" class="anchor"></a>Top N</h3>
 <p>The <code><a href="../reference/top_n_nested.html">top_n_nested()</a></code> function in the <code>top_n.R</code> script works in the same way as <a href="https://dplyr.tidyverse.org/reference/top_n.html">top_n</a> function in <a href="https://github.com/tidyverse/tidyverse">tidyverse</a> but for nested dataframe. It allows to select the top entries in each group, ordered by wt.</p>
 <div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">df_enriched</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">2</span>]]
-<span class="co">#&gt; # A tibble: 835 x 8</span>
+<span class="co">#&gt; # A tibble: 827 x 8</span>
 <span class="co">#&gt;    created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;    &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt;  1 2014-11-19 06:58:04     944  2014    11    19     4     6 2014-11-19</span>
-<span class="co">#&gt;  2 2015-01-03 07:39:41     565  2015     1     3     7     7 2015-01-03</span>
-<span class="co">#&gt;  3 2014-11-16 12:20:28     518  2014    11    16     1    12 2014-11-16</span>
-<span class="co">#&gt;  4 2014-10-06 12:02:21     518  2014    10     6     2    12 2014-10-06</span>
-<span class="co">#&gt;  5 2014-11-16 13:27:10     565  2014    11    16     1    13 2014-11-16</span>
-<span class="co">#&gt;  6 2014-11-05 10:27:31     945  2014    11     5     4    10 2014-11-05</span>
-<span class="co">#&gt;  7 2014-11-17 02:50:26     429  2014    11    17     2     2 2014-11-17</span>
-<span class="co">#&gt;  8 2014-11-15 10:55:11     518  2014    11    15     7    10 2014-11-15</span>
-<span class="co">#&gt;  9 2014-11-25 14:30:10     518  2014    11    25     3    14 2014-11-25</span>
-<span class="co">#&gt; 10 2014-11-21 17:48:18     518  2014    11    21     6    17 2014-11-21</span>
-<span class="co">#&gt; # … with 825 more rows</span>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2014-05-20 05:17:21 1204     2014     5    20     3     5 2014-05-20</span>
+<span class="co">#&gt;  2 2012-10-20 18:16:01 1204     2012    10    20     7    18 2012-10-21</span>
+<span class="co">#&gt;  3 2014-09-28 07:38:15 767      2014     9    28     1     7 2014-09-28</span>
+<span class="co">#&gt;  4 2012-07-18 05:18:54 1442     2012     7    18     4     5 2012-07-18</span>
+<span class="co">#&gt;  5 2014-08-09 07:23:51 1204     2014     8     9     7     7 2014-08-09</span>
+<span class="co">#&gt;  6 2014-08-23 19:41:35 531      2014     8    23     7    19 2014-08-24</span>
+<span class="co">#&gt;  7 2014-07-02 06:06:00 1204     2014     7     2     4     6 2014-07-02</span>
+<span class="co">#&gt;  8 2014-09-22 04:45:02 1204     2014     9    22     2     4 2014-09-22</span>
+<span class="co">#&gt;  9 2014-08-31 06:18:23 1133     2014     8    31     1     6 2014-08-31</span>
+<span class="co">#&gt; 10 2012-09-02 02:34:28 1262     2012     9     2     1     2 2012-09-02</span>
+<span class="co">#&gt; # … with 817 more rows</span>
 
 <span class="co">## get the top 1 row based on hour </span>
 <span class="no">df_top_1</span> <span class="kw">&lt;-</span> <span class="no">df_enriched</span> <span class="kw">%&gt;%</span>
@@ -987,19 +994,24 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start selecting top 1 row(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish selecting top 1 row(s)!</span>
-<span class="co">#&gt; ⌛ Selecting time: 1.287 secs</span>
+<span class="co">#&gt; ⌛ Selecting time: 0.97 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="no">df_top_1</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">2</span>]]
-<span class="co">#&gt; # A tibble: 6 x 8</span>
-<span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 2014-11-30 23:17:50     518  2014    11    30     1    23 2014-11-30</span>
-<span class="co">#&gt; 2 2014-11-16 23:04:25     565  2014    11    16     1    23 2014-11-16</span>
-<span class="co">#&gt; 3 2014-12-14 23:12:01     518  2014    12    14     1    23 2014-12-14</span>
-<span class="co">#&gt; 4 2014-11-15 23:23:31     518  2014    11    15     7    23 2014-11-15</span>
-<span class="co">#&gt; 5 2014-11-30 23:23:04     518  2014    11    30     1    23 2014-11-30</span>
-<span class="co">#&gt; 6 2014-12-17 23:17:00     518  2014    12    17     4    23 2014-12-17</span></pre></body></html></div>
+<span class="co">#&gt; # A tibble: 38 x 8</span>
+<span class="co">#&gt;    created_at          grid_id  year month   day  wday  hour ymd       </span>
+<span class="co">#&gt;    &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt;  1 2014-09-29 23:35:10 762      2014     9    29     2    23 2014-09-30</span>
+<span class="co">#&gt;  2 2014-05-03 23:30:34 811      2014     5     3     7    23 2014-05-04</span>
+<span class="co">#&gt;  3 2014-04-19 23:19:52 1204     2014     4    19     7    23 2014-04-20</span>
+<span class="co">#&gt;  4 2016-01-30 23:53:02 1729     2016     1    30     7    23 2016-01-31</span>
+<span class="co">#&gt;  5 2014-06-22 23:14:10 1204     2014     6    22     1    23 2014-06-23</span>
+<span class="co">#&gt;  6 2014-06-18 23:22:13 1204     2014     6    18     4    23 2014-06-19</span>
+<span class="co">#&gt;  7 2014-05-09 23:30:42 811      2014     5     9     6    23 2014-05-10</span>
+<span class="co">#&gt;  8 2014-05-14 23:46:01 1204     2014     5    14     4    23 2014-05-15</span>
+<span class="co">#&gt;  9 2014-09-15 23:47:09 1204     2014     9    15     2    23 2014-09-16</span>
+<span class="co">#&gt; 10 2014-07-01 23:44:28 1204     2014     7     1     3    23 2014-07-02</span>
+<span class="co">#&gt; # … with 28 more rows</span></pre></body></html></div>
 </div>
 <div id="identify-locations-with-embedded-recipes" class="section level3">
 <h3 class="hasAnchor">

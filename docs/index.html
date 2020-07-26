@@ -70,7 +70,7 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>The goal of <code>homelocator</code> is to provide a consistent framework and interface for the adoption of different approaches for identifying meaningful locations for users. With the package, you are able to write structured, algorithmic ‘recipes’ to identify meaningful locations according to your research requirements. The package also has a number of built-in ‘recipes’ that have been translated from approaches in the existing literature.</p>
+<p>The goal of <code>homelocator</code> is to provide a consistent framework and interface for the adoption of different approaches for identifying meaningful locations for users. With the package, you are able to write structured, algorithmic ‘recipes’ to identify meaningful locations according to your research requirements. The package also has a number of built-in ‘recipes’ that have been translated from approaches in the existing literature. A walkthrough demo video can be found in <code>demo/demo.mov</code>.</p>
 </div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
@@ -93,7 +93,7 @@
 </ul>
 <p>You can use <code><a href="reference/validate_dataset.html">validate_dataset()</a></code> to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">homelocator</span>)
-<span class="no">test_sample</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span>(<span class="fu">here</span>(<span class="st">"data/test_sample.rds"</span>))
+<span class="no">test_sample</span> <span class="kw">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data/test_sample.csv"</span>), <span class="kw">col_types</span> <span class="kw">=</span> <span class="fu">cols</span>(<span class="kw">grid_id</span> <span class="kw">=</span> <span class="fu">col_character</span>()))
 <span class="no">df_validated</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/validate_dataset.html">validate_dataset</a></span>(<span class="no">test_sample</span>,
                  <span class="kw">user</span> <span class="kw">=</span> <span class="st">"u_id"</span>, <span class="kw">timestamp</span> <span class="kw">=</span> <span class="st">"created_at"</span>, <span class="kw">location</span> <span class="kw">=</span> <span class="st">"grid_id"</span>)
 <span class="co">#&gt; 🎉 Congratulations!! Your dataset has passed validation.</span>
@@ -103,14 +103,14 @@
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_validated</span>)
 <span class="co">#&gt; # A tibble: 6 x 3</span>
-<span class="co">#&gt;   u_id     grid_id created_at         </span>
-<span class="co">#&gt;   &lt;chr&gt;      &lt;int&gt; &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 39592393    1376 2014-03-01 11:57:54</span>
-<span class="co">#&gt; 2 68320978     944 2014-11-19 06:58:04</span>
-<span class="co">#&gt; 3 85194110     789 2012-10-01 10:38:43</span>
-<span class="co">#&gt; 4 66559308    1615 2014-08-07 02:58:43</span>
-<span class="co">#&gt; 5 40221447     849 2012-11-13 11:32:36</span>
-<span class="co">#&gt; 6 54795328     999 2013-08-01 10:06:44</span></pre></div>
+<span class="co">#&gt;       u_id grid_id created_at         </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;dttm&gt;             </span>
+<span class="co">#&gt; 1 10380249 400     2015-02-25 07:03:51</span>
+<span class="co">#&gt; 2 52229026 1204    2014-05-20 05:17:21</span>
+<span class="co">#&gt; 3 83978717 814     2013-10-24 03:13:22</span>
+<span class="co">#&gt; 4 62462498 394     2014-01-09 08:57:39</span>
+<span class="co">#&gt; 5   941995 535     2013-03-27 18:57:06</span>
+<span class="co">#&gt; 6 67125054 757     2013-01-30 11:08:42</span></pre></div>
 </div>
 <div id="nesting-users-for-parallel-computing" class="section level3">
 <h3 class="hasAnchor">
@@ -119,28 +119,28 @@
 <div class="sourceCode" id="cb3"><pre class="r"><span class="no">df_nested</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span>(<span class="no">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"created_at"</span>, <span class="st">"grid_id"</span>))
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.351 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.338 secs</span>
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_nested</span>)
 <span class="co">#&gt; # A tibble: 6 x 2</span>
-<span class="co">#&gt;   u_id     data                </span>
-<span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;              </span>
-<span class="co">#&gt; 1 39592393 &lt;tibble [100 × 2]&gt;  </span>
-<span class="co">#&gt; 2 68320978 &lt;tibble [835 × 2]&gt;  </span>
-<span class="co">#&gt; 3 85194110 &lt;tibble [805 × 2]&gt;  </span>
-<span class="co">#&gt; 4 66559308 &lt;tibble [3,305 × 2]&gt;</span>
-<span class="co">#&gt; 5 40221447 &lt;tibble [6,641 × 2]&gt;</span>
-<span class="co">#&gt; 6 54795328 &lt;tibble [79 × 2]&gt;</span>
+<span class="co">#&gt;       u_id data                </span>
+<span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;              </span>
+<span class="co">#&gt; 1 10380249 &lt;tibble [216 × 2]&gt;  </span>
+<span class="co">#&gt; 2 52229026 &lt;tibble [827 × 2]&gt;  </span>
+<span class="co">#&gt; 3 83978717 &lt;tibble [562 × 2]&gt;  </span>
+<span class="co">#&gt; 4 62462498 &lt;tibble [4,112 × 2]&gt;</span>
+<span class="co">#&gt; 5   941995 &lt;tibble [322 × 2]&gt;  </span>
+<span class="co">#&gt; 6 67125054 &lt;tibble [316 × 2]&gt;</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_nested</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]])
 <span class="co">#&gt; # A tibble: 6 x 2</span>
 <span class="co">#&gt;   created_at          grid_id</span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 2014-03-01 11:57:54    1376</span>
-<span class="co">#&gt; 2 2012-11-09 14:30:22    1065</span>
-<span class="co">#&gt; 3 2012-09-10 16:01:20     936</span>
-<span class="co">#&gt; 4 2012-07-29 15:20:56     935</span>
-<span class="co">#&gt; 5 2014-02-27 10:22:11     755</span>
-<span class="co">#&gt; 6 2013-02-20 11:41:07     755</span></pre></div>
+<span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;  </span>
+<span class="co">#&gt; 1 2015-02-25 07:03:51 400    </span>
+<span class="co">#&gt; 2 2015-09-29 14:42:34 561    </span>
+<span class="co">#&gt; 3 2014-12-30 20:49:03 366    </span>
+<span class="co">#&gt; 4 2016-05-27 15:44:55 574    </span>
+<span class="co">#&gt; 5 2013-08-07 01:54:18 517    </span>
+<span class="co">#&gt; 6 2015-05-02 07:10:31 854</span></pre></div>
 </div>
 <div id="enrich-variables-from-timestamp" class="section level3">
 <h3 class="hasAnchor">
@@ -150,18 +150,18 @@
 <span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 4.18 secs</span>
+<span class="co">#&gt; ⌛ Enriching time: 2.454 secs</span>
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">df_enriched</span>$<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]])
 <span class="co">#&gt; # A tibble: 6 x 8</span>
 <span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 2014-03-01 11:57:54    1376  2014     3     1     7    11 2014-03-01</span>
-<span class="co">#&gt; 2 2012-11-09 14:30:22    1065  2012    11     9     6    14 2012-11-09</span>
-<span class="co">#&gt; 3 2012-09-10 16:01:20     936  2012     9    10     2    16 2012-09-10</span>
-<span class="co">#&gt; 4 2012-07-29 15:20:56     935  2012     7    29     1    15 2012-07-29</span>
-<span class="co">#&gt; 5 2014-02-27 10:22:11     755  2014     2    27     5    10 2014-02-27</span>
-<span class="co">#&gt; 6 2013-02-20 11:41:07     755  2013     2    20     4    11 2013-02-20</span></pre></div>
+<span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
+<span class="co">#&gt; 1 2015-02-25 07:03:51 400      2015     2    25     4     7 2015-02-25</span>
+<span class="co">#&gt; 2 2015-09-29 14:42:34 561      2015     9    29     3    14 2015-09-29</span>
+<span class="co">#&gt; 3 2014-12-30 20:49:03 366      2014    12    30     3    20 2014-12-31</span>
+<span class="co">#&gt; 4 2016-05-27 15:44:55 574      2016     5    27     6    15 2016-05-27</span>
+<span class="co">#&gt; 5 2013-08-07 01:54:18 517      2013     8     7     4     1 2013-08-07</span>
+<span class="co">#&gt; 6 2015-05-02 07:10:31 854      2015     5     2     7     7 2015-05-02</span></pre></div>
 </div>
 <div id="use-built-in-recipes" class="section level3">
 <h3 class="hasAnchor">
