@@ -48,7 +48,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 # load data
-test_sample <- readRDS(here("data/test_sample.rds"))
+test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
 
 # show test sample 
 test_sample %>% head(3)
