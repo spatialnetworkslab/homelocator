@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Overview 
 
-The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature.
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo/demo.mov`. 
 
 ## Installation
 
@@ -53,7 +53,7 @@ library(here)
 
 ```{r validate}
 library(homelocator)
-test_sample <- readRDS(here("data/test_sample.rds"))
+test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
 df_validated <- validate_dataset(test_sample, 
                  user = "u_id", timestamp = "created_at", location = "grid_id")
 head(df_validated)
