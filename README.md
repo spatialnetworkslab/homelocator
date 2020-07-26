@@ -14,7 +14,8 @@ structured, algorithmic ‘recipes’ to identify meaningful locations
 according to your research requirements. The package also has a number
 of built-in ‘recipes’ that have been translated from approaches in the
 existing literature. A walkthrough demo video can be found in
-`homelocator-package/demo.mov`.
+`demo.mov`. And a static website of `homelocator` package can be found
+in `docs`.
 
 ## Installation
 
@@ -78,7 +79,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.343 secs
+#> ⌛ Nesting time: 0.421 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -114,7 +115,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 2.462 secs
+#> ⌛ Enriching time: 2.53 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8

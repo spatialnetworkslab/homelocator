@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Overview 
 
-The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `homelocator-package/demo.mov`. 
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo.mov`. And a static website of `homelocator` package can be found in `docs`. 
 
 ## Installation
 
