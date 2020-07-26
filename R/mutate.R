@@ -4,7 +4,7 @@
 #' 
 #' @param df A dataframe 
 #' @param ... Name-value pairs of expressions
-#' 
+#' @export
 mutate_verbose <- function(df, ...){
   if (!is.data.frame(df)) {
     stop(paste(emo::ji("bomb"), "Dataset is not a dataframe!"))
@@ -41,7 +41,7 @@ mutate_verbose <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of expressions
 #'
-
+#' @export
 mutate_nested <- function(df, ...){
   
   if(!is.list(df[ , grepl("^data$", names(df))])){
@@ -92,7 +92,7 @@ mutate_nested <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param var Name of column to calculate 
 #' 
-#' 
+#' @export 
 prop_factor_nested <- function(df, ...){
   
   if(!is.list(df[ , grepl("^data$", names(df))])){
@@ -155,7 +155,7 @@ prop_factor_nested <- function(df, ...){
 #' @param df A dataframe 
 #' @param nest_cols A selection of columns to nest in existing list-column
 #' @param ... Name-value pairs of functions
-#' 
+#' @export
 mutate_double_nested <- function(df, nest_cols, ...){
 
   if(nrow(df) == 0){

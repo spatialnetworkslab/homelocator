@@ -8,7 +8,7 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param counts Name of column that holds the data points frequency for each user         
 #' @param topNpct_user A decimal number that represent the certain percentage of users to remove
-
+#' @export
 remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_user = 1){
   
   if (!rlang::has_name(df, user)) {

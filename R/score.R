@@ -8,8 +8,7 @@
 #' @param ... Name-value pairs of expression
 #' 
 #' 
-#' Can we replace this with just mutate_nested? And potentially add transmute_nested counterpart?
-#' 
+#' @export
 score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_vars = F, ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))
@@ -86,7 +85,7 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
 #' @param location Name of column that holds unique identifier for each location
 #' @param ... A selection of columns to sum
 #' 
-#' 
+#' @export 
 score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))

@@ -6,7 +6,7 @@
 #' @param var_value Column name or position
 #' 
 #' 
-#' 
+#' @export
 spread_nested <- function(df, key_var, value_var){
   
   key_var_expr <-  rlang::sym(key_var)

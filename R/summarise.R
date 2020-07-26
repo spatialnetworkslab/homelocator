@@ -4,7 +4,7 @@
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of summary functions.
 #' 
-#' 
+#' @export
 summarise_nested <- function(df, ...){
   if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Dataset is not nested!"))
@@ -55,7 +55,7 @@ summarise_nested <- function(df, ...){
 #' @param ... Name-value pairs of summary functions
 #' 
 #' 
-#' 
+#' @export 
 summarise_double_nested <- function(df, nest_cols, ...){
   
   if(nrow(df) == 0){

@@ -19,9 +19,7 @@ score_nested(
 
 \item{location}{Name of column that holds unique identifier for each location}
 
-\item{...}{Name-value pairs of expression
-
-Can we replace this with just mutate_nested? And potentially add transmute_nested counterpart?}
+\item{...}{Name-value pairs of expression}
 
 \item{keep_ori_vars}{Option to keep or drop original varialbes}
 }

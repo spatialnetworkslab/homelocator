@@ -5,7 +5,7 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 #' 
-#' 
+#' @export
 filter_verbose <- function(df, user = "u_id", ...){
   
   if (!rlang::has_name(df, user)) {
@@ -49,7 +49,7 @@ filter_verbose <- function(df, user = "u_id", ...){
 #' @param user Name of column that holds unique identifier for each user
 #' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 #' 
-#' 
+#' @export
 filter_nested <- function(df,  user = "u_id", ...){
   
   if(!is.list(df[ , grepl("^data$", names(df))])){

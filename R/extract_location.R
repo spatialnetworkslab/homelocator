@@ -8,7 +8,7 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
 #' 
-
+#' @export
 extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc = 1, keep_score = F, ...){
   if (!rlang::has_name(df, user)) {
     stop(paste(emo::ji("bomb"), "User column does not exist!"))

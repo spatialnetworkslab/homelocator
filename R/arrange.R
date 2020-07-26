@@ -5,6 +5,7 @@
 #' @param ... Comma separated list of unquoted variable names
 #' 
 #' 
+#' @export
 arrange_nested <- function(df, ...){
   var_expr <- enquos(...)
   colname_nested_data <- names(df[ , grepl("^data$", names(df))])
@@ -47,6 +48,7 @@ arrange_nested <- function(df, ...){
 #' @param nest_cols Name of columns to nest in existing list-column
 #' @param ... Comma separated list of unquoted variable names
 #' 
+#' @export
 arrange_double_nested <- function(df, nest_cols, ...){
   if(nrow(df) == 0){
     stop(paste(emo::ji("bomb"), "No user left, tune your threshold and try again."))

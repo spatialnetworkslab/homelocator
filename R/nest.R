@@ -4,7 +4,7 @@
 #' @param df A dataframe 
 #' @param ... A selection of columns. 
 #' 
-#' 
+#' @export
 nest_verbose <- function(df, ...){
   
   if (!is.data.frame(df)) {
@@ -39,7 +39,7 @@ nest_verbose <- function(df, ...){
 #' @param df A dataframe
 #' @param ... Specification of columns to unnest. 
 #' 
-#' 
+#' @export
 unnest_verbose <- function(df, ...){
   
   if (!is.data.frame(df)) {
@@ -72,6 +72,7 @@ unnest_verbose <- function(df, ...){
 #' Unnest within a nested dataframe 
 #' 
 #' Flatten list-column to regular columns inside a nested dataframe
+#' @export
 unnest_nested <- function(df, ...){
   if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Error: Dataset is not nested!"))
@@ -119,7 +120,7 @@ unnest_nested <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param ... A selection of columns. 
 #' 
-#' 
+#' @export
 nest_nested <- function(df, ...){
   
   if(!is.list(df[ , grepl("^data$", names(df))])){
@@ -170,7 +171,7 @@ nest_nested <- function(df, ...){
 #' @param ... Specification of columns to unnest. 
 #' 
 #' 
-#' 
+#' @export 
 unnest_double_nested <- function(df, ...){
   
   if(!is.list(df[ , grepl("^data$", names(df))])){

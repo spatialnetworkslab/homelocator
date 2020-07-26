@@ -5,7 +5,7 @@
 #' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct
 #' @param tz A character string containing the time zone to convert to and it should be recognized in R. 
 #' 
-#' 
+#' @export
 enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"){
   if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Input dataset is not nested!"))

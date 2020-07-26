@@ -5,7 +5,7 @@
 #' @param n Number of rows to return 
 #' @param wt The variable to use for ordering 
 #' 
-#' 
+#' @export
 top_n_nested <- function(df, n = 2, wt){
   wt_expr <- rlang::sym(wt)
   colname_nested_data <- names(df[ , grepl("^data$", names(df))])
