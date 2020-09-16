@@ -1,10 +1,6 @@
 
 # homelocator
 
-<!-- badges: start -->
-
-<!-- badges: end -->
-
 ## Overview
 
 The goal of `homelocator` is to provide a consistent framework and
@@ -22,7 +18,7 @@ in `docs`.
 You can install the released version of homelocator with:
 
 ``` r
-install.packages("~/Downloads/homelocator-package/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
+remotes::install_local("homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 
 ## Example
@@ -36,8 +32,8 @@ You need to make sure the input dataset includes three essential
 attributes:
 
   - a unique identifier for the person or user
-  - a unique identifier for the spatial locaiton for the data point
-  - a timestamp that relects the time the data point was created
+  - a unique identifier for the spatial location for the data point
+  - a timestamp that reflects the time the data point was created
 
 You can use `validate_dataset()` to validate your input dataset before
 starting identifying meaningful locations. In this function, you need to
@@ -45,15 +41,11 @@ specify the names of three essential attribute that used in your
 dataset.
 
 ``` r
-devtools::load_all(".")
-#> Loading homelocator
-#> Welcome to homelocator package!
-library(homelocator)
+# load test sample dataset 
 test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
-df_validated <- validate_dataset(test_sample, 
-                 user = "u_id", timestamp = "created_at", location = "grid_id")
+df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 #> 🎉 Congratulations!! Your dataset has passed validation.
-#> 👤 There are 3000 unique users in your dataset.
+#> 👤 There are 100 unique users in your dataset.
 #> 🌏 Now start your journey identifying their meaningful location(s)!
 #> 👏 Good luck!
 #> 
@@ -61,12 +53,12 @@ head(df_validated)
 #> # A tibble: 6 x 3
 #>       u_id grid_id created_at         
 #>      <dbl> <chr>   <dttm>             
-#> 1 10380249 400     2015-02-25 07:03:51
-#> 2 52229026 1204    2014-05-20 05:17:21
-#> 3 83978717 814     2013-10-24 03:13:22
-#> 4 62462498 394     2014-01-09 08:57:39
-#> 5   941995 535     2013-03-27 18:57:06
-#> 6 67125054 757     2013-01-30 11:08:42
+#> 1  8590551 561     2014-08-17 15:41:06
+#> 2 66787067 975     2013-02-05 00:55:08
+#> 3 88554268 480     2012-12-24 01:05:46
+#> 4 21880033 364     2013-01-04 22:35:24
+#> 5 36713566 431     2012-09-10 04:38:51
+#> 6 25782489 365     2014-11-19 23:27:25
 ```
 
 ### Nesting users for parallel computing
@@ -79,28 +71,28 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.421 secs
+#> ⌛ Nesting time: 0.077 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
 #>       u_id data                
 #>      <dbl> <list>              
-#> 1 10380249 <tibble [216 × 2]>  
-#> 2 52229026 <tibble [827 × 2]>  
-#> 3 83978717 <tibble [562 × 2]>  
-#> 4 62462498 <tibble [4,112 × 2]>
-#> 5   941995 <tibble [322 × 2]>  
-#> 6 67125054 <tibble [316 × 2]>
+#> 1  8590551 <tibble [177 × 2]>  
+#> 2 66787067 <tibble [441 × 2]>  
+#> 3 88554268 <tibble [312 × 2]>  
+#> 4 21880033 <tibble [102 × 2]>  
+#> 5 36713566 <tibble [1,629 × 2]>
+#> 6 25782489 <tibble [24 × 2]>
 head(df_nested$data[[1]])
 #> # A tibble: 6 x 2
 #>   created_at          grid_id
 #>   <dttm>              <chr>  
-#> 1 2015-02-25 07:03:51 400    
-#> 2 2015-09-29 14:42:34 561    
-#> 3 2014-12-30 20:49:03 366    
-#> 4 2016-05-27 15:44:55 574    
-#> 5 2013-08-07 01:54:18 517    
-#> 6 2015-05-02 07:10:31 854
+#> 1 2014-08-17 15:41:06 561    
+#> 2 2015-02-24 20:05:49 1141   
+#> 3 2015-03-05 23:57:26 1140   
+#> 4 2015-02-15 18:41:21 1264   
+#> 5 2015-02-23 07:01:17 1264   
+#> 6 2015-04-02 09:32:49 1263
 ```
 
 ### Enrich variables from timestamp
@@ -115,18 +107,18 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 2.53 secs
+#> ⌛ Enriching time: 0.583 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
 #>   created_at          grid_id  year month   day  wday  hour ymd       
 #>   <dttm>              <chr>   <dbl> <dbl> <int> <dbl> <int> <date>    
-#> 1 2015-02-25 07:03:51 400      2015     2    25     4     7 2015-02-25
-#> 2 2015-09-29 14:42:34 561      2015     9    29     3    14 2015-09-29
-#> 3 2014-12-30 20:49:03 366      2014    12    30     3    20 2014-12-31
-#> 4 2016-05-27 15:44:55 574      2016     5    27     6    15 2016-05-27
-#> 5 2013-08-07 01:54:18 517      2013     8     7     4     1 2013-08-07
-#> 6 2015-05-02 07:10:31 854      2015     5     2     7     7 2015-05-02
+#> 1 2014-08-17 15:41:06 561      2014     8    17     1    15 2014-08-17
+#> 2 2015-02-24 20:05:49 1141     2015     2    24     3    20 2015-02-25
+#> 3 2015-03-05 23:57:26 1140     2015     3     5     5    23 2015-03-06
+#> 4 2015-02-15 18:41:21 1264     2015     2    15     1    18 2015-02-16
+#> 5 2015-02-23 07:01:17 1264     2015     2    23     2     7 2015-02-23
+#> 6 2015-04-02 09:32:49 1263     2015     4     2     5     9 2015-04-02
 ```
 
 ### Use built-in recipes
@@ -170,10 +162,9 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at",
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
-## It is important to load the neighbors table before you use the recipe!!
-## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-
+## It is important to create your location neighbors table before you use the recipe!!
+## For detailed steps for creating neighbors of locations, please check at "Generate grid neighbors"
+## section in "00b-identifying-home-locations.Rmd" file under "identifying-meaningful-locations" directory
 df_neighbors <- readRDS(here("data/neighbors.rds"))
 identify_location(test_sample, user = "u_id", timestamp = "created_at", 
                   location = "grid_id", recipe = "APDM")

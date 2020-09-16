@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -12,9 +14,6 @@ knitr::opts_chunk$set(
 
 # homelocator
 
-<!-- badges: start -->
-<!-- badges: end -->
-
 ## Overview 
 
 The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo.mov`. And a static website of `homelocator` package can be found in `docs`. 
@@ -24,7 +23,7 @@ The goal of `homelocator` is to provide a consistent framework and interface for
 You can install the released version of homelocator with:
 
 ``` r
-install.packages("~/Downloads/homelocator-package/homelocator_0.1.0.tar.gz", repos=NULL, type="source")
+remotes::install_local("homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 ## Example
 
@@ -35,30 +34,27 @@ These are some basic examples that show you how to use common functions in the p
 You need to make sure the input dataset includes three essential attributes: 
 
   - a unique identifier for the person or user 
-  - a unique identifier for the spatial locaiton for the data point 
-  - a timestamp that relects the time the data point was created 
+  - a unique identifier for the spatial location for the data point 
+  - a timestamp that reflects the time the data point was created 
 
 You can use `validate_dataset()` to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset. 
 
 
 ```{r echo=FALSE, results='hide', message=F}
+# Load homelocator library
+library(homelocator)
 # Load other needed libraries
 library(tidyverse)
-library(emo)
-library(lubridate)
 library(here)
 ```
 
 
 ```{r validate}
-devtools::load_all(".")
-library(homelocator)
+# load test sample dataset 
 test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
-df_validated <- validate_dataset(test_sample, 
-                 user = "u_id", timestamp = "created_at", location = "grid_id")
+df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 head(df_validated)
 ```
-
 
 
 ### Nesting users for parallel computing 
@@ -115,10 +111,9 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at",
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
-## It is important to load the neighbors table before you use the recipe!!
-## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-
+## It is important to create your location neighbors table before you use the recipe!!
+## For detailed steps for creating neighbors of locations, please check at "Generate grid neighbors"
+## section in "00b-identifying-home-locations.Rmd" file under "identifying-meaningful-locations" directory
 df_neighbors <- readRDS(here("data/neighbors.rds"))
 identify_location(test_sample, user = "u_id", timestamp = "created_at", 
                   location = "grid_id", recipe = "APDM")
