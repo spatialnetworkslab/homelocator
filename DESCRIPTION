@@ -16,6 +16,8 @@ Description: Inferring users' potential home(s) based on location and timestampe
 License: MIT + file LICENSE
 Depends:
     R (>= 3.5.0)
+Remotes:
+    hadley/emo
 Imports:
     chron (>= 2.3-55),
     lubridate (>= 1.7.8),
@@ -27,8 +29,7 @@ Imports:
     dplyr (>= 0.8.5),
     here (>= 0.1),
     tictoc (>= 1.0),
-    usethis (>= 1.6.0),
-    homelocator
+    usethis (>= 1.6.0)
 Suggests:
     devtools,
     furrr,
