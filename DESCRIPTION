@@ -27,7 +27,8 @@ Imports:
     dplyr (>= 0.8.5),
     here (>= 0.1),
     tictoc (>= 1.0),
-    usethis (>= 1.6.0)
+    usethis (>= 1.6.0),
+    homelocator
 Suggests:
     devtools,
     furrr,
