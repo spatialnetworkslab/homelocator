@@ -17,7 +17,7 @@ License: MIT + file LICENSE
 Depends:
     R (>= 3.5.0)
 Remotes:
-    hadley/emo
+    github::hadley/emo
 Imports:
     chron (>= 2.3-55),
     lubridate (>= 1.7.8),
@@ -29,7 +29,8 @@ Imports:
     dplyr (>= 0.8.5),
     here (>= 0.1),
     tictoc (>= 1.0),
-    usethis (>= 1.6.0)
+    usethis (>= 1.6.0),
+    emo
 Suggests:
     devtools,
     furrr,
@@ -40,4 +41,4 @@ Suggests:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
