@@ -41,8 +41,20 @@ specify the names of three essential attribute that used in your
 dataset.
 
 ``` r
+# Load homelocator library
+library(homelocator)
+#> Welcome to homelocator package!
+```
+
+``` r
+# Load other needed libraries
+library(tidyverse)
+library(here)
+```
+
+``` r
 # load test sample dataset 
-test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
+load(here::here("data/test_sample.rda"))
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 #> 🎉 Congratulations!! Your dataset has passed validation.
 #> 👤 There are 100 unique users in your dataset.
@@ -71,7 +83,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.077 secs
+#> ⌛ Nesting time: 0.089 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -107,7 +119,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.583 secs
+#> ⌛ Enriching time: 0.609 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
@@ -146,26 +158,26 @@ Current available recipes, where `HMLC` is the default recipe used in
 
 ``` r
 # default recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "HMLC")
 
 
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "FREQ")
 
 
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "OSNA")
 
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to create your location neighbors table before you use the recipe!!
-## For detailed steps for creating neighbors of locations, please check at "Generate grid neighbors"
-## section in "00b-identifying-home-locations.Rmd" file under "identifying-meaningful-locations" directory
-df_neighbors <- readRDS(here("data/neighbors.rds"))
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", recipe = "APDM")
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+load(here::here("data/df_neighbors.rda"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "APDM")
 ```

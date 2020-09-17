@@ -39,10 +39,12 @@ You need to make sure the input dataset includes three essential attributes:
 
 You can use `validate_dataset()` to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset. 
 
-
-```{r echo=FALSE, results='hide', message=F}
+```{r}
 # Load homelocator library
 library(homelocator)
+```
+
+```{r message=FALSE}
 # Load other needed libraries
 library(tidyverse)
 library(here)
@@ -51,7 +53,7 @@ library(here)
 
 ```{r validate}
 # load test sample dataset 
-test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
+load(here::here("data/test_sample.rda"))
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 head(df_validated)
 ```
@@ -95,28 +97,28 @@ Current available recipes, where `HMLC` is the default recipe used in `identify_
 
 ```{r eval=F}
 # default recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "HMLC")
 
 
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "FREQ")
 
 
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "OSNA")
 
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to create your location neighbors table before you use the recipe!!
-## For detailed steps for creating neighbors of locations, please check at "Generate grid neighbors"
-## section in "00b-identifying-home-locations.Rmd" file under "identifying-meaningful-locations" directory
-df_neighbors <- readRDS(here("data/neighbors.rds"))
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", recipe = "APDM")
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+load(here::here("data/df_neighbors.rda"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
+                  show_n_loc = 1, recipe = "APDM")
 ```
 
 
