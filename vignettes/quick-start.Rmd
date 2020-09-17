@@ -48,7 +48,7 @@ library(here)
 The test sample includes 100 random users, and it will be used as the example to get quick started for using `homelocator` package. 
 
 ```{r}
-load(here("data/test_sample.rda"))
+data("test_sample", package = "homelocator")
 ```
 
 ## Validate test sample 
@@ -105,7 +105,7 @@ Calculates the average and standard deviation of start time data points by a sin
 ## It is important to load the neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 ##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-load(here::here("data/df_neighbors.rda"))
+data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "APDM", keep_score = F)
 ```
 

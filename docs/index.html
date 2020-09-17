@@ -116,7 +116,7 @@
 </pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit">
 <span class="co"># load test sample dataset </span>
-<span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span>(<span class="kw">here</span>::<span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"data/test_sample.rda"</span>))
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"test_sample"</span>, package = <span class="st">"homelocator"</span>)
 <span class="kw">df_validated</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/validate_dataset.html">validate_dataset</a></span>(<span class="kw">test_sample</span>, user = <span class="st">"u_id"</span>, timestamp = <span class="st">"created_at"</span>, location = <span class="st">"grid_id"</span>)
 <span class="co">#&gt; 🎉 Congratulations!! Your dataset has passed validation.</span>
 <span class="co">#&gt; 👤 There are 100 unique users in your dataset.</span>
@@ -143,7 +143,7 @@
 <span class="kw">df_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span>(<span class="kw">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"created_at"</span>, <span class="st">"grid_id"</span>))
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.089 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.068 secs</span>
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="kw">df_nested</span>)
 <span class="co">#&gt; # A tibble: 6 x 2</span>
@@ -176,7 +176,7 @@
 <span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 0.609 secs</span>
+<span class="co">#&gt; ⌛ Enriching time: 0.555 secs</span>
 <span class="co">#&gt; </span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="kw">df_enriched</span><span class="op">$</span><span class="kw">data</span>[[<span class="fl">1</span>]])
 <span class="co">#&gt; # A tibble: 6 x 8</span>
@@ -241,7 +241,7 @@
 <span class="co">## It is important to create your location neighbors table before you use the recipe!!</span>
 <span class="co">## example: st_queen &lt;- function(a, b = a) st_relate(a, b, pattern = "F***T****")</span>
 <span class="co">##          neighbors &lt;- st_queen(df_sf) ===&gt; convert result to dataframe </span>
-<span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span>(<span class="kw">here</span>::<span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"data/df_neighbors.rda"</span>))
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"df_neighbors"</span>, package = <span class="st">"homelocator"</span>)
 <span class="fu"><a href="reference/identify_location.html">identify_location</a></span>(<span class="kw">test_sample</span>, user = <span class="st">"u_id"</span>, timestamp = <span class="st">"created_at"</span>, location = <span class="st">"grid_id"</span>, 
                   show_n_loc = <span class="fl">1</span>, recipe = <span class="st">"APDM"</span>)
 </pre></div>

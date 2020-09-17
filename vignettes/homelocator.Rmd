@@ -43,7 +43,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 # load data
-load(here::here("data/test_sample.rda"))
+data("test_sample", package = "homelocator")
 
 # show test sample 
 test_sample %>% head(3)
@@ -511,7 +511,7 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at",
 ## It is important to load the neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 ##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-load(here::here("data/df_neighbors.rda"))
+data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", 
                   location = "grid_id", recipe = "APDM", keep_score = F)
 ```

@@ -53,7 +53,7 @@ library(here)
 
 ```{r validate}
 # load test sample dataset 
-load(here::here("data/test_sample.rda"))
+data("test_sample", package = "homelocator")
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 head(df_validated)
 ```
@@ -116,7 +116,7 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 ## It is important to create your location neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 ##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-load(here::here("data/df_neighbors.rda"))
+data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```

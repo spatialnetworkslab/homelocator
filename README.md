@@ -54,7 +54,7 @@ library(here)
 
 ``` r
 # load test sample dataset 
-load(here::here("data/test_sample.rda"))
+data("test_sample", package = "homelocator")
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 #> 🎉 Congratulations!! Your dataset has passed validation.
 #> 👤 There are 100 unique users in your dataset.
@@ -83,7 +83,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.089 secs
+#> ⌛ Nesting time: 0.068 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -119,7 +119,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.609 secs
+#> ⌛ Enriching time: 0.555 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
@@ -177,7 +177,7 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 ## It is important to create your location neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 ##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-load(here::here("data/df_neighbors.rda"))
+data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```

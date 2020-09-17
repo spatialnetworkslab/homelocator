@@ -117,7 +117,7 @@
 <a href="#load-test-sample" class="anchor"></a>Load test sample</h2>
 <p>The test sample includes 100 random users, and it will be used as the example to get quick started for using <code>homelocator</code> package.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span>(<span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"data/test_sample.rda"</span>))
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"test_sample"</span>, package = <span class="st">"homelocator"</span>)
 </pre></div>
 </div>
 <div id="validate-test-sample" class="section level2">
@@ -198,7 +198,7 @@
 <span class="co">## It is important to load the neighbors table before you use the recipe!!</span>
 <span class="co">## example: st_queen &lt;- function(a, b = a) st_relate(a, b, pattern = "F***T****")</span>
 <span class="co">##          neighbors &lt;- st_queen(df_sf) ===&gt; convert result to dataframe </span>
-<span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span>(<span class="kw">here</span>::<span class="fu"><a href="https://rdrr.io/pkg/here/man/here.html">here</a></span>(<span class="st">"data/df_neighbors.rda"</span>))
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"df_neighbors"</span>, package = <span class="st">"homelocator"</span>)
 <span class="fu"><a href="../reference/identify_location.html">identify_location</a></span>(<span class="kw">test_sample</span>, user = <span class="st">"u_id"</span>, timestamp = <span class="st">"created_at"</span>, location = <span class="st">"grid_id"</span>, recipe = <span class="st">"APDM"</span>, keep_score = <span class="kw">F</span>)
 </pre></div>
 </div>
