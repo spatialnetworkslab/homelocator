@@ -1,0 +1,111 @@
+---
+title: "Quick start"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Quick start}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Download homelocator open-sources 
+
+Download `homelocator` open-sources from figshare at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
+
+## Install package 
+
+Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-open-sources/homelocator-package/`. 
+
+```{r eval=FALSE}
+remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
+```
+
+
+## Load library
+
+```{r setup}
+#load homelocator package 
+library(homelocator)
+```
+
+```{r message=FALSE}
+# load other packages needed for the analysis
+library(tidyverse)
+library(here)
+```
+
+
+## Load test sample 
+The test sample includes 100 random users, and it will be used as the example to get quick started for using `homelocator` package. 
+
+```{r}
+load(here("data/test_sample.rda"))
+```
+
+## Validate test sample 
+
+The `validate_dataset()` function in `validate_datset.R` script makes sure your input dataset contains all three necessary variables: user, location and timestamp. There are 4 arguments in this function: 
+
+  - `user`: name of column that holds a unique identifier for each user.
+  - `timestamp`: name of column that holds specific timestamp for each data point. This timestamp should be in `POSIXct` format.
+  - `location`: name of column that holds a unique identifier for each location.
+  - `keep_other_vars`: option to keep or remove any other variables of the input dataset. The default is `FALSE`.
+
+_When validating the dataset, please specify the names of column for user, timestamp and location._
+
+```{r}
+validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = FALSE)
+```
+
+## Identify home locations with embeded recipes
+
+### Recipe: HMLC
+
+Weighs data points across multiple time frames to ‘score’ potentially meaningful locations for each user 
+
+```{r eval = FALSE}
+# recipe: homelocator -- HMLC
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+```
+
+### Recipe: FREQ
+
+Selects the most frequently 'visited' location assuming a user is active mainly around their home location. 
+  
+```{r eval = FALSE}
+# recipe: Frequency -- FREQ
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "FREQ")
+```
+
+### Recipe: OSNA ([Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)):
+
+Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
+
+```{r eval = FALSE}
+# recipe: Online Social Network Activity -- OSNA
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "OSNA")
+```
+
+### Recipe: APDM ([Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones))
+
+Calculates the average and standard deviation of start time data points by a single user, in a single location. 
+
+```{r eval = FALSE}
+# recipe: Online Social Network Activity -- APDM
+## APDM recipe strictly returns the most likely home location
+## It is important to load the neighbors table before you use the recipe!!
+## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+load(here::here("data/df_neighbors.rda"))
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "APDM", keep_score = F)
+```
+

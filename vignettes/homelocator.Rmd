@@ -14,15 +14,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-
-```{r echo=FALSE, results='hide'}
-devtools::load_all(".")
-```
-
-```{r setup}
-library(homelocator)
-```
-
 # Introduction
 
 <p align="justify">Identifying meaningful locations, such as home and/or work locations from mobile technology is an essential step in the field of mobility analysis. The `homelocator` library is designed for identifying meaningful locations of user based on the spatio-temporally features contained within the mobility data, such as social media data, mobile phone data, mobile app data and so on.</p>
@@ -34,11 +25,15 @@ library(homelocator)
 <p align="justify">We hope that through packages like `homelocator`, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.</p>
 
 
+
+```{r}
+# Load homelocator library
+library(homelocator)
+```
+
 ```{r echo=FALSE, results='hide', message=F}
 # Load other needed libraries
 library(tidyverse)
-library(emo)
-library(lubridate)
 library(here)
 ```
 
@@ -48,7 +43,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 
 ```{r}
 # load data
-test_sample <- read_csv(here("data/test_sample.csv"), col_types = cols(grid_id = col_character()))
+load(here::here("data/test_sample.rda"))
 
 # show test sample 
 test_sample %>% head(3)
@@ -71,8 +66,7 @@ The `validate_dataset()` function in `validate_datset.R` script makes sure your 
 
 
 ```{r}
-df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", 
-                                 location = "grid_id", keep_other_vars = FALSE)
+df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = FALSE)
 
 # show result 
 df_validated %>% head(3)
@@ -517,7 +511,7 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at",
 ## It is important to load the neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
 ##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
-df_neighbors <- readRDS(here::here("data/neighbors.rds"))
+load(here::here("data/df_neighbors.rda"))
 identify_location(test_sample, user = "u_id", timestamp = "created_at", 
                   location = "grid_id", recipe = "APDM", keep_score = F)
 ```
