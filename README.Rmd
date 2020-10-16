@@ -18,12 +18,16 @@ knitr::opts_chunk$set(
 
 The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo.mov`. And a static website of `homelocator` package can be found in `docs`. 
 
+## Download open-sources 
+
+Download `homelocator` open-sources from _figshare_ at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
+
 ## Installation
 
-You can install the released version of homelocator with:
+Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-open-sources/homelocator-package/`. 
 
 ``` r
-remotes::install_local("homelocator_0.1.0.tar.gz", dependencies = T)
+remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 ## Example
 
