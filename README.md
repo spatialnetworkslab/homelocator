@@ -13,12 +13,19 @@ existing literature. A walkthrough demo video can be found in
 `demo.mov`. And a static website of `homelocator` package can be found
 in `docs`.
 
+## Download open-sources
+
+Download `homelocator` open-sources from *figshare* at:
+<https://figshare.com/s/ce7b8bcfd2e6b44a5568>
+
 ## Installation
 
-You can install the released version of homelocator with:
+Install the released version of `homelocator` as follows, where the
+**homelocator\_0.1.0.tar.gz** is stored under
+`homelocator-open-sources/homelocator-package/`.
 
 ``` r
-remotes::install_local("homelocator_0.1.0.tar.gz", dependencies = T)
+remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 
 ## Example
@@ -83,7 +90,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.068 secs
+#> ⌛ Nesting time: 0.054 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -119,7 +126,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.555 secs
+#> ⌛ Enriching time: 0.568 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
@@ -154,24 +161,36 @@ Current available recipes, where `HMLC` is the default recipe used in
       - Calculates the average and standard deviation of start time data
         points by a single user, in a single location.
 
-<!-- end list -->
+#### HMLC
 
 ``` r
 # default recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+```
 
+![hmlc-home-result](data/pic/sample-result-hmlc.png) \#\#\#\# FREQ
 
+``` r
 # recipe: Frequency -- FREQ
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "FREQ")
+```
 
+![freq-home-result](data/pic/sample-result-freq.png)
 
+#### OSNA
+
+``` r
 # recipe: Online Social Network Activity -- OSNA
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
+```
 
+![osna-home-result](data/pic/sample-result-osna.png)
 
+#### APDM
+
+``` r
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to create your location neighbors table before you use the recipe!!
@@ -181,3 +200,5 @@ data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```
+
+![apdm-home-result](data/pic/sample-result-apdm.png)

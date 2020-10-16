@@ -98,23 +98,31 @@ Current available recipes, where `HMLC` is the default recipe used in `identify_
 - `APDM`: [Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
   - Calculates the average and standard deviation of start time data points by a single user, in a single location. 
 
-
+#### HMLC
 ```{r eval=F}
 # default recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+```
 
-
+![hmlc-home-result](data/pic/sample-result-hmlc.png)
+#### FREQ
+```{r eval=F}
 # recipe: Frequency -- FREQ
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "FREQ")
+```
+![freq-home-result](data/pic/sample-result-freq.png)
 
-
+#### OSNA
+```{r eval=F}
 # recipe: Online Social Network Activity -- OSNA
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
+```
+![osna-home-result](data/pic/sample-result-osna.png)
 
-
+#### APDM
+```{r eval=F}
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to create your location neighbors table before you use the recipe!!
@@ -124,6 +132,5 @@ data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```
-
-
+![apdm-home-result](data/pic/sample-result-apdm.png)
 
