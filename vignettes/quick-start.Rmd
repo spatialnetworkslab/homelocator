@@ -5,8 +5,6 @@ vignette: >
   %\VignetteIndexEntry{Quick start}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
@@ -17,9 +15,9 @@ knitr::opts_chunk$set(
 ```
 
 
-## Download homelocator open-sources 
+## Download homelocator source-code 
 
-Download `homelocator` open-sources from figshare at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
+Download `homelocator` source-code from Figshare at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
 
 ## Install package 
 
