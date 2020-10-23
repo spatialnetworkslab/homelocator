@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## Download homelocator source-code 
 
-Download `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
+Download the `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
 
 - A walkthrough demo video can be found in `homelocator-source-code/homelocator-package/demo.mov`
 - A static website of `homelocator` package can be found in `homelocator-source-code/homelocator-package/static-website`. 
@@ -45,8 +45,8 @@ library(here)
 ```
 
 
-## Load test sample 
-The test sample includes 100 random users, and it will be used as the example to get quick started for using `homelocator` package. 
+## Load test data 
+The test data includes 100 random users, and it can be used as an example to get started with `homelocator` package. 
 
 ```{r}
 data("test_sample", package = "homelocator")
@@ -54,7 +54,7 @@ data("test_sample", package = "homelocator")
 
 ## Validate test sample 
 
-The `validate_dataset()` function in `validate_datset.R` script makes sure your input dataset contains all three necessary variables: user, location and timestamp. There are 4 arguments in this function: 
+The `validate_dataset()` function makes sure your input dataset contains all three necessary variables: user, location and timestamp. There are 4 arguments in this function: 
 
   - `user`: name of column that holds a unique identifier for each user.
   - `timestamp`: name of column that holds specific timestamp for each data point. This timestamp should be in `POSIXct` format.
@@ -67,7 +67,7 @@ _When validating the dataset, please specify the names of column for user, times
 validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = FALSE)
 ```
 
-## Identify home locations with embeded recipes
+## Identify home locations with embedded recipes
 
 ### Recipe: HMLC
 
@@ -87,7 +87,7 @@ Selects the most frequently 'visited' location assuming a user is active mainly 
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "FREQ")
 ```
 
-### Recipe: OSNA ([Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)):
+### Recipe: OSNA ([Efstathiades et al.2015](https://doi.org/10.1145/2808797.2808877)):
 
 Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
 
@@ -96,7 +96,7 @@ Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Her
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "OSNA")
 ```
 
-### Recipe: APDM ([Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones))
+### Recipe: APDM ([Ahas et al. 2010](https://doi.org/10.1080/10630731003597306))
 
 Calculates the average and standard deviation of start time data points by a single user, in a single location. 
 

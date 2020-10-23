@@ -90,7 +90,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.054 secs
+#> ⌛ Nesting time: 0.053 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -126,7 +126,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.579 secs
+#> ⌛ Enriching time: 0.53 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8

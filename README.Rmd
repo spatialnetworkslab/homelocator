@@ -16,15 +16,15 @@ knitr::opts_chunk$set(
 
 ## Overview 
 
-The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `homelocator-package/demo.mov`. And a static website of `homelocator` package can be found in `homelocator-package/static-website`. 
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `homelocator-source-code/homelocator-package/demo.mov`. And a static website of `homelocator` package can be found in `homelocator-source-code/homelocator-package/static-website`. 
 
 ## Download source-code 
 
-Download `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
+Download the `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
 
 ## Installation
 
-Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-source-code/homelocator-package/`. 
+Install the `homelocator` package as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-source-code/homelocator-package/`. 
 
 ``` r
 remotes::install_local("~/Downloads/homelocator-source-code/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
@@ -93,9 +93,9 @@ Current available recipes, where `HMLC` is the default recipe used in `identify_
   - Weighs data points across multiple time frames to ‘score’ potentially meaningful locations for each user 
 - `FREQ`
   - Selects the most frequently 'visited' location assuming a user is active mainly around their home location. 
-- `OSNA`: [Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+- `OSNA`: [Efstathiades et al.2015](https://doi.org/10.1080/10630731003597306)
   - Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
-- `APDM`: [Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+- `APDM`: [Ahas et al. 2010](https://doi.org/10.1080/10630731003597306)
   - Calculates the average and standard deviation of start time data points by a single user, in a single location. 
 
 #### HMLC

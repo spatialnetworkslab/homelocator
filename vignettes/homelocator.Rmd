@@ -488,9 +488,9 @@ Current available recipes:
   - Weighs data points across multiple time frames to ‘score’ potentially meaningful locations for each user 
 - `recipe_FREQ`
   - Selects the most frequently 'visited' location assuming a user is active mainly around their home location. 
-- `recipe_OSNA`: [Efstathiades et al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+- `recipe_OSNA`: [Efstathiades et al.2015](https://doi.org/10.1145/2808797.2808877)
   - Finds the most 'popular' location during 'rest', 'active' and 'leisure time. Here we focus on 'rest' and 'leisure' time to find the most possible home location for each user. 
-- `recipe_APDM`: [Ahas et al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+- `recipe_APDM`: [Ahas et al. 2010](https://doi.org/10.1080/10630731003597306)
   - Calculates the average and standard deviation of start time data points by a single user, in a single location. 
 
 ```{r eval = FALSE}
