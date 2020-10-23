@@ -17,14 +17,17 @@ knitr::opts_chunk$set(
 
 ## Download homelocator source-code 
 
-Download `homelocator` source-code from Figshare at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
+Download `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
+
+- A walkthrough demo video can be found in `homelocator-source-code/homelocator-package/demo.mov`
+- A static website of `homelocator` package can be found in `homelocator-source-code/homelocator-package/static-website`. 
 
 ## Install package 
 
-Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-open-sources/homelocator-package/`. 
+Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-source-code/homelocator-package/`. 
 
 ```{r eval=FALSE}
-remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
+remotes::install_local("~/Downloads/homelocator-source-code/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 
 

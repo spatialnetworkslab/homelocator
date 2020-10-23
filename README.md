@@ -10,22 +10,22 @@ structured, algorithmic ‘recipes’ to identify meaningful locations
 according to your research requirements. The package also has a number
 of built-in ‘recipes’ that have been translated from approaches in the
 existing literature. A walkthrough demo video can be found in
-`demo.mov`. And a static website of `homelocator` package can be found
-in `docs`.
+`homelocator-package/demo.mov`. And a static website of `homelocator`
+package can be found in `homelocator-package/static-website`.
 
-## Download open-sources
+## Download source-code
 
-Download `homelocator` open-sources from *figshare* at:
-<https://figshare.com/s/ce7b8bcfd2e6b44a5568>
+Download `homelocator` source-code from
+[*Figshare*](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
 
 ## Installation
 
 Install the released version of `homelocator` as follows, where the
 **homelocator\_0.1.0.tar.gz** is stored under
-`homelocator-open-sources/homelocator-package/`.
+`homelocator-source-code/homelocator-package/`.
 
 ``` r
-remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
+remotes::install_local("~/Downloads/homelocator-source-code/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 
 ## Example
@@ -71,13 +71,13 @@ df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "create
 head(df_validated)
 #> # A tibble: 6 x 3
 #>       u_id grid_id created_at         
-#>      <dbl> <chr>   <dttm>             
-#> 1  8590551 561     2014-08-17 15:41:06
-#> 2 66787067 975     2013-02-05 00:55:08
-#> 3 88554268 480     2012-12-24 01:05:46
-#> 4 21880033 364     2013-01-04 22:35:24
-#> 5 36713566 431     2012-09-10 04:38:51
-#> 6 25782489 365     2014-11-19 23:27:25
+#>      <int>   <int> <dttm>             
+#> 1 92298565    1581 2016-04-17 22:43:06
+#> 2 33908340    1461 2014-10-03 16:29:48
+#> 3 92298565    1136 2014-02-07 07:26:15
+#> 4 11616678    1375 2014-07-18 10:08:21
+#> 5 11616678    1375 2013-11-24 23:16:24
+#> 6 47727539     736 2016-06-21 15:59:49
 ```
 
 ### Nesting users for parallel computing
@@ -95,23 +95,23 @@ df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 head(df_nested)
 #> # A tibble: 6 x 2
 #>       u_id data                
-#>      <dbl> <list>              
-#> 1  8590551 <tibble [177 × 2]>  
-#> 2 66787067 <tibble [441 × 2]>  
-#> 3 88554268 <tibble [312 × 2]>  
-#> 4 21880033 <tibble [102 × 2]>  
-#> 5 36713566 <tibble [1,629 × 2]>
-#> 6 25782489 <tibble [24 × 2]>
+#>      <int> <list>              
+#> 1 92298565 <tibble [1,291 × 2]>
+#> 2 33908340 <tibble [1,170 × 2]>
+#> 3 11616678 <tibble [938 × 2]>  
+#> 4 47727539 <tibble [307 × 2]>  
+#> 5 54875363 <tibble [903 × 2]>  
+#> 6 40153763 <tibble [1,688 × 2]>
 head(df_nested$data[[1]])
 #> # A tibble: 6 x 2
 #>   created_at          grid_id
-#>   <dttm>              <chr>  
-#> 1 2014-08-17 15:41:06 561    
-#> 2 2015-02-24 20:05:49 1141   
-#> 3 2015-03-05 23:57:26 1140   
-#> 4 2015-02-15 18:41:21 1264   
-#> 5 2015-02-23 07:01:17 1264   
-#> 6 2015-04-02 09:32:49 1263
+#>   <dttm>                <int>
+#> 1 2016-04-17 22:43:06    1581
+#> 2 2014-02-07 07:26:15    1136
+#> 3 2012-08-18 19:26:31    1038
+#> 4 2014-11-25 19:39:00    1699
+#> 5 2014-12-23 01:54:55    1499
+#> 6 2015-06-01 19:48:18     740
 ```
 
 ### Enrich variables from timestamp
@@ -126,18 +126,18 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.568 secs
+#> ⌛ Enriching time: 0.579 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
 #>   created_at          grid_id  year month   day  wday  hour ymd       
-#>   <dttm>              <chr>   <dbl> <dbl> <int> <dbl> <int> <date>    
-#> 1 2014-08-17 15:41:06 561      2014     8    17     1    15 2014-08-17
-#> 2 2015-02-24 20:05:49 1141     2015     2    24     3    20 2015-02-25
-#> 3 2015-03-05 23:57:26 1140     2015     3     5     5    23 2015-03-06
-#> 4 2015-02-15 18:41:21 1264     2015     2    15     1    18 2015-02-16
-#> 5 2015-02-23 07:01:17 1264     2015     2    23     2     7 2015-02-23
-#> 6 2015-04-02 09:32:49 1263     2015     4     2     5     9 2015-04-02
+#>   <dttm>                <int> <dbl> <dbl> <int> <dbl> <int> <date>    
+#> 1 2016-04-17 22:43:06    1581  2016     4    17     1    22 2016-04-17
+#> 2 2014-02-07 07:26:15    1136  2014     2     7     6     7 2014-02-07
+#> 3 2012-08-18 19:26:31    1038  2012     8    18     7    19 2012-08-18
+#> 4 2014-11-25 19:39:00    1699  2014    11    25     3    19 2014-11-25
+#> 5 2014-12-23 01:54:55    1499  2014    12    23     3     1 2014-12-23
+#> 6 2015-06-01 19:48:18     740  2015     6     1     2    19 2015-06-01
 ```
 
 ### Use built-in recipes
@@ -168,15 +168,13 @@ Current available recipes, where `HMLC` is the default recipe used in
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "HMLC")
 ```
 
-![hmlc-home-result](data/pic/sample-result-hmlc.png) \#\#\#\# FREQ
+#### FREQ
 
 ``` r
 # recipe: Frequency -- FREQ
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "FREQ")
 ```
-
-![freq-home-result](data/pic/sample-result-freq.png)
 
 #### OSNA
 
@@ -185,8 +183,6 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
 ```
-
-![osna-home-result](data/pic/sample-result-osna.png)
 
 #### APDM
 
@@ -200,5 +196,3 @@ data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```
-
-![apdm-home-result](data/pic/sample-result-apdm.png)

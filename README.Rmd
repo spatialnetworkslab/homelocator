@@ -16,18 +16,18 @@ knitr::opts_chunk$set(
 
 ## Overview 
 
-The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `demo.mov`. And a static website of `homelocator` package can be found in `docs`. 
+The goal of `homelocator` is to provide a consistent framework and interface for the adoption of different approaches for identifying  meaningful locations for users. With the package, you are able to write structured, algorithmic 'recipes' to identify meaningful locations according to your research requirements. The package also has a number of built-in 'recipes' that have been translated from approaches in the existing literature. A walkthrough demo video can be found in `homelocator-package/demo.mov`. And a static website of `homelocator` package can be found in `homelocator-package/static-website`. 
 
-## Download open-sources 
+## Download source-code 
 
-Download `homelocator` open-sources from _figshare_ at: https://figshare.com/s/ce7b8bcfd2e6b44a5568
+Download `homelocator` source-code from [_Figshare_](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
 
 ## Installation
 
-Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-open-sources/homelocator-package/`. 
+Install the released version of `homelocator` as follows, where the **homelocator_0.1.0.tar.gz** is stored under `homelocator-source-code/homelocator-package/`. 
 
 ``` r
-remotes::install_local("~/Downloads/homelocator-open-sources/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
+remotes::install_local("~/Downloads/homelocator-source-code/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
 ```
 ## Example
 
@@ -104,14 +104,12 @@ Current available recipes, where `HMLC` is the default recipe used in `identify_
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", show_n_loc = 1, recipe = "HMLC")
 ```
 
-![hmlc-home-result](data/pic/sample-result-hmlc.png)
 #### FREQ
 ```{r eval=F}
 # recipe: Frequency -- FREQ
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "FREQ")
 ```
-![freq-home-result](data/pic/sample-result-freq.png)
 
 #### OSNA
 ```{r eval=F}
@@ -119,7 +117,6 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "OSNA")
 ```
-![osna-home-result](data/pic/sample-result-osna.png)
 
 #### APDM
 ```{r eval=F}
@@ -132,5 +129,5 @@ data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
                   show_n_loc = 1, recipe = "APDM")
 ```
-![apdm-home-result](data/pic/sample-result-apdm.png)
+
 
