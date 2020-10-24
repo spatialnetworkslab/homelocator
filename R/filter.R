@@ -5,6 +5,10 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 #' 
+#' @importFrom emo ji
+#' @importFrom rlang sym
+#' @importFrom rlang has_name
+#' 
 #' @export
 filter_verbose <- function(df, user = "u_id", ...){
   
@@ -48,6 +52,15 @@ filter_verbose <- function(df, user = "u_id", ...){
 #' @param df A nested dataframe 
 #' @param user Name of column that holds unique identifier for each user
 #' @param ... Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
+#' 
+#' @importFrom emo ji
+#' @importFrom rlang sym
+#' @importFrom rlang has_name
+#' @importFrom dplyr n_distinct
+#' @importFrom dplyr progress_estimated
+#' @importFrom plyr empty
+#' @importFrom purrr map
+#' @importFrom purrr map_lgl
 #' 
 #' @export
 filter_nested <- function(df,  user = "u_id", ...){

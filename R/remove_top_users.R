@@ -8,6 +8,13 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param counts Name of column that holds the data points frequency for each user         
 #' @param topNpct_user A decimal number that represent the certain percentage of users to remove
+#' 
+#' @importFrom rlang has_name
+#' @importFrom rlang sym
+#' @importFrom emo ji
+#' @importFrom dplyr n_distinct
+#' @importFrom dplyr slice
+#' 
 #' @export
 remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_user = 1){
   

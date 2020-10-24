@@ -4,7 +4,9 @@
 #' @param df A nested dataframe 
 #' @param ... Comma separated list of unquoted variable names
 #' 
-#' 
+#' @importFrom dplyr progress_estimated
+#' @importFrom emo ji
+#' @importFrom purrr map
 #' @export
 arrange_nested <- function(df, ...){
   var_expr <- enquos(...)
@@ -47,6 +49,9 @@ arrange_nested <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param nest_cols Name of columns to nest in existing list-column
 #' @param ... Comma separated list of unquoted variable names
+#' 
+#' @importFrom emo ji
+#' @importFrom purrr map
 #' 
 #' @export
 arrange_double_nested <- function(df, nest_cols, ...){

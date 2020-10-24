@@ -4,6 +4,11 @@
 #' 
 #' @param df A dataframe 
 #' @param ... Name-value pairs of expressions
+#' 
+#' @importFrom emo ji
+#' @importFrom dplyr setdiff
+#' 
+#' 
 #' @export
 mutate_verbose <- function(df, ...){
   if (!is.data.frame(df)) {
@@ -40,7 +45,11 @@ mutate_verbose <- function(df, ...){
 #' Add new variables and preserves existing within a nested dataframe
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of expressions
-#'
+#' 
+#' @importFrom emo ji
+#' @importFrom purrr map
+#' @importFrom dplyr setdiff
+
 #' @export
 mutate_nested <- function(df, ...){
   
@@ -92,6 +101,15 @@ mutate_nested <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param var Name of column to calculate 
 #' 
+#' 
+#' @importFrom emo ji
+#' @importFrom dplyr select
+#' @importFrom dplyr summarise
+#' @importFrom dplyr bind_cols
+#' @importFrom dplyr bind_rows
+#' @importFrom purrr map
+#' @importFrom dplyr setdiff
+
 #' @export 
 prop_factor_nested <- function(df, ...){
   
@@ -155,6 +173,10 @@ prop_factor_nested <- function(df, ...){
 #' @param df A dataframe 
 #' @param nest_cols A selection of columns to nest in existing list-column
 #' @param ... Name-value pairs of functions
+#' 
+#' @importFrom emo ji
+#' @importFrom purrr map
+#' 
 #' @export
 mutate_double_nested <- function(df, nest_cols, ...){
 

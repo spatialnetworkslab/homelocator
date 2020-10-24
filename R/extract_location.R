@@ -8,6 +8,14 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param location Name of column that holds unique identifier for each location
 #' 
+#' @importFrom rlang has_name
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated 
+#' @importFrom dplyr arrange
+#' @importFrom dplyr select
+#' @importFrom purrr map_chr
+#' 
+#' 
 #' @export
 extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc = 1, keep_score = F, ...){
   if (!rlang::has_name(df, user)) {

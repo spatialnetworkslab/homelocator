@@ -11,6 +11,11 @@
 #' @param location Name of column that holds unique identifier for each location
 #' @param keep_other_vars Option to keep or remove other variables of the input dataset
 #' 
+#' @importFrom emo ji
+#' @importFrom rlang sym
+#' @importFrom rlang has_name
+#' @importFrom dplyr select
+#' 
 #' @export
 validate_dataset <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", keep_other_vars = F){
   if (!rlang::has_name(df, user)) {

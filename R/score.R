@@ -7,6 +7,13 @@
 #' @param keep_ori_vars Option to keep or drop original varialbes 
 #' @param ... Name-value pairs of expression
 #' 
+#' @importFrom rlang has_name
+#' @importFrom rlang sym 
+#' @importFrom emo ji
+#' @importFrom dplyr select 
+#' @importFrom dplyr setdiff
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map
 #' 
 #' @export
 score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_vars = F, ...){
@@ -85,6 +92,14 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
 #' @param location Name of column that holds unique identifier for each location
 #' @param ... A selection of columns to sum
 #' 
+#' 
+#' @importFrom rlang has_name
+#' @importFrom rlang sym 
+#' @importFrom emo ji
+#' @importFrom dplyr select 
+#' @importFrom dplyr setdiff
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map
 #' @export 
 score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   if (!rlang::has_name(df, user)) {

@@ -4,6 +4,11 @@
 #' @param df A dataframe 
 #' @param ... A selection of columns. 
 #' 
+#' 
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map 
+#' 
 #' @export
 nest_verbose <- function(df, ...){
   
@@ -39,6 +44,7 @@ nest_verbose <- function(df, ...){
 #' @param df A dataframe
 #' @param ... Specification of columns to unnest. 
 #' 
+#' @importFrom emo ji
 #' @export
 unnest_verbose <- function(df, ...){
   
@@ -72,6 +78,14 @@ unnest_verbose <- function(df, ...){
 #' Unnest within a nested dataframe 
 #' 
 #' Flatten list-column to regular columns inside a nested dataframe
+#' 
+#' @param df A dataframe
+#' @param ... Specification of columns to unnest 
+#' 
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map
+#' 
 #' @export
 unnest_nested <- function(df, ...){
   if(!is.list(df[ , grepl("^data$", names(df))])){
@@ -120,6 +134,9 @@ unnest_nested <- function(df, ...){
 #' @param df A nested dataframe 
 #' @param ... A selection of columns. 
 #' 
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map
 #' @export
 nest_nested <- function(df, ...){
   
@@ -170,6 +187,9 @@ nest_nested <- function(df, ...){
 #' @param df A nested dataframe
 #' @param ... Specification of columns to unnest. 
 #' 
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated
+#' @importFrom purrr map
 #' 
 #' @export 
 unnest_double_nested <- function(df, ...){

@@ -13,6 +13,19 @@ recipe_APDM(
   keep_score = F
 )
 }
+\arguments{
+\item{df}{An enriched dataframe}
+
+\item{user}{Name of column that holds unique identifier for each user}
+
+\item{timestamp}{Name of timestamp column. Should be POSIXct}
+
+\item{location}{Name of column that holds unique identifier for each location}
+
+\item{keep_score}{Option to keep or remove calculated result/score per user per location}
+
+\item{show_n_loc}{Number of potential homes to extract}
+}
 \description{
 recipe: Anchor Point Determining Model - APDM
 }

@@ -5,6 +5,9 @@
 #' @param n Number of rows to return 
 #' @param wt The variable to use for ordering 
 #' 
+#' @importFrom dplyr progress_estimated
+#' @importFrom rlang sym
+#' @importFrom emo ji
 #' @export
 top_n_nested <- function(df, n = 2, wt){
   wt_expr <- rlang::sym(wt)

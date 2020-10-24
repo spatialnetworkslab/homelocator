@@ -12,6 +12,12 @@
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' 
+#' @importFrom rlang sym
+#' @importFrom rlang has_name
+#' @importFrom emo ji
+#' @importFrom tictoc tic
+#' @importFrom tictoc toc
+#' 
 #' @export
 identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", tz = "Asia/Singapore", 
                               recipe, show_n_loc = 1, keep_score = F){
@@ -55,7 +61,24 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   return(output)
 }
 
+
+
+
+
 #' recipe: homelocator - HMLC
+#' @param df An enriched dataframe
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+#' @param show_n_loc Number of potential homes to extract
+#' @param keep_score Option to keep or remove calculated result/score per user per location
+#' @param  keep_original_vars Option to keep or remove columns other than 'user, timestamp, and location'
+#' 
+#' @importFrom rlang sym
+#' @importFrom lubridate hour
+#' @importFrom lubridate minute
+#' @importFrom lubridate second
+#' 
 recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F) {
   
   user_expr <- rlang::sym(user)
@@ -156,6 +179,15 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
 
 
 #' recipe: frequency - FREQ
+#' 
+#' @param df An enriched dataframe
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+#' @param show_n_loc Number of potential homes to extract
+#' @param keep_score Option to keep or remove calculated result/score per user per location
+#' 
+#' @importFrom rlang sym
 recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
@@ -200,6 +232,16 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
 
 
 #' recipe: Online Social Networks Activity - OSNA
+#' 
+#' 
+#' @param df An enriched dataframe
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+#' @param show_n_loc Number of potential homes to extract
+#' @param keep_score Option to keep or remove calculated result/score per user per location
+#' 
+#' @importFrom rlang sym
 recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
   
   user_expr <- rlang::sym(user)
@@ -262,6 +304,18 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
 
 
 #' recipe: Anchor Point Determining Model - APDM
+#' 
+#' @param df An enriched dataframe
+#' @param user Name of column that holds unique identifier for each user
+#' @param timestamp Name of timestamp column. Should be POSIXct
+#' @param location Name of column that holds unique identifier for each location
+#' @param show_n_loc Number of potential homes to extract
+#' @param keep_score Option to keep or remove calculated result/score per user per location
+#' 
+#' @importFrom rlang sym
+#' @importFrom rlang has_name
+#' @importFrom emo ji
+#' @importFrom chron times
 recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)

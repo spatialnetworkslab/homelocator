@@ -4,6 +4,11 @@
 #' @param df A nested dataframe 
 #' @param ... Name-value pairs of summary functions.
 #' 
+#' @importFrom emo ji
+#' @importFrom dplyr progress_estimated
+#' @importFrom dplyr setdiff
+#' @importFrom purrr map
+#' 
 #' @export
 summarise_nested <- function(df, ...){
   if(!is.list(df[ , grepl("^data$", names(df))])){
@@ -54,6 +59,9 @@ summarise_nested <- function(df, ...){
 #' @param nest_cols A selection of columns to nest in existing list-column
 #' @param ... Name-value pairs of summary functions
 #' 
+#' @importFrom emo ji
+#' @importFrom dplyr setdiff
+#' @importFrom purrr map
 #' 
 #' @export 
 summarise_double_nested <- function(df, nest_cols, ...){

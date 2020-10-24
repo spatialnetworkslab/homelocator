@@ -6,6 +6,11 @@
 #' @param var_value Column name or position
 #' 
 #' 
+#' @importFrom rlang sym
+#' @importFrom dplyr progress_estimated
+#' @importFrom dplyr setdiff
+#' @importFrom purrr map
+#' @importFrom emo ji
 #' @export
 spread_nested <- function(df, key_var, value_var){
   

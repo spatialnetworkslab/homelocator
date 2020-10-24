@@ -6,6 +6,11 @@
 \usage{
 unnest_nested(df, ...)
 }
+\arguments{
+\item{df}{A dataframe}
+
+\item{...}{Specification of columns to unnest}
+}
 \description{
 Flatten list-column to regular columns inside a nested dataframe
 }
