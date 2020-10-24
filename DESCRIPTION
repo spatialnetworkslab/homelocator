@@ -2,16 +2,16 @@ Package: homelocator
 Title: Inferring Home Locations for Social Media Users 
 Version: 0.1.0
 Authors@R: 
-    c(person(given = "First",
+  c(person(given = "First",
            family = "Last",
            role = c("aut", "cre"),
            email = "first.last@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID")),
-      person(given = "First",
-             family = "Last",
-             role = c("aut"),
-             email = "first.last@example.com",
-             comment = c(ORCID = "YOUR-ORCID-ID")))
+    person(given = "First",
+           family = "Last",
+           role = c("aut"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID")))
 Description: Inferring users' potential home(s) based on location and timestampe information from social media data.
 License: MIT + file LICENSE
 Depends:
@@ -43,3 +43,4 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+
