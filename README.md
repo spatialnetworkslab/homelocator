@@ -10,17 +10,18 @@ structured, algorithmic ‘recipes’ to identify meaningful locations
 according to your research requirements. The package also has a number
 of built-in ‘recipes’ that have been translated from approaches in the
 existing literature. A walkthrough demo video can be found in
-`homelocator-package/demo.mov`. And a static website of `homelocator`
-package can be found in `homelocator-package/static-website`.
+`homelocator-source-code/homelocator-package/demo.mov`. And a static
+website of `homelocator` package can be found in
+`homelocator-source-code/homelocator-package/static-website`.
 
 ## Download source-code
 
-Download `homelocator` source-code from
+Download the `homelocator` source-code from
 [*Figshare*](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
 
 ## Installation
 
-Install the released version of `homelocator` as follows, where the
+Install the `homelocator` package as follows, where the
 **homelocator\_0.1.0.tar.gz** is stored under
 `homelocator-source-code/homelocator-package/`.
 
@@ -90,7 +91,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.053 secs
+#> ⌛ Nesting time: 0.054 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -126,7 +127,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.53 secs
+#> ⌛ Enriching time: 0.519 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
@@ -152,12 +153,12 @@ Current available recipes, where `HMLC` is the default recipe used in
       - Selects the most frequently ‘visited’ location assuming a user
         is active mainly around their home location.
   - `OSNA`: [Efstathiades et
-    al.2015](https://www.researchgate.net/publication/279884727_Identification_of_Key_Locations_based_on_Online_Social_Network_Activity)
+    al.2015](https://doi.org/10.1080/10630731003597306)
       - Finds the most ‘popular’ location during ‘rest’, ‘active’ and
         ‘leisure time. Here we focus on ’rest’ and ‘leisure’ time to
         find the most possible home location for each user.
   - `APDM`: [Ahas et
-    al. 2010](https://www.researchgate.net/publication/233197970_Using_Mobile_Positioning_Data_to_Model_Locations_Meaningful_to_Users_of_Mobile_Phones)
+    al. 2010](https://doi.org/10.1080/10630731003597306)
       - Calculates the average and standard deviation of start time data
         points by a single user, in a single location.
 
