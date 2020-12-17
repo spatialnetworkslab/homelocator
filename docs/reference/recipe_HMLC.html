@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -127,16 +127,48 @@
     <p>recipe: homelocator - HMLC</p>
     </div>
 
-    <pre class="usage"><span class='fu'>recipe_HMLC</span>(
-  <span class='kw'>df</span>,
-  user = <span class='st'>"u_id"</span>,
-  timestamp = <span class='st'>"created_at"</span>,
-  location = <span class='st'>"loc_id"</span>,
-  <span class='kw'>show_n_loc</span>,
-  keep_original_vars = <span class='kw'>F</span>,
-  keep_score = <span class='kw'>F</span>
-)</pre>
+    <pre class="usage"><span class='fu'>recipe_HMLC</span><span class='op'>(</span>
+  <span class='va'>df</span>,
+  user <span class='op'>=</span> <span class='st'>"u_id"</span>,
+  timestamp <span class='op'>=</span> <span class='st'>"created_at"</span>,
+  location <span class='op'>=</span> <span class='st'>"loc_id"</span>,
+  <span class='va'>show_n_loc</span>,
+  keep_original_vars <span class='op'>=</span> <span class='cn'>F</span>,
+  keep_score <span class='op'>=</span> <span class='cn'>F</span>
+<span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>df</th>
+      <td><p>An enriched dataframe</p></td>
+    </tr>
+    <tr>
+      <th>user</th>
+      <td><p>Name of column that holds unique identifier for each user</p></td>
+    </tr>
+    <tr>
+      <th>timestamp</th>
+      <td><p>Name of timestamp column. Should be POSIXct</p></td>
+    </tr>
+    <tr>
+      <th>location</th>
+      <td><p>Name of column that holds unique identifier for each location</p></td>
+    </tr>
+    <tr>
+      <th>show_n_loc</th>
+      <td><p>Number of potential homes to extract</p></td>
+    </tr>
+    <tr>
+      <th>keep_original_vars</th>
+      <td><p>Option to keep or remove columns other than 'user, timestamp, and location'</p></td>
+    </tr>
+    <tr>
+      <th>keep_score</th>
+      <td><p>Option to keep or remove calculated result/score per user per location</p></td>
+    </tr>
+    </table>
 
 
   </div>
@@ -150,11 +182,11 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by First Last, First Last.</p>
+  <p>Developed by Qingqing Chen, Ate Poorthuis.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
