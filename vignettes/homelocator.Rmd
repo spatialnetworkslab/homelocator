@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-<p align="justify">Identifying meaningful locations, such as home and/or work locations from mobile technology is an essential step in the field of mobility analysis. The `homelocator` library is designed for identifying meaningful locations of user based on the spatio-temporally features contained within the mobility data, such as social media data, mobile phone data, mobile app data and so on.</p>
+<p align="justify">Identifying meaningful locations, such as home and/or work locations from mobile technology is an essential step in the field of mobility analysis. The `homelocator` library is designed for identifying home locations of user based on the spatio-temporally features contained within the mobility data, such as social media data, mobile phone data, mobile app data and so on.</p>
 
 <p align="justify">Although there is a myriad of different approaches to inferring meaningful locations in the last 10 years, a consensus or single best approach has not emerged in the current state-of-the-art. The actual algorithms used are not always discussed in detail in publications and the source codes are seldom released in public, which makes comparing algorithms as well as reproducing work difficult.</p>
 
@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 
 <p align="justify">We hope that through packages like `homelocator`, future work that relies on the inference of meaningful locations becomes less ‘custom’ (with each researcher writing their own algorithm) but instead will use common, comparable algorithms in order to increase transparency and reproducibility in the field.</p>
 
-
+# Load Library
 
 ```{r}
 # Load homelocator library
