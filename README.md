@@ -3,30 +3,23 @@
 
 ## Overview
 
+<div style="text-align: justify">
+
 The goal of `homelocator` is to provide a consistent framework and
-interface for the adoption of different approaches for identifying
-meaningful locations for users. With the package, you are able to write
-structured, algorithmic ‘recipes’ to identify meaningful locations
-according to your research requirements. The package also has a number
-of built-in ‘recipes’ that have been translated from approaches in the
-existing literature. A walkthrough demo video can be found in
-`homelocator-source-code/homelocator-package/demo.mov`. And a static
-website of `homelocator` package can be found in
-`homelocator-source-code/homelocator-package/static-website`.
+interface for the adoption of different approaches for identifying home
+locations for users. With the package, you are able to write structured,
+algorithmic ‘recipes’ to identify home locations according to your
+research requirements. The package also has a number of built-in
+‘recipes’ that have been translated from approaches in the existing
+literature.
 
-## Download source-code
-
-Download the `homelocator` source-code from
-[*Figshare*](https://figshare.com/s/ce7b8bcfd2e6b44a5568)
+</div>
 
 ## Installation
 
-Install the `homelocator` package as follows, where the
-**homelocator\_0.1.0.tar.gz** is stored under
-`homelocator-source-code/homelocator-package/`.
-
 ``` r
-remotes::install_local("~/Downloads/homelocator-source-code/homelocator-package/homelocator_0.1.0.tar.gz", dependencies = T)
+# Install development version from GitHub
+install_github("spatialnetworkslab/homelocator")
 ```
 
 ## Example
@@ -91,7 +84,7 @@ user at the same time.
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 #> 🛠 Start nesting...
 #> ✅ Finish nesting!
-#> ⌛ Nesting time: 0.054 secs
+#> ⌛ Nesting time: 0.192 secs
 #> 
 head(df_nested)
 #> # A tibble: 6 x 2
@@ -127,7 +120,7 @@ df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 #> 🛠 Enriching variables from timestamp...
 #> 
 #> ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.
-#> ⌛ Enriching time: 0.519 secs
+#> ⌛ Enriching time: 0.708 secs
 #> 
 head(df_enriched$data[[1]])
 #> # A tibble: 6 x 8
