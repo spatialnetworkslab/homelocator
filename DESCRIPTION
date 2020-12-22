@@ -12,10 +12,8 @@ Authors@R:
            email = "ate.poorthuis@kuleuven.be"))
 Description: Inferring users' potential home(s) based on location and timestampe information from social media data.
 License: MIT + file LICENSE
-Depends:
-    R (>= 3.5.0)
 Remotes:
-    github::hadley/emo
+    hadley/emo
 Imports:
     chron (>= 2.3-55),
     lubridate (>= 1.7.8),
