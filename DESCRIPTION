@@ -15,7 +15,7 @@ License: MIT + file LICENSE
 Remotes:
     hadley/emo
 Imports:
-    chron (>= 2.3-55),
+    chron (>= 2.3-54),
     lubridate (>= 1.7.8),
     plyr (>= 1.8.6),
     purrr (>= 0.3.3),
