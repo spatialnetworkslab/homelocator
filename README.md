@@ -4,15 +4,7 @@
 ## Overview
 
 <div style="text-align: justify">
-
-The goal of `homelocator` is to provide a consistent framework and
-interface for the adoption of different approaches for identifying home
-locations for users. With the package, you are able to write structured,
-algorithmic ‘recipes’ to identify home locations according to your
-research requirements. The package also has a number of built-in
-‘recipes’ that have been translated from approaches in the existing
-literature.
-
+The goal of `homelocator` is to improve the consistency and replicability of algorithms used for identifying home locations in human mobility data. The easy-to-use `homelocator` package provide a consistent framework and interface for the adoption of different algorithms for location inference. With the package, you are able to write structured, algorithmic ‘recipes’ to identify home locations according to your research requirements. The package also has a number of built-in ‘recipes’ that have been translated from approaches in the existing literature.
 </div>
 
 ## Installation
@@ -36,10 +28,7 @@ attributes:
   - a unique identifier for the spatial location for the data point
   - a timestamp that reflects the time the data point was created
 
-You can use `validate_dataset()` to validate your input dataset before
-starting identifying meaningful locations. In this function, you need to
-specify the names of three essential attribute that used in your
-dataset.
+You can use `validate_dataset()` to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset.
 
 ``` r
 # Load homelocator library
@@ -76,8 +65,7 @@ head(df_validated)
 
 ### Nesting users for parallel computing
 
-To speed up computing progress, you can nest the validated dataset by
-user so that the subsequent location inference can be applied to each
+To speed up computing progress, you can nest the validated dataset by user so that the subsequent location inference can be applied to each
 user at the same time.
 
 ``` r
@@ -110,10 +98,7 @@ head(df_nested$data[[1]])
 
 ### Enrich variables from timestamp
 
-Add additional needed varialbes derived from the timestamp column. These
-are often used/needed as intermediate variables in home location
-algorithms, such as year, month, day, day of the week and hour of the
-day, etc.
+Add additional needed varialbes derived from the timestamp column. These are often used/needed as intermediate variables in home location algorithms, such as year, month, day, day of the week and hour of the day, etc.
 
 ``` r
 df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
