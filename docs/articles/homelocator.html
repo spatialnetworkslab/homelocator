@@ -179,7 +179,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="va">df_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nest_verbose.html">nest_verbose</a></span><span class="op">(</span><span class="va">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"created_at"</span>, <span class="st">"grid_id"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.021 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.019 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -204,7 +204,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="va">df_unnested</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unnest_verbose.html">unnest_verbose</a></span><span class="op">(</span><span class="va">df_nested</span>, <span class="va">data</span><span class="op">)</span>
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.018 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.012 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -232,7 +232,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start nesting...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.874 secs</span>
+<span class="co">#&gt; ⌛ Nesting time: 0.745 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -267,7 +267,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
   <span class="fu"><a href="../reference/unnest_double_nested.html">unnest_double_nested</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">data</span><span class="op">)</span> 
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.62 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.423 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -306,7 +306,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 0.394 secs</span>
+<span class="co">#&gt; ⌛ Enriching time: 0.3 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -339,7 +339,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_tweets, n_locs</span>
-<span class="co">#&gt; ⌛ Summarising time: 0.229 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 0.179 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -359,7 +359,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
                     n_tweets <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span>, n_days <span class="op">=</span> <span class="fu">n_distinct</span><span class="op">(</span><span class="va">ymd</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_tweets, n_days</span>
-<span class="co">#&gt; ⌛ Summarising time: 6.949 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 5.871 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -431,7 +431,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start filtering users...</span>
 <span class="co">#&gt; ✅ Finish filtering! Filterred 36 users!</span>
 <span class="co">#&gt; 👤 There are 64 users left.</span>
-<span class="co">#&gt; ⌛ Filtering time: 0.001 secs</span>
+<span class="co">#&gt; ⌛ Filtering time: 0.002 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -452,7 +452,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish Filtering! Filterred 0 users!</span>
 <span class="co">#&gt; 👤 There are 64 users left!</span>
-<span class="co">#&gt; ⌛ Filtering time: 0.088 secs</span>
+<span class="co">#&gt; ⌛ Filtering time: 0.078 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -505,11 +505,11 @@ We hope that through packages like <code>homelocator</code>, future work that re
                  <span class="va">n_tweets_loc</span> <span class="op">&gt;</span> <span class="fl">10</span> <span class="op">&amp;</span> <span class="va">n_hrs_loc</span> <span class="op">&gt;</span> <span class="fl">10</span> <span class="op">&amp;</span> <span class="va">n_days_loc</span> <span class="op">&gt;</span> <span class="fl">10</span> <span class="op">&amp;</span> <span class="va">period_loc</span> <span class="op">&gt;</span> <span class="fl">10</span><span class="op">)</span> 
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 4 new added variables: n_tweets_loc, n_hrs_loc, n_days_loc, period_loc</span>
-<span class="co">#&gt; ⌛ Summarising time: 7.183 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 5.92 secs</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 🛠 Start unnesting...</span>
 <span class="co">#&gt; ✅ Finish unnesting!</span>
-<span class="co">#&gt; ⌛ Unnesting time: 0.008 secs</span>
+<span class="co">#&gt; ⌛ Unnesting time: 0.006 secs</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 👤 There are 64 users at this moment.</span>
 <span class="co">#&gt; 🛠 Start filtering users...</span>
@@ -536,7 +536,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
                 wk.am_or_wk.pm <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="va">time_numeric</span> <span class="op">&gt;=</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">time_numeric</span> <span class="op">&lt;=</span> <span class="fl">12</span> <span class="op">&amp;</span> <span class="va">wd_or_wk</span> <span class="op">==</span> <span class="st">"weekend"</span>, <span class="st">"weekend_am"</span>, <span class="st">"weekend_pm"</span><span class="op">)</span><span class="op">)</span> 
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; ✅ Finish adding! There are 4 new added variables: wd_or_wk, time_numeric, rest_or_work, wk.am_or_wk.pm</span>
-<span class="co">#&gt; ⌛ Adding time: 0.31 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.236 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -573,7 +573,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start calculating proportion...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish calculating! There are 6 new calculated variables: rest, weekday, weekend, weekend_am, weekend_pm, work</span>
-<span class="co">#&gt; ⌛ Calculating time: 1.565 secs</span>
+<span class="co">#&gt; ⌛ Calculating time: 1.314 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="co"># show result </span>
@@ -622,7 +622,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summarising! There are 2 new added variables: n_wdays_loc, n_months_loc</span>
-<span class="co">#&gt; ⌛ Summarising time: 0.224 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 0.184 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_expanded</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -650,7 +650,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
                s_wk_am <span class="op">=</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="op">(</span><span class="va">weekend_am</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; 🛠 Start scoring ...</span>
 <span class="co">#&gt; ✅ Finish scoring! There are 9 new added variables: s_n_tweets_loc, s_n_hrs_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_weekend, s_rest, s_wk_am</span>
-<span class="co">#&gt; ⌛ Scoring time: 0.147 secs</span>
+<span class="co">#&gt; ⌛ Scoring time: 0.124 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_scored</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -698,7 +698,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish adding! There are 9 new added variables: s_n_tweets_loc, s_n_hrs_loc, s_n_days_loc, s_period_loc, s_n_wdays_loc, s_n_months_loc, s_weekend, s_rest, s_wk_am</span>
-<span class="co">#&gt; ⌛ Adding time: 0.076 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.065 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_scored_2</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -736,7 +736,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start summing scores...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish summing! There are 1 new added variables: score</span>
-<span class="co">#&gt; ⌛ Summing time: 0.121 secs</span>
+<span class="co">#&gt; ⌛ Summing time: 0.096 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_score_summed</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -790,7 +790,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start extracting homes for users...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; 🎉 Congratulations!! Your have found 29 users' potential home(s).</span>
-<span class="co">#&gt; ⌛ Extracting time: 0.108 secs</span>
+<span class="co">#&gt; ⌛ Extracting time: 0.085 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_home</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -806,7 +806,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
   <span class="fu"><a href="../reference/extract_location.html">extract_location</a></span><span class="op">(</span><span class="va">.</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, show_n_loc <span class="op">=</span> <span class="fl">1</span>, keep_score <span class="op">=</span> <span class="cn">T</span>, <span class="va">score</span><span class="op">)</span>
 <span class="co">#&gt; 🛠 Start extracting homes for users...</span>
 <span class="co">#&gt; 🎉 Congratulations!! Your have found 29 users' potential home(s).</span>
-<span class="co">#&gt; ⌛ Extracting time: 0.101 secs</span>
+<span class="co">#&gt; ⌛ Extracting time: 0.08 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_home</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>
@@ -846,7 +846,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start adding variable(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish adding! There are 1 new added variables: timeframe</span>
-<span class="co">#&gt; ⌛ Adding time: 0.199 secs</span>
+<span class="co">#&gt; ⌛ Adding time: 0.177 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">colnames_nested_data</span> <span class="op">&lt;-</span> <span class="va">df_timeframe</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="op">)</span>
@@ -858,7 +858,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
                             n_points_timeframe <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> 
 <span class="co">#&gt; 🛠 Start summarising values...</span>
 <span class="co">#&gt; ✅ Finish summarising! There are 1 new added variables: n_points_timeframe</span>
-<span class="co">#&gt; ⌛ Summarising time: 4.2 secs</span>
+<span class="co">#&gt; ⌛ Summarising time: 3.522 secs</span>
 <span class="co">#&gt; </span>
 <span class="va">df_timeframe</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>
 <span class="co">#&gt; # A tibble: 102 x 4</span>
@@ -881,7 +881,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
     <span class="fu"><a href="../reference/spread_nested.html">spread_nested</a></span><span class="op">(</span><span class="va">.</span>, key_var <span class="op">=</span> <span class="st">"timeframe"</span>, value_var <span class="op">=</span> <span class="st">"n_points_timeframe"</span><span class="op">)</span> 
 <span class="co">#&gt; 🛠 Start spreading timeframe variable...</span>
 <span class="co">#&gt; ✅ Finish spreading! There are 3 new added variables: Active, Leisure, Rest</span>
-<span class="co">#&gt; ⌛ Spreading time: 0.271 secs</span>
+<span class="co">#&gt; ⌛ Spreading time: 0.252 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_timeframe_spreaded</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>
@@ -932,7 +932,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start sorting...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish sorting!</span>
-<span class="co">#&gt; ⌛ Sorting time: 0.302 secs</span>
+<span class="co">#&gt; ⌛ Sorting time: 0.263 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_arranged</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span>
@@ -965,7 +965,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
                         <span class="fu">desc</span><span class="op">(</span><span class="va">created_at</span><span class="op">)</span><span class="op">)</span> <span class="co"># sort by time in descending order</span>
 <span class="co">#&gt; 🛠 Start sorting...</span>
 <span class="co">#&gt; ✅ Finish sorting!</span>
-<span class="co">#&gt; ⌛ Sorting time: 3.024 secs</span>
+<span class="co">#&gt; ⌛ Sorting time: 2.5 secs</span>
 <span class="co">#&gt; </span>
 
 
@@ -1033,7 +1033,7 @@ We hope that through packages like <code>homelocator</code>, future work that re
 <span class="co">#&gt; 🛠 Start selecting top 1 row(s)...</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ✅ Finish selecting top 1 row(s)!</span>
-<span class="co">#&gt; ⌛ Selecting time: 0.118 secs</span>
+<span class="co">#&gt; ⌛ Selecting time: 0.163 secs</span>
 <span class="co">#&gt; </span>
 
 <span class="va">df_top_1</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>
