@@ -119,8 +119,8 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
     w_n_months_loc <- readline(prompt = "Give a weight to the number of unique months data points were sent at a place (default = 0.1): ") %>% as.integer()
     w_period_loc <- readline(prompt = "Give a weight to the period data points were sent at a place (default = 0.1): ") %>% as.integer()
     w_weekend <- readline(prompt = "Give a weight to the proportion of data points sent during weekend at a place (default = 0.1): ") %>% as.integer()
-    w_rest <- readline(prompt = "Give a weight the proportion of data points sent during rest time at a place (defaust = 0.2): ") %>% as.integer()
-    w_weekend_am <- readline(prompt = "Give a weight the proportion of data points sent during weekend morning at a place (defaust = 0.1): ") %>% as.integer()
+    w_rest <- readline(prompt = "Give a weight the proportion of data points sent during rest time at a place (default = 0.2): ") %>% as.integer()
+    w_weekend_am <- readline(prompt = "Give a weight the proportion of data points sent during weekend morning at a place (default = 0.1): ") %>% as.integer()
   }
   
   # users level 
