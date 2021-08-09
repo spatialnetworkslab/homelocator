@@ -105,12 +105,12 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
     w_weekend_am <- 0.1
   } else{
     topNpct <- readline(prompt="How many percentage of top active users to be removed (default = 1)? Your answer: ") %>% as.integer()
-    threshold_n_points <- readline(prompt = "What is the minumn number of data points should a user sent in total(default = 10)? Your answer: ") %>% as.integer()
-    threshold_n_locs <- readline(prompt = "What is the minumn number of unique places should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
-    threshold_n_points_loc <- readline(prompt = "What is the minumn number of data points should a user sent at each place (default = 10)? Your answer: ") %>% as.integer()
-    threshold_n_hours_loc <- readline(prompt = "What is the minumn number of unqiue hours should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
-    threshold_n_days_loc <- readline(prompt = "What is the minum number of days should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
-    threshold_period_loc <- readline(prompt = "What is the minum period should a user being active on the digital platform (default = 10)? Your answer: ") %>% as.integer()
+    threshold_n_points <- readline(prompt = "What is the minimum number of data points should a user sent in total(default = 10)? Your answer: ") %>% as.integer()
+    threshold_n_locs <- readline(prompt = "What is the minimum number of unique places should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
+    threshold_n_points_loc <- readline(prompt = "What is the minimum number of data points should a user sent at each place (default = 10)? Your answer: ") %>% as.integer()
+    threshold_n_hours_loc <- readline(prompt = "What is the minimum number of unique hours should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
+    threshold_n_days_loc <- readline(prompt = "What is the minimum number of days should data points be collected from (default = 10)? Your answer: ") %>% as.integer()
+    threshold_period_loc <- readline(prompt = "What is the minimum period should a user being active on the digital platform (default = 10)? Your answer: ") %>% as.integer()
     
     w_n_points_loc <- readline(prompt = "Give a weight to the number of data points at a place (default = 0.1): ") %>% as.integer()
     w_n_hours_loc <- readline(prompt = "Give a weight to the number of unique hours data points were sent a place (default = 0.1): ") %>% as.integer()
