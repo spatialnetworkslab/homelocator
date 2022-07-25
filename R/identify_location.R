@@ -10,6 +10,7 @@
 #' @param recipe  Embeded algorithms to identify the most possible home locations for users           
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
+#' @param use_default_threshold Option to use default threshold or customized threshold
 #' 
 #' @importFrom rlang sym
 #' @importFrom rlang has_name
@@ -18,7 +19,7 @@
 #' @importFrom tictoc toc
 #' 
 #' @export
-identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", recipe, show_n_loc = 1, keep_score = F){
+identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", recipe, show_n_loc = 1, keep_score = F, use_default_threshold = TRUE){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -35,24 +36,24 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   
   ## recipe: HMLC
   if(recipe == "HMLC"){
-    output <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score)
+    output <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score, use_default_threshold = use_default_threshold)
   } 
   
   ## recipe: FREQ
   if(recipe == "FREQ"){
-    output <- recipe_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score)
+    output <- recipe_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score, use_default_threshold = use_default_threshold)
   }
   
   ## recipe: OSNA
   if(recipe == "OSNA"){
-    output <- recipe_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score)
+    output <- recipe_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score, use_default_threshold = use_default_threshold)
   }
   
   ## recipe: APDM
   if(recipe == "APDM"){
     message(paste(emo::ji("exclamation"), "Please make sure you have loaded the neighbors table before you use APDM recipe.\nThe table should have one column named", location,
           "and another column named neighbor.\n The neighbor column should be a list-column contains the neighboring locations for", location, "per row."))
-    output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, keep_score = keep_score)
+    output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, keep_score = keep_score, use_default_threshold = use_default_threshold)
   }
   tictoc::toc()
   return(output)
@@ -66,19 +67,21 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' @param  keep_original_vars Option to keep or remove columns other than 'user, timestamp, and location'
+#' @param use_default_threshold Option to use default threshold or customized threshold
 #' 
 #' @importFrom rlang sym
 #' @importFrom lubridate hour
 #' @importFrom lubridate minute
 #' @importFrom lubridate second
 #' 
-recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F) {
+recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F,
+                         use_default_threshold = TRUE) {
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
   
-  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
-  if(use_default_threshold == "Yes"){
+  # use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold){
     topNpct <- 1
     threshold_n_points <- 10
     threshold_n_locs <- 10
@@ -178,15 +181,16 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
 #' @param location Name of column that holds unique identifier for each location
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
+#' @param use_default_threshold Option to use default threshold or customized threshold
 #' 
 #' @importFrom rlang sym
-recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
+recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F, use_default_threshold = TRUE){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
   
-  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
-  if(use_default_threshold == "Yes"){
+  # use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold){
     topNpct <- 1
     threshold_n_points <- 10
     threshold_n_locs <- 10
@@ -232,15 +236,16 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
 #' @param location Name of column that holds unique identifier for each location
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
+#' @param use_default_threshold Option to use default threshold or customized threshold
 #' 
 #' @importFrom rlang sym
-recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
+recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F, use_default_threshold = TRUE){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
   
-  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
-  if(use_default_threshold == "Yes"){
+  # use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold){
     topNpct <- 1
     threshold_n_locs <- 3
   } else{
@@ -302,12 +307,13 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
 #' @param location Name of column that holds unique identifier for each location
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
+#' @param use_default_threshold Option to use default threshold or customized threshold
 #' 
 #' @importFrom rlang sym
 #' @importFrom rlang has_name
 #' @importFrom emo ji
 #' @importFrom chron times
-recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F){
+recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F, use_default_threshold = TRUE){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -319,8 +325,8 @@ recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at
   if (!rlang::has_name(df_neighbors, "neighbor")) {
     stop(paste(emo::ji("bomb"), "Neighbor column does not exist!"))
   }
-  use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
-  if(use_default_threshold == "Yes"){
+  # use_default_threshold <- readline(prompt = "Do you want to use the default thresholds? (Yes/No): ")
+  if(use_default_threshold){
     threshold_n_days_per_month_loc <- 7
     threshold_n_points_per_month_loc <- 500
   } else{
