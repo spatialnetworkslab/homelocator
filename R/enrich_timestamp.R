@@ -3,7 +3,6 @@
 #' Create new variables from existing timestamp, which are often used/needed as intermediate variables in home location algorithms. 
 #' @param df A nested dataframe 
 #' @param timestamp Name of column that holds specific timestamp for each data point and it should be POSIXct
-#' @param tz A character string containing the time zone to convert to and it should be recognized in R. 
 #' 
 #' @importFrom emo ji
 #' @importFrom rlang sym
@@ -16,7 +15,7 @@
 #' @importFrom purrr map 
 #' 
 #' @export
-enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"){
+enrich_timestamp <- function(df, timestamp = "created_at"){
   if(!is.list(df[ , grepl("^data$", names(df))])){
     stop(paste(emo::ji("bomb"), "Input dataset is not nested!"))
   }
@@ -37,7 +36,7 @@ enrich_timestamp <- function(df, timestamp = "created_at", tz = "Asia/Singapore"
              day = lubridate::day({{timestamp}}),
              wday = lubridate::wday({{timestamp}}), # day of the week
              hour = lubridate::hour({{timestamp}}), # hour of the day
-             ymd = as.Date({{timestamp}}, tz = tz))
+             ymd = as.Date({{timestamp}}))
   }
 
   #create the progress bar

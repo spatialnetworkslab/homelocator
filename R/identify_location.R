@@ -7,7 +7,6 @@
 #' @param user Name of column that holds unique identifier for each user
 #' @param timestamp Name of timestamp column. Should be POSIXct
 #' @param location Name of column that holds unique identifier for each location
-#' @param tz A character string containing the time zone to convert to and it should be recognized in R
 #' @param recipe  Embeded algorithms to identify the most possible home locations for users           
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
@@ -19,9 +18,7 @@
 #' @importFrom tictoc toc
 #' 
 #' @export
-identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", tz = "Asia/Singapore", 
-                              recipe, show_n_loc = 1, keep_score = F){
-  
+identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", recipe, show_n_loc = 1, keep_score = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -34,7 +31,7 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   df_nested <- nest_verbose(df_valided, c({{location_expr}}, {{timestamp_expr}}))
 
   ## Derive new variables from timestamp
-  df_enriched <- enrich_timestamp(df_nested, timestamp = timestamp, tz = tz)
+  df_enriched <- enrich_timestamp(df_nested, timestamp = timestamp)
   
   ## recipe: HMLC
   if(recipe == "HMLC"){
@@ -61,10 +58,6 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   return(output)
 }
 
-
-
-
-
 #' recipe: homelocator - HMLC
 #' @param df An enriched dataframe
 #' @param user Name of column that holds unique identifier for each user
@@ -80,7 +73,6 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
 #' @importFrom lubridate second
 #' 
 recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F) {
-  
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -243,7 +235,6 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
 #' 
 #' @importFrom rlang sym
 recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F){
-  
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
