@@ -1,6 +1,16 @@
 
 # homelocator
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/spatialnetworkslab/entangledfootprints/master?urlpath=rstudio)
+
+Paper:
+
+> Chen, Q. and Poorthuis, A. (2021) *Identifying home locations in human mobility data: 
+> an open-source R package for comparison and reproducibility*. International Journal of 
+> Geographical Information Science, Pages 1425-1448, 
+> <https://doi.org/10.1080/13658816.2021.1887489>
+
+
 ## Overview
 
 <div style="text-align: justify">
