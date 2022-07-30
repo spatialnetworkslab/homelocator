@@ -36,7 +36,7 @@ enrich_timestamp <- function(df, timestamp = "created_at"){
              day = lubridate::day({{timestamp}}),
              wday = lubridate::wday({{timestamp}}), # day of the week
              hour = lubridate::hour({{timestamp}}), # hour of the day
-             ymd = as.Date({{timestamp}}))
+             ymd = format({{timestamp}}, "%Y-%m-%d"))
   }
 
   #create the progress bar
