@@ -1,7 +1,7 @@
 
 # homelocator
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/spatialnetworkslab/entangledfootprints/master?urlpath=rstudio)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/spatialnetworkslab/homelocator/master?urlpath=rstudio)
 
 Paper:
 
