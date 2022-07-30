@@ -32,7 +32,7 @@ remove_top_users <- function(df, user = "u_id", counts = "n_points", topNpct_use
   n_original_users <- df %>% pull({{user}}) %>% dplyr::n_distinct()
   message(paste(emo::ji("bust_in_silhouette"), "There are", n_original_users, "users at this moment."))
   
-  if(rm_topNpct_user){
+  if(rm_topNpct_user == F){
     message(paste(emo::ji("bust_in_silhouette"), "Skip removing active users"))
     output <- df %>% arrange(desc({{counts}}))
   }else{
