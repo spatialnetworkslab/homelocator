@@ -11,6 +11,7 @@
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' @param use_default_threshold Option to use default threshold or customized threshold
+#' @param rm_topNpct_user Option to remove or keep the top N percent active users
 #' 
 #' @importFrom rlang sym
 #' @importFrom rlang has_name
@@ -19,7 +20,8 @@
 #' @importFrom tictoc toc
 #' 
 #' @export
-identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", recipe, show_n_loc = 1, keep_score = F, use_default_threshold = TRUE){
+identify_location <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", recipe, 
+                              show_n_loc = 1, keep_score = F, use_default_threshold = T, rm_topNpct_user = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -36,24 +38,29 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
   
   ## recipe: HMLC
   if(recipe == "HMLC"){
-    output <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_original_vars = F, keep_score = keep_score, use_default_threshold = use_default_threshold)
+    output <- recipe_HMLC(df_enriched, user = user, timestamp = timestamp, location = location, 
+                          show_n_loc, keep_original_vars = F, keep_score = keep_score, 
+                          use_default_threshold = use_default_threshold, rm_topNpct_user = rm_topNpct_user)
   } 
   
   ## recipe: FREQ
   if(recipe == "FREQ"){
-    output <- recipe_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, keep_score = keep_score, use_default_threshold = use_default_threshold)
+    output <- recipe_FREQ(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc, 
+                          keep_score = keep_score, use_default_threshold = use_default_threshold, rm_topNpct_user = rm_topNpct_user)
   }
   
   ## recipe: OSNA
   if(recipe == "OSNA"){
-    output <- recipe_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, keep_score = keep_score, use_default_threshold = use_default_threshold)
+    output <- recipe_OSNA(df_enriched, user = user, timestamp = timestamp, location = location, show_n_loc = show_n_loc, 
+                          keep_score = keep_score, use_default_threshold = use_default_threshold, rm_topNpct_user = rm_topNpct_user)
   }
   
   ## recipe: APDM
   if(recipe == "APDM"){
     message(paste(emo::ji("exclamation"), "Please make sure you have loaded the neighbors table before you use APDM recipe.\nThe table should have one column named", location,
           "and another column named neighbor.\n The neighbor column should be a list-column contains the neighboring locations for", location, "per row."))
-    output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, keep_score = keep_score, use_default_threshold = use_default_threshold)
+    output <- recipe_APDM(df_enriched, df_neighbors, user = user, timestamp = timestamp, location = location, 
+                          keep_score = keep_score, use_default_threshold = use_default_threshold)
   }
   tictoc::toc()
   return(output)
@@ -68,14 +75,15 @@ identify_location <- function(df, user = "u_id", timestamp = "created_at", locat
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' @param  keep_original_vars Option to keep or remove columns other than 'user, timestamp, and location'
 #' @param use_default_threshold Option to use default threshold or customized threshold
+#' @param rm_topNpct_user Option to remove or keep the top N percent active users
 #' 
 #' @importFrom rlang sym
 #' @importFrom lubridate hour
 #' @importFrom lubridate minute
 #' @importFrom lubridate second
 #' 
-recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_original_vars = F, keep_score = F,
-                         use_default_threshold = TRUE) {
+recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, 
+                         keep_original_vars = F, keep_score = F, use_default_threshold = T, rm_topNpct_user = F) {
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -123,7 +131,7 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
   df_match_user_condition <- df %>%
     summarise_nested(., n_points = n(),
                      n_locs = n_distinct({{location_expr}})) %>%
-    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct) %>% # remove top N percent active users based on frequency
+    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct, rm_topNpct_user = rm_topNpct_user) %>% # remove top N percent active users based on frequency
     filter_verbose(., user = user, n_points > threshold_n_points & n_locs > threshold_n_locs) # each use at least has more than threshold_n_points data points sent at threshold_n_locs different locations
   
   # location level 
@@ -182,9 +190,11 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' @param use_default_threshold Option to use default threshold or customized threshold
+#' @param rm_topNpct_user Option to remove or keep the top N percent active users
 #' 
 #' @importFrom rlang sym
-recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F, use_default_threshold = TRUE){
+recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, 
+                        keep_score = F, use_default_threshold = T, rm_topNpct_user = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -208,7 +218,7 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
     summarise_nested(., 
                      n_points = n(),
                      n_locs = n_distinct({{location_expr}})) %>%
-    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct) %>% # remove top N percent active users based on frequency
+    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct, rm_topNpct_user = rm_topNpct_user) %>% # remove top N percent active users based on frequency
     filter_verbose(., user = user, n_points > threshold_n_points & n_locs > threshold_n_locs) # each use at least has more than threshold_n_points data points sent at threshold_n_loc different locations
   
   # location level 
@@ -237,9 +247,11 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
 #' @param show_n_loc Number of potential homes to extract
 #' @param keep_score Option to keep or remove calculated result/score per user per location
 #' @param use_default_threshold Option to use default threshold or customized threshold
+#' @param rm_topNpct_user Option to remove or keep the top N percent active users
 #' 
 #' @importFrom rlang sym
-recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, keep_score = F, use_default_threshold = TRUE){
+recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = "loc_id", show_n_loc, 
+                        keep_score = F, use_default_threshold = T, rm_topNpct_user = F){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
@@ -258,7 +270,7 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
     summarise_nested(., 
                      n_points = n(),
                      n_locs = n_distinct({{location_expr}})) %>% 
-    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct) %>% # remove top N percent active users based on frequency
+    remove_top_users(., user = user, counts = "n_points", topNpct_user = topNpct, rm_topNpct_user = rm_topNpct_user) %>% # remove top N percent active users based on frequency
     filter_verbose(., user = user, n_locs > threshold_n_locs) %>% # remove users with data at less than N places 
     filter_nested(., user = user, !wday %in% c(1, 7)) %>%  # remove data sent on weekend, 1 for Sunday and 7 for Saturday 
     mutate_nested(timeframe = if_else(hour >= 2 & hour < 8, "Rest", if_else(hour >= 8 & hour < 19, "Active", "Leisure"))) %>% # add time frame column 
@@ -313,7 +325,7 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
 #' @importFrom rlang has_name
 #' @importFrom emo ji
 #' @importFrom chron times
-recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F, use_default_threshold = TRUE){
+recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at", location = "loc_id", keep_score = F, use_default_threshold = T){
   user_expr <- rlang::sym(user)
   timestamp_expr <- rlang::sym(timestamp)
   location_expr <- rlang::sym(location)
