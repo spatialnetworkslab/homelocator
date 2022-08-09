@@ -16,11 +16,11 @@
 #' 
 #' @export
 enrich_timestamp <- function(df, timestamp = "created_at"){
-  if(!is.list(df[ , grepl("^data$", names(df))])){
+  if(!is.list(df[ , grepl("^data$", names(df)), with=F])){
     stop(paste(emo::ji("bomb"), "Input dataset is not nested!"))
   }
   
-  colname_nested_data <- names(df[ , grepl("^data$", names(df))])
+  colname_nested_data <- names(df[ , grepl("^data$", names(df)), with=F])
   timestamp <- rlang::sym(timestamp)
  
   if(!is(df[[colname_nested_data]][[1]] %>% pull({{timestamp}}), "POSIXct")){
