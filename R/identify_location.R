@@ -395,7 +395,7 @@ recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at
   ## for multiple home users, take the top 2 most frequently visit places and do the comparision
   df_multiple_homes <- df_with_home_type %>% 
     filter(n_home > 1) %>% 
-    arrange_nested(., desc(n_days_loc, n_points_loc)) # order the location by number of days and number of data points in descending order
+    arrange_nested(., desc(n_days_loc), desc(n_points_loc)) # order the location by number of days and number of data points in descending order
   
   
   decide_home <- function(data){
