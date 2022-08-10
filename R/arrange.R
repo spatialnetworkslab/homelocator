@@ -24,7 +24,7 @@ arrange_nested <- function(df, ...){
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start sorting..."))
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~arrange_with_progress(.))) 
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~arrange_with_progress(.))) 
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
 
@@ -69,7 +69,7 @@ arrange_double_nested <- function(df, nest_cols, ...){
   arrange_column <- . %>% arrange(!!!var_expr)
   
   arrange_columns <- . %>% 
-    mutate(data = purrr::map(data, arrange_column)) 
+    dplyr::mutate(data = purrr::map(data, arrange_column)) 
   
   # double nest 
   df[[colname_nested_data]] <- purrr::map(df[[colname_nested_data]], ~.x %>% nest(data = nest_cols))
@@ -77,7 +77,7 @@ arrange_double_nested <- function(df, nest_cols, ...){
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Start sorting..."))
   output <- df %>% 
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], arrange_columns))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], arrange_columns))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
 

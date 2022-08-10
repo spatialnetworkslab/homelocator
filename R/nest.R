@@ -108,7 +108,7 @@ unnest_nested <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
   start.time <- Sys.time()
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.)))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
@@ -161,7 +161,7 @@ nest_nested <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start nesting..."))
   start.time <- Sys.time()
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~nest_with_progress(.)))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
@@ -213,7 +213,7 @@ unnest_double_nested <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start unnesting..."))
   start.time <- Sys.time()
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.))) %>% 
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~unnest_with_progress(.))) %>% 
     unnest_legacy()
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)

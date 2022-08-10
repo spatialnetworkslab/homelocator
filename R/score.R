@@ -47,7 +47,7 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
   add_with_progress <- function(data){
     pb$tick()$print()
     data %>% 
-      mutate(!!!var_expr)
+      dplyr::mutate(!!!var_expr)
   }
   
   #create the progress bar
@@ -58,10 +58,10 @@ score_nested <- function(df, user = "u_id", location = "loc_id", keep_original_v
   start.time <- Sys.time()
   if(keep_original_vars){
     output <- df_nest %>% 
-      mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~add_with_progress(.)))
+      dplyr::mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~add_with_progress(.)))
   }else{
     output <- df_nest %>% 
-      mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~transmute_with_progress(.)))
+      dplyr::mutate({{colname_nested_data}} := purrr::map(df_nest[[colname_nested_data]], ~transmute_with_progress(.)))
   }
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
@@ -118,7 +118,7 @@ score_summary <- function(df, user = "u_id", location = "loc_id", ...){
     
     location_index <- which(colnames(data_sub) == location)
     data_sub %>% 
-      mutate(score = rowSums(.[ , -c(location_index)]))
+      dplyr::mutate(score = rowSums(.[ , -c(location_index)]))
   }
    
   # create the progress bar
@@ -128,7 +128,7 @@ score_summary <- function(df, user = "u_id", location = "loc_id", ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start summing scores..."))
   start.time <- Sys.time()
   output <- df %>% 
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~sum_score_with_progress(.)))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~sum_score_with_progress(.)))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   

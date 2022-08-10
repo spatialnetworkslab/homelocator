@@ -31,7 +31,7 @@ spread_nested <- function(df, key_var, value_var){
   message(paste(emo::ji("hammer_and_wrench"), "Start spreading", key_var, "variable..."))
   start.time <- Sys.time()
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~spread_with_progress(.)))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~spread_with_progress(.)))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   

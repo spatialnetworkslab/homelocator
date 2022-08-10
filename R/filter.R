@@ -94,7 +94,7 @@ filter_nested <- function(df,  user = "u_id", ...){
   
   start.time <- Sys.time()
   output <- df %>% 
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~filter_with_progress(.))) 
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~filter_with_progress(.))) 
   output_data <- output[[colname_nested_data]]
   #check empty tibble 
   output <- output %>% 

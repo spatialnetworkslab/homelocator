@@ -20,7 +20,7 @@ summarise_nested <- function(df, ...){
   
   summarise_with_progress <- function(data){
     pb$tick()$print()
-    data %>% summarise(!!!var_expr)
+    data %>% dplyr::summarise(!!!var_expr)
   }
   # create the progress bar
   pb <- dplyr::progress_estimated(nrow(df))
@@ -28,7 +28,7 @@ summarise_nested <- function(df, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start summarising values..."))
   start.time <- Sys.time()
   output <- df %>%
-    mutate(adds = purrr::map(df[[colname_nested_data]], ~summarise_with_progress(.))) %>%
+    dplyr::mutate(adds = purrr::map(df[[colname_nested_data]], ~summarise_with_progress(.))) %>%
     unnest_legacy(adds)
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
@@ -77,10 +77,10 @@ summarise_double_nested <- function(df, nest_cols, ...){
   var_expr <- enquos(..., .named = TRUE)
   colname_nested_data <- names(df[ , grepl("^data$", names(df))])
   
-  cal_column <- . %>% summarise(!!!var_expr)
+  cal_column <- . %>% dplyr::summarise(!!!var_expr)
   
   add_column <- . %>% 
-      mutate(adds = purrr::map(data, cal_column)) %>% 
+      dplyr::mutate(adds = purrr::map(data, cal_column)) %>% 
       unnest_legacy(adds) 
   
   # double nest 
@@ -89,7 +89,7 @@ summarise_double_nested <- function(df, nest_cols, ...){
   message(paste(emo::ji("hammer_and_wrench"), "Start summarising values..."))
   start.time <- Sys.time()
   output <- df %>% 
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], add_column))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   

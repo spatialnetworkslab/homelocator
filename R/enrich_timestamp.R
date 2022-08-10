@@ -31,7 +31,7 @@ enrich_timestamp <- function(df, timestamp = "created_at"){
   enrich_with_progress <- function(data){
     pb$tick()$print()
     data %>%
-      mutate(year = lubridate::year({{timestamp}}),
+      dplyr::mutate(year = lubridate::year({{timestamp}}),
              month = lubridate::month({{timestamp}}),
              day = lubridate::day({{timestamp}}),
              wday = lubridate::wday({{timestamp}}), # day of the week
@@ -45,7 +45,7 @@ enrich_timestamp <- function(df, timestamp = "created_at"){
   start.time <- Sys.time()
   message(paste(emo::ji("hammer_and_wrench"), "Enriching variables from timestamp..."))
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~enrich_with_progress(.)))
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~enrich_with_progress(.)))
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   

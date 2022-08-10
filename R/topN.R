@@ -25,7 +25,7 @@ top_n_nested <- function(df, n = 2, wt){
   message(paste(emo::ji("hammer_and_wrench"), "Start selecting top", n, "row(s)...")) 
   start.time <- Sys.time()
   output <- df %>%
-    mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~top_n_with_progress(.))) 
+    dplyr::mutate({{colname_nested_data}} := purrr::map(df[[colname_nested_data]], ~top_n_with_progress(.))) 
   end.time <- Sys.time()
   time.taken <-  difftime(end.time, start.time, units = "secs") %>% round(., 3)
   
