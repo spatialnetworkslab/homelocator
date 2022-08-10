@@ -30,7 +30,7 @@ extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc 
   get_loc_with_progress <- function(data){
     pb$tick()$print()
     get_loc <- data %>%
-      dplyr::arrange(desc(!!!var_expr)) %>% 
+      dplyr::arrange(!!!var_expr) %>% 
       slice(1:show_n_loc) %>%
       pull({{location}}) 
     if(show_n_loc == 1){
@@ -47,10 +47,10 @@ extract_location <- function(df, user = "u_id", location = "loc_id", show_n_loc 
   
   if(keep_score){
     output <- df %>%
-      mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) 
+      dplyr::mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) 
   } else{
     output <- df %>%
-      mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) %>%
+      dplyr::mutate(home = purrr::map_chr(df[[colname_nested_data]], ~get_loc_with_progress(.))) %>%
       dplyr::select(-colname_nested_data) %>%
       dplyr::select({{user}}, home)
   }

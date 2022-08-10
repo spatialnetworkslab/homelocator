@@ -177,7 +177,7 @@ recipe_HMLC <- function (df, user = "u_id", timestamp = "created_at", location =
   
   # extract locations based on score value 
   df_scored %>% 
-    extract_location(., user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
+    extract_location(., user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, desc(score))
 }
 
 
@@ -233,7 +233,7 @@ recipe_FREQ <- function(df, user = "u_id", timestamp = "created_at", location = 
   
   # extract locations based on frequency of data points sent on locations
   df_match_loc_condition %>% 
-    extract_location(., user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, n_points_loc)
+    extract_location(., user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, desc(n_points_loc))
 }
 
 
@@ -306,7 +306,7 @@ recipe_OSNA <- function(df, user = "u_id", timestamp = "created_at", location = 
                             score = sum(score_ymd_loc))
   
   # extract location based on score value 
-  extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, score)
+  extract_location(df_scored, user = user, location = location, show_n_loc = show_n_loc, keep_score = keep_score, desc(score))
 }
 
 
@@ -390,7 +390,8 @@ recipe_APDM <- function(df, df_neighbors, user = "u_id", timestamp = "created_at
   ## for one home users, directly extract the location as their homes 
   df_one_home <- df_with_home_type %>% filter(n_home == 1)
   
-  output <- extract_location(df_one_home %>% dplyr::select(-n_home), user = user, location = location, show_n_loc = 1, keep_score = keep_score, n_days_loc, n_points_loc)
+  output <- extract_location(df_one_home %>% dplyr::select(-n_home), user = user, 
+                             location = location, show_n_loc = 1, keep_score = keep_score, desc(n_days_loc), desc(n_points_loc))
   
   ## for multiple home users, take the top 2 most frequently visit places and do the comparision
   df_multiple_homes <- df_with_home_type %>% 
