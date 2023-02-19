@@ -27,7 +27,7 @@ install_github("spatialnetworkslab/homelocator")
 ## Load library
 
 ```{r setup}
-#load homelocator package 
+# load homelocator package
 library(homelocator)
 ```
 
@@ -98,7 +98,7 @@ Calculates the average and standard deviation of start time data points by a sin
 ## APDM recipe strictly returns the most likely home location
 ## It is important to load the neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe
 data("df_neighbors", package = "homelocator")
 identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", recipe = "APDM", keep_score = F)
 ```
