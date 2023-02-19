@@ -52,7 +52,7 @@ library(here)
 
 
 ```{r validate}
-# load test sample dataset 
+# load test sample dataset
 data("test_sample", package = "homelocator")
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id")
 head(df_validated)
@@ -103,15 +103,19 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 #### FREQ
 ```{r eval=F}
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "FREQ")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at", location = "grid_id",
+  show_n_loc = 1, recipe = "FREQ"
+)
 ```
 
 #### OSNA
 ```{r eval=F}
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "OSNA")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at", location = "grid_id",
+  show_n_loc = 1, recipe = "OSNA"
+)
 ```
 
 #### APDM
@@ -120,10 +124,12 @@ identify_location(test_sample, user = "u_id", timestamp = "created_at", location
 ## APDM recipe strictly returns the most likely home location
 ## It is important to create your location neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe
 data("df_neighbors", package = "homelocator")
-identify_location(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", 
-                  show_n_loc = 1, recipe = "APDM")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at", location = "grid_id",
+  show_n_loc = 1, recipe = "APDM"
+)
 ```
 
 

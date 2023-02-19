@@ -45,7 +45,7 @@ To explore the basic data manipulation functions of `homelocator`, we'll use a `
 # load data
 data("test_sample", package = "homelocator")
 
-# show test sample 
+# show test sample
 test_sample %>% head(3)
 ```
 
@@ -68,7 +68,7 @@ The `validate_dataset()` function makes sure your input dataset contains all thr
 ```{r}
 df_validated <- validate_dataset(test_sample, user = "u_id", timestamp = "created_at", location = "grid_id", keep_other_vars = FALSE)
 
-# show result 
+# show result
 df_validated %>% head(3)
 ```
 
@@ -85,16 +85,16 @@ The `nest_verbose()` and `unnest_verbose()` functions work in the same way as  [
 # nest data
 df_nested <- nest_verbose(df_validated, c("created_at", "grid_id"))
 
-# show result 
+# show result
 df_nested %>% head(3)
 
-# show result 
+# show result
 df_nested$data[[1]] %>% head(3)
 
 # unnest data
 df_unnested <- unnest_verbose(df_nested, data)
 
-# show result 
+# show result
 df_unnested %>% head(3)
 ```
 
@@ -111,20 +111,20 @@ The `nest_double_nest()` and `unnest_double_nested()` functions work in a simila
 # double nest data (e.g., nesting column: created_at)
 df_double_nested <- nest_nested(df_nested %>% head(100), c("created_at"))
 
-# show result 
+# show result
 df_double_nested %>% head(3)
 
-# show result 
+# show result
 df_double_nested$data[[1]] %>% head(3)
 
 df_double_nested$data[[1]]$data[[1]] %>% head(3)
 
-# unnest nested data 
-df_double_unnested <- df_double_nested %>% 
-  head(100) %>%  ## take first 100 rows for example
-  unnest_double_nested(., data) 
+# unnest nested data
+df_double_unnested <- df_double_nested %>%
+  head(100) %>% ## take first 100 rows for example
+  unnest_double_nested(., data)
 
-# show result 
+# show result
 df_double_unnested %>% head(3)
 ```
 
@@ -138,14 +138,18 @@ The `enrich_timestamp()` function creates additional variables that are derived 
 
 
 ```{r}
-#original variables 
-df_nested[1, ] %>% unnest(cols = c(data)) %>% head(3)
+# original variables
+df_nested[1, ] %>%
+  unnest(cols = c(data)) %>%
+  head(3)
 
-# create new variables from "created_at" timestamp column 
+# create new variables from "created_at" timestamp column
 df_enriched <- enrich_timestamp(df_nested, timestamp = "created_at")
 
-# show result 
-df_enriched[1, ] %>% unnest(cols = c(data)) %>% head(3)
+# show result
+df_enriched[1, ] %>%
+  unnest(cols = c(data)) %>%
+  head(3)
 ```
 
 ### Summarize in nested and double nested dataframe 
@@ -157,23 +161,25 @@ The `summarise_nested()` function  works similar to dplyr's regular `summarise` 
   - `...`: name-value pairs of summary functions 
 
 ```{r}
-# summarize in nested dataframe 
+# summarize in nested dataframe
 # e.g., summarise total number of tweets and total number of places per user
-df_summarize_nested <- summarise_nested(df_enriched, 
-                                        n_tweets = n(),
-                                        n_locs = n_distinct(grid_id))
+df_summarize_nested <- summarise_nested(df_enriched,
+  n_tweets = n(),
+  n_locs = n_distinct(grid_id)
+)
 
-# show result 
+# show result
 df_summarize_nested %>% head(3)
 
-# summarize in double nested dataframe 
+# summarize in double nested dataframe
 # take first 100 users for example
-# e.g summarise total number of tweets and totla number of distinct days 
-df_summarize_double_nested <- summarise_double_nested(df_enriched %>% head(100), 
-                    nest_cols = c("created_at", "ymd", "year", "month", "day", "wday", "hour"), 
-                    n_tweets = n(), n_days = n_distinct(ymd))
+# e.g summarise total number of tweets and totla number of distinct days
+df_summarize_double_nested <- summarise_double_nested(df_enriched %>% head(100),
+  nest_cols = c("created_at", "ymd", "year", "month", "day", "wday", "hour"),
+  n_tweets = n(), n_days = n_distinct(ymd)
+)
 
-# show result 
+# show result
 df_summarize_double_nested[1, ]
 df_summarize_double_nested[1, ]$data[[1]] %>% head(3)
 ```
@@ -189,10 +195,12 @@ The `remove_top_users()` function allows to remove top `N` percent of active use
 
 ```{r}
 # remove top 1% active users (e.g based on the frequency of tweets sent by users)
-df_removed_active_users <- remove_top_users(df_summarize_nested, user = "u_id", 
-                                            counts = "n_tweets", topNpct_user = 1) 
+df_removed_active_users <- remove_top_users(df_summarize_nested,
+  user = "u_id",
+  counts = "n_tweets", topNpct_user = 1
+)
 
-# show result 
+# show result
 df_removed_active_users %>% head(3)
 ```
 
@@ -206,19 +214,23 @@ The `filter_verbose()` function works in the same way as [filter](https://www.rd
   - `...`: Logical predicates defined in terms of the variables in df. Only rows match conditions are kept.
 
 ```{r}
-# filter users with less than 10 tweets sent at less than 10 places 
-df_filtered <- filter_verbose(df_removed_active_users, user = "u_id", 
-                              n_tweets > 10 & n_locs > 10)
+# filter users with less than 10 tweets sent at less than 10 places
+df_filtered <- filter_verbose(df_removed_active_users,
+  user = "u_id",
+  n_tweets > 10 & n_locs > 10
+)
 
-# show result 
+# show result
 df_filtered %>% head(3)
 
 # filter tweets that sent on weekends and during daytime (8am to 6pm)
-df_filter_nested <- filter_nested(df_filtered, user = "u_id", 
-                                  !wday %in% c(1, 7), # 1 means Sunday and 7 means Saturday
-                                  !hour %in% seq(8, 18, 1)) 
+df_filter_nested <- filter_nested(df_filtered,
+  user = "u_id",
+  !wday %in% c(1, 7), # 1 means Sunday and 7 means Saturday
+  !hour %in% seq(8, 18, 1)
+)
 
-# show result 
+# show result
 df_filter_nested %>% head(3)
 
 df_filter_nested$data[[1]] %>% head(3)
@@ -238,31 +250,37 @@ Function `mutate_nested()` works in the similar way as `mutate_verbose()` but it
   
   
 ```{r}
-## let's use pre-discussed functions to filter some users first 
+## let's use pre-discussed functions to filter some users first
 colnmaes_data <- df_filtered$data[[1]] %>% names()
-colnmaes_to_nest <- colnmaes_data[-which(colnmaes_data == "grid_id")] 
+colnmaes_to_nest <- colnmaes_data[-which(colnmaes_data == "grid_id")]
 
-df_cleaned <- df_filtered %>% 
-  summarise_double_nested(., nest_cols = colnmaes_to_nest,
-                          n_tweets_loc = n(), # number of tweets sent at each location
-                          n_hrs_loc = n_distinct(hour), # number of unique hours of sent tweets 
-                          n_days_loc = n_distinct(ymd), # number of unique days of sent tweets 
-                          period_loc = as.numeric(max(created_at) - min(created_at), "days")) %>% # period of tweeting 
-  unnest_verbose(data) %>% 
-  filter_verbose(., user = "u_id",
-                 n_tweets_loc > 10 & n_hrs_loc > 10 & n_days_loc > 10 & period_loc > 10) 
-  
-# show cleaned dataset 
+df_cleaned <- df_filtered %>%
+  summarise_double_nested(.,
+    nest_cols = colnmaes_to_nest,
+    n_tweets_loc = n(), # number of tweets sent at each location
+    n_hrs_loc = n_distinct(hour), # number of unique hours of sent tweets
+    n_days_loc = n_distinct(ymd), # number of unique days of sent tweets
+    period_loc = as.numeric(max(created_at) - min(created_at), "days")
+  ) %>% # period of tweeting
+  unnest_verbose(data) %>%
+  filter_verbose(.,
+    user = "u_id",
+    n_tweets_loc > 10 & n_hrs_loc > 10 & n_days_loc > 10 & period_loc > 10
+  )
+
+# show cleaned dataset
 df_cleaned %>% head(3)
 
 # ok, then let's apply the mutate_nested function to add four new variables: wd_or_wk, time_numeric, rest_or_work, wk.am_or_wk.pm
-df_expanded <- df_cleaned %>% 
-  mutate_nested(wd_or_wk = if_else(wday %in% c(1,7), "weekend", "weekday"),
-                time_numeric = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600, 
-                rest_or_work = if_else(time_numeric >= 9 & time_numeric <= 18, "work", "rest"), 
-                wk.am_or_wk.pm = if_else(time_numeric >= 6 & time_numeric <= 12 & wd_or_wk == "weekend", "weekend_am", "weekend_pm")) 
+df_expanded <- df_cleaned %>%
+  mutate_nested(
+    wd_or_wk = if_else(wday %in% c(1, 7), "weekend", "weekday"),
+    time_numeric = lubridate::hour(created_at) + lubridate::minute(created_at) / 60 + lubridate::second(created_at) / 3600,
+    rest_or_work = if_else(time_numeric >= 9 & time_numeric <= 18, "work", "rest"),
+    wk.am_or_wk.pm = if_else(time_numeric >= 6 & time_numeric <= 12 & wd_or_wk == "weekend", "weekend_am", "weekend_pm")
+  )
 
-# show result 
+# show result
 df_expanded %>% head(3)
 ```
 
@@ -277,10 +295,10 @@ The function `prop_factor_nested()` allows you to calculate the proportion of ca
 df_expanded$data[[1]] %>% head(3)
 
 # calculate proportion of categories for four variables: wd_or_wk, rest_or_work, wk.am_or_wk.pm
-df_expanded <- df_expanded %>% 
-  prop_factor_nested(wd_or_wk, rest_or_work, wk.am_or_wk.pm) 
+df_expanded <- df_expanded %>%
+  prop_factor_nested(wd_or_wk, rest_or_work, wk.am_or_wk.pm)
 
-# show result 
+# show result
 df_expanded %>% head(3)
 ```
 
@@ -303,41 +321,47 @@ The `score_summary()` function summarises all scored columns and return one sing
 
 
 ```{r}
-## let's add two more variables before we do the scoring 
-df_expanded <- df_expanded %>% 
-  summarise_nested(n_wdays_loc = n_distinct(wday),
-                   n_months_loc = n_distinct(month))
+## let's add two more variables before we do the scoring
+df_expanded <- df_expanded %>%
+  summarise_nested(
+    n_wdays_loc = n_distinct(wday),
+    n_months_loc = n_distinct(month)
+  )
 
 df_expanded %>% head(3)
 
 # when calculating scores, you can give weight to different variables, but the total weight should add up to 1
-df_scored <- df_expanded %>% 
-  score_nested(., user = "u_id", location = "grid_id", keep_original_vars = F,
-               s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
-               s_n_hrs_loc = 0.1 * (n_hrs_loc/24), 
-               s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
-               s_period_loc = 0.1 * (period_loc/max(period_loc)),
-               s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
-               s_n_months_loc = 0.1 * (n_months_loc/12),
-               s_weekend = 0.1 * (weekend),
-               s_rest = 0.2 * (rest),
-               s_wk_am = 0.1 * (weekend_am))
+df_scored <- df_expanded %>%
+  score_nested(.,
+    user = "u_id", location = "grid_id", keep_original_vars = F,
+    s_n_tweets_loc = 0.1 * (n_tweets_loc / max(n_tweets_loc)),
+    s_n_hrs_loc = 0.1 * (n_hrs_loc / 24),
+    s_n_days_loc = 0.1 * (n_days_loc / max(n_days_loc)),
+    s_period_loc = 0.1 * (period_loc / max(period_loc)),
+    s_n_wdays_loc = 0.1 * (n_wdays_loc / 7),
+    s_n_months_loc = 0.1 * (n_months_loc / 12),
+    s_weekend = 0.1 * (weekend),
+    s_rest = 0.2 * (rest),
+    s_wk_am = 0.1 * (weekend_am)
+  )
 
 df_scored %>% head(3)
 df_scored$data[[1]]
 
-### we can replace the score function by mutate function 
-df_scored_2 <- df_expanded %>% 
-  nest_verbose(-u_id) %>% 
-  mutate_nested(s_n_tweets_loc = 0.1 * (n_tweets_loc/max(n_tweets_loc)),
-                s_n_hrs_loc = 0.1 * (n_hrs_loc/24), 
-                s_n_days_loc = 0.1 * (n_days_loc/max(n_days_loc)),
-                s_period_loc = 0.1 * (period_loc/max(period_loc)),
-                s_n_wdays_loc = 0.1 * (n_wdays_loc/7),
-                s_n_months_loc = 0.1 * (n_months_loc/12),
-                s_weekend = 0.1 * (weekend),
-                s_rest = 0.2 * (rest),
-                s_wk_am = 0.1 * (weekend_am))
+### we can replace the score function by mutate function
+df_scored_2 <- df_expanded %>%
+  nest_verbose(-u_id) %>%
+  mutate_nested(
+    s_n_tweets_loc = 0.1 * (n_tweets_loc / max(n_tweets_loc)),
+    s_n_hrs_loc = 0.1 * (n_hrs_loc / 24),
+    s_n_days_loc = 0.1 * (n_days_loc / max(n_days_loc)),
+    s_period_loc = 0.1 * (period_loc / max(period_loc)),
+    s_n_wdays_loc = 0.1 * (n_wdays_loc / 7),
+    s_n_months_loc = 0.1 * (n_months_loc / 12),
+    s_weekend = 0.1 * (weekend),
+    s_rest = 0.2 * (rest),
+    s_wk_am = 0.1 * (weekend_am)
+  )
 
 df_scored_2 %>% head(3)
 df_scored_2$data[[1]]
@@ -345,8 +369,8 @@ df_scored_2$data[[1]]
 
 
 ```{r}
-# sum varialbes score for each location 
-df_score_summed <- df_scored %>% 
+# sum varialbes score for each location
+df_score_summed <- df_scored %>%
   score_summary(., user = "u_id", location = "grid_id", starts_with("s_"))
 
 df_score_summed %>% head(3)
@@ -367,13 +391,13 @@ The `extract_location()` function allows you to sort the locations of each each 
 
 ```{r}
 # extract homes for users based on score value (each user return 1 most possible home)
-df_home <- df_score_summed %>% 
+df_home <- df_score_summed %>%
   extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F, score)
 
 df_home %>% head(3)
 
 # extract homes for users and keep scores of locations
-df_home <- df_score_summed %>% 
+df_home <- df_score_summed %>%
   extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = T, score)
 
 df_home %>% head(3)
@@ -391,7 +415,7 @@ The `spread_nested()` function works in the same way as [spread](https://www.rdo
 
 ```{r}
 # let's add one timeframe variable first and calculate the number of data points at each timeframe
-df_timeframe <- df_enriched %>% 
+df_timeframe <- df_enriched %>%
   mutate_nested(timeframe = if_else(hour >= 2 & hour < 8, "Rest", if_else(hour >= 8 & hour < 19, "Active", "Leisure")))
 
 colnames_nested_data <- df_timeframe$data[[1]] %>% names()
@@ -399,13 +423,15 @@ colnames_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("gri
 
 df_timeframe <- df_timeframe %>%
   head(20) %>% # take first 20 users as example
-  summarise_double_nested(., nest_cols = colnames_to_nest, 
-                            n_points_timeframe = n()) 
+  summarise_double_nested(.,
+    nest_cols = colnames_to_nest,
+    n_points_timeframe = n()
+  )
 df_timeframe$data[[2]]
 
 # spread timeframe in nested dataframe with key is timeframe and value is n_points_timeframe
-df_timeframe_spreaded <- df_timeframe %>% 
-    spread_nested(., key_var = "timeframe", value_var = "n_points_timeframe") 
+df_timeframe_spreaded <- df_timeframe %>%
+  spread_nested(., key_var = "timeframe", value_var = "n_points_timeframe")
 
 df_timeframe_spreaded$data[[2]]
 ```
@@ -419,9 +445,9 @@ The `arrange_nested()` function works in the same way as [arrange](https://www.r
   - `...`: comma separated list of unquoted variable names
 
 ```{r}
-df_enriched$data[[3]]  
+df_enriched$data[[3]]
 
-df_arranged <- df_enriched %>% 
+df_arranged <- df_enriched %>%
   arrange_nested(desc(hour)) # arrange the hour in descending order
 
 df_arranged$data[[3]]
@@ -435,23 +461,25 @@ The `arrange_double_nested()` function works in the similar way as `arrange_nest
 
 
 ```{r}
-# get the name of columns to nest 
+# get the name of columns to nest
 colnames_nested_data <- df_enriched$data[[1]] %>% names()
 colnmaes_to_nest <- colnames_nested_data[-which(colnames_nested_data %in% c("grid_id"))]
 
-df_double_arranged <- df_enriched %>% 
+df_double_arranged <- df_enriched %>%
   head(20) %>% # take the first 20 users for example
-  arrange_double_nested(., nest_cols = colnmaes_to_nest, 
-                        desc(created_at)) # sort by time in descending order
+  arrange_double_nested(.,
+    nest_cols = colnmaes_to_nest,
+    desc(created_at)
+  ) # sort by time in descending order
 
 
 # original third user
 df_enriched[3, ]
-# third user data points 
+# third user data points
 df_enriched$data[[3]]
 # arranged third user
 df_double_arranged[3, ]
-# arranged time 
+# arranged time
 df_double_arranged$data[[3]]$data[[2]]
 ```
 
@@ -463,8 +491,8 @@ The `top_n_nested()` function works in the same way as [top_n](https://dplyr.tid
 ```{r}
 df_enriched$data[[2]]
 
-## get the top 1 row based on hour 
-df_top_1 <- df_enriched %>% 
+## get the top 1 row based on hour
+df_top_1 <- df_enriched %>%
   top_n_nested(., n = 1, wt = "hour")
 
 df_top_1$data[[2]]
@@ -494,23 +522,31 @@ Current available recipes:
 
 ```{r eval = FALSE}
 # recipe: homelocator -- HMLC
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "HMLC")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at",
+  location = "grid_id", show_n_loc = 1, recipe = "HMLC"
+)
 
 # recipe: Frequency -- FREQ
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "FREQ")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at",
+  location = "grid_id", show_n_loc = 1, recipe = "FREQ"
+)
 
 # recipe: Online Social Network Activity -- OSNA
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", show_n_loc = 1, recipe = "OSNA")
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at",
+  location = "grid_id", show_n_loc = 1, recipe = "OSNA"
+)
 
 # recipe: Online Social Network Activity -- APDM
 ## APDM recipe strictly returns the most likely home location
 ## It is important to load the neighbors table before you use the recipe!!
 ## example: st_queen <- function(a, b = a) st_relate(a, b, pattern = "F***T****")
-##          neighbors <- st_queen(df_sf) ===> convert result to dataframe 
+##          neighbors <- st_queen(df_sf) ===> convert result to dataframe
 data("df_neighbors", package = "homelocator")
-identify_location(test_sample, user = "u_id", timestamp = "created_at", 
-                  location = "grid_id", recipe = "APDM", keep_score = F)
+identify_location(test_sample,
+  user = "u_id", timestamp = "created_at",
+  location = "grid_id", recipe = "APDM", keep_score = F
+)
 ```

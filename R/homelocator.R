@@ -1,8 +1,8 @@
-.onAttach <- function(libname, pkgname){
+.onAttach <- function(libname, pkgname) {
   packageStartupMessage("Welcome to homelocator package!")
 }
 
-.onLoad <- function(libname, pkgname){
+.onLoad <- function(libname, pkgname) {
   op <- options()
   op.devtools <- list(
     devtools.path = "~/R-dev",
@@ -12,20 +12,6 @@
     devtools.desc = list()
   )
   toset <- !(names(op.devtools) %in% names(op))
-  if(any(toset)) options(op.devtools[toset])
+  if (any(toset)) options(op.devtools[toset])
   invisible()
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
