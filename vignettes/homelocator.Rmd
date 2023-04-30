@@ -368,13 +368,13 @@ The `extract_location()` function allows you to sort the locations of each each 
 ```{r}
 # extract homes for users based on score value (each user return 1 most possible home)
 df_home <- df_score_summed %>% 
-  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F, score)
+  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = F, desc(score))
 
 df_home %>% head(3)
 
 # extract homes for users and keep scores of locations
 df_home <- df_score_summed %>% 
-  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = T, score)
+  extract_location(., user = "u_id", location = "grid_id", show_n_loc = 1, keep_score = T, desc(score))
 
 df_home %>% head(3)
 df_home$data[[3]]

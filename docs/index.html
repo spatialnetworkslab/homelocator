@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">homelocator</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="articles/homelocator.html">Get started</a>
 </li>
@@ -50,7 +46,7 @@
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -74,30 +70,35 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="homelocator" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#homelocator" class="anchor"></a>homelocator</h1></div>
-<div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
+<div class="section level1">
+<div class="page-header"><h1 id="homelocator">homelocator<a class="anchor" aria-label="anchor" href="#homelocator"></a>
+</h1></div>
+<p><a href="https://mybinder.org/v2/gh/spatialnetworkslab/homelocator/master?urlpath=rstudio" class="external-link"><img src="https://mybinder.org/badge_logo.svg" alt="Binder"></a></p>
+<p>Paper:</p>
+<blockquote>
+<p>Chen, Q. and Poorthuis, A. (2021) <em>Identifying home locations in human mobility data: an open-source R package for comparison and reproducibility</em>. International Journal of Geographical Information Science, Pages 1425-1448, <a href="https://doi.org/10.1080/13658816.2021.1887489" class="external-link uri">https://doi.org/10.1080/13658816.2021.1887489</a></p>
+</blockquote>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
 <div style="text-align: justify">
-The goal of <code>homelocator</code> is to improve the consistency and replicability of algorithms used for identifying home locations in human mobility data. The easy-to-use <code>homelocator</code> package provide a consistent framework and interface for the adoption of different algorithms for location inference. With the package, you are able to write structured, algorithmic ‘recipes’ to identify home locations according to your research requirements. The package also has a number of built-in ‘recipes’ that have been translated from approaches in the existing literature.
+<p>The goal of <code>homelocator</code> is to improve the consistency and replicability of algorithms used for identifying home locations in human mobility data. The easy-to-use <code>homelocator</code> package provide a consistent framework and interface for the adoption of different algorithms for location inference. With the package, you are able to write structured, algorithmic ‘recipes’ to identify home locations according to your research requirements. The package also has a number of built-in ‘recipes’ that have been translated from approaches in the existing literature.</p>
 </div>
 </div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Install development version from GitHub</span>
-<span class="fu">install_github</span><span class="op">(</span><span class="st">"spatialnetworkslab/homelocator"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Install development version from GitHub</span></span>
+<span><span class="fu">install_github</span><span class="op">(</span><span class="st">"spatialnetworkslab/homelocator"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="example" class="section level2">
-<h2 class="hasAnchor">
-<a href="#example" class="anchor"></a>Example</h2>
+<div class="section level2">
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h2>
 <p>These are some basic examples that show you how to use common functions in the package.</p>
-<div id="validate-input-dataset" class="section level3">
-<h3 class="hasAnchor">
-<a href="#validate-input-dataset" class="anchor"></a>Validate input dataset</h3>
+<div class="section level3">
+<h3 id="validate-input-dataset">Validate input dataset<a class="anchor" aria-label="anchor" href="#validate-input-dataset"></a>
+</h3>
 <p>You need to make sure the input dataset includes three essential attributes:</p>
 <ul>
 <li>a unique identifier for the person or user</li>
@@ -106,89 +107,89 @@ The goal of <code>homelocator</code> is to improve the consistency and replicabi
 </ul>
 <p>You can use <code><a href="reference/validate_dataset.html">validate_dataset()</a></code> to validate your input dataset before starting identifying meaningful locations. In this function, you need to specify the names of three essential attribute that used in your dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Load homelocator library</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">homelocator</span><span class="op">)</span>
-<span class="co">#&gt; Welcome to homelocator package!</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Load homelocator library</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">homelocator</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Welcome to homelocator package!</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Load other needed libraries</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Load other needed libraries</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/" class="external-link">here</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># load test sample dataset </span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"test_sample"</span>, package <span class="op">=</span> <span class="st">"homelocator"</span><span class="op">)</span>
-<span class="va">df_validated</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/validate_dataset.html">validate_dataset</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span><span class="op">)</span>
-<span class="co">#&gt; 🎉 Congratulations!! Your dataset has passed validation.</span>
-<span class="co">#&gt; 👤 There are 100 unique users in your dataset.</span>
-<span class="co">#&gt; 🌏 Now start your journey identifying their meaningful location(s)!</span>
-<span class="co">#&gt; 👏 Good luck!</span>
-<span class="co">#&gt; </span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">df_validated</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 3</span>
-<span class="co">#&gt;       u_id grid_id created_at         </span>
-<span class="co">#&gt;      &lt;int&gt;   &lt;int&gt; &lt;dttm&gt;             </span>
-<span class="co">#&gt; 1 92298565    1581 2016-04-17 22:43:06</span>
-<span class="co">#&gt; 2 33908340    1461 2014-10-03 16:29:48</span>
-<span class="co">#&gt; 3 92298565    1136 2014-02-07 07:26:15</span>
-<span class="co">#&gt; 4 11616678    1375 2014-07-18 10:08:21</span>
-<span class="co">#&gt; 5 11616678    1375 2013-11-24 23:16:24</span>
-<span class="co">#&gt; 6 47727539     736 2016-06-21 15:59:49</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># load test sample dataset </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"test_sample"</span>, package <span class="op">=</span> <span class="st">"homelocator"</span><span class="op">)</span></span>
+<span><span class="va">df_validated</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/validate_dataset.html">validate_dataset</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 🎉 Congratulations!! Your dataset has passed validation.</span></span>
+<span><span class="co">#&gt; 👤 There are 100 unique users in your dataset.</span></span>
+<span><span class="co">#&gt; 🌏 Now start your journey identifying their meaningful location(s)!</span></span>
+<span><span class="co">#&gt; 👏 Good luck!</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_validated</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 3</span></span>
+<span><span class="co">#&gt;       u_id grid_id created_at         </span></span>
+<span><span class="co">#&gt;      &lt;int&gt;   &lt;int&gt; &lt;dttm&gt;             </span></span>
+<span><span class="co">#&gt; 1 92298565    1581 2016-04-17 22:43:06</span></span>
+<span><span class="co">#&gt; 2 33908340    1461 2014-10-03 16:29:48</span></span>
+<span><span class="co">#&gt; 3 92298565    1136 2014-02-07 07:26:15</span></span>
+<span><span class="co">#&gt; 4 11616678    1375 2014-07-18 10:08:21</span></span>
+<span><span class="co">#&gt; 5 11616678    1375 2013-11-24 23:16:24</span></span>
+<span><span class="co">#&gt; 6 47727539     736 2016-06-21 15:59:49</span></span></code></pre></div>
 </div>
-<div id="nesting-users-for-parallel-computing" class="section level3">
-<h3 class="hasAnchor">
-<a href="#nesting-users-for-parallel-computing" class="anchor"></a>Nesting users for parallel computing</h3>
+<div class="section level3">
+<h3 id="nesting-users-for-parallel-computing">Nesting users for parallel computing<a class="anchor" aria-label="anchor" href="#nesting-users-for-parallel-computing"></a>
+</h3>
 <p>To speed up computing progress, you can nest the validated dataset by user so that the subsequent location inference can be applied to each user at the same time.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">df_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span><span class="op">(</span><span class="va">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"created_at"</span>, <span class="st">"grid_id"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; 🛠 Start nesting...</span>
-<span class="co">#&gt; ✅ Finish nesting!</span>
-<span class="co">#&gt; ⌛ Nesting time: 0.192 secs</span>
-<span class="co">#&gt; </span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">df_nested</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
-<span class="co">#&gt;       u_id data                </span>
-<span class="co">#&gt;      &lt;int&gt; &lt;list&gt;              </span>
-<span class="co">#&gt; 1 92298565 &lt;tibble [1,291 × 2]&gt;</span>
-<span class="co">#&gt; 2 33908340 &lt;tibble [1,170 × 2]&gt;</span>
-<span class="co">#&gt; 3 11616678 &lt;tibble [938 × 2]&gt;  </span>
-<span class="co">#&gt; 4 47727539 &lt;tibble [307 × 2]&gt;  </span>
-<span class="co">#&gt; 5 54875363 &lt;tibble [903 × 2]&gt;  </span>
-<span class="co">#&gt; 6 40153763 &lt;tibble [1,688 × 2]&gt;</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">df_nested</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
-<span class="co">#&gt;   created_at          grid_id</span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt;</span>
-<span class="co">#&gt; 1 2016-04-17 22:43:06    1581</span>
-<span class="co">#&gt; 2 2014-02-07 07:26:15    1136</span>
-<span class="co">#&gt; 3 2012-08-18 19:26:31    1038</span>
-<span class="co">#&gt; 4 2014-11-25 19:39:00    1699</span>
-<span class="co">#&gt; 5 2014-12-23 01:54:55    1499</span>
-<span class="co">#&gt; 6 2015-06-01 19:48:18     740</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">df_nested</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nest_verbose.html">nest_verbose</a></span><span class="op">(</span><span class="va">df_validated</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"created_at"</span>, <span class="st">"grid_id"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 🛠 Start nesting...</span></span>
+<span><span class="co">#&gt; ✅ Finish nesting!</span></span>
+<span><span class="co">#&gt; ⌛ Nesting time: 0.192 secs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_nested</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 2</span></span>
+<span><span class="co">#&gt;       u_id data                </span></span>
+<span><span class="co">#&gt;      &lt;int&gt; &lt;list&gt;              </span></span>
+<span><span class="co">#&gt; 1 92298565 &lt;tibble [1,291 × 2]&gt;</span></span>
+<span><span class="co">#&gt; 2 33908340 &lt;tibble [1,170 × 2]&gt;</span></span>
+<span><span class="co">#&gt; 3 11616678 &lt;tibble [938 × 2]&gt;  </span></span>
+<span><span class="co">#&gt; 4 47727539 &lt;tibble [307 × 2]&gt;  </span></span>
+<span><span class="co">#&gt; 5 54875363 &lt;tibble [903 × 2]&gt;  </span></span>
+<span><span class="co">#&gt; 6 40153763 &lt;tibble [1,688 × 2]&gt;</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_nested</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 2</span></span>
+<span><span class="co">#&gt;   created_at          grid_id</span></span>
+<span><span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 2016-04-17 22:43:06    1581</span></span>
+<span><span class="co">#&gt; 2 2014-02-07 07:26:15    1136</span></span>
+<span><span class="co">#&gt; 3 2012-08-18 19:26:31    1038</span></span>
+<span><span class="co">#&gt; 4 2014-11-25 19:39:00    1699</span></span>
+<span><span class="co">#&gt; 5 2014-12-23 01:54:55    1499</span></span>
+<span><span class="co">#&gt; 6 2015-06-01 19:48:18     740</span></span></code></pre></div>
 </div>
-<div id="enrich-variables-from-timestamp" class="section level3">
-<h3 class="hasAnchor">
-<a href="#enrich-variables-from-timestamp" class="anchor"></a>Enrich variables from timestamp</h3>
+<div class="section level3">
+<h3 id="enrich-variables-from-timestamp">Enrich variables from timestamp<a class="anchor" aria-label="anchor" href="#enrich-variables-from-timestamp"></a>
+</h3>
 <p>Add additional needed varialbes derived from the timestamp column. These are often used/needed as intermediate variables in home location algorithms, such as year, month, day, day of the week and hour of the day, etc.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">df_enriched</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/enrich_timestamp.html">enrich_timestamp</a></span><span class="op">(</span><span class="va">df_nested</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span><span class="op">)</span>
-<span class="co">#&gt; 🛠 Enriching variables from timestamp...</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span>
-<span class="co">#&gt; ⌛ Enriching time: 0.708 secs</span>
-<span class="co">#&gt; </span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">df_enriched</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 8</span>
-<span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span>
-<span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span>
-<span class="co">#&gt; 1 2016-04-17 22:43:06    1581  2016     4    17     1    22 2016-04-17</span>
-<span class="co">#&gt; 2 2014-02-07 07:26:15    1136  2014     2     7     6     7 2014-02-07</span>
-<span class="co">#&gt; 3 2012-08-18 19:26:31    1038  2012     8    18     7    19 2012-08-18</span>
-<span class="co">#&gt; 4 2014-11-25 19:39:00    1699  2014    11    25     3    19 2014-11-25</span>
-<span class="co">#&gt; 5 2014-12-23 01:54:55    1499  2014    12    23     3     1 2014-12-23</span>
-<span class="co">#&gt; 6 2015-06-01 19:48:18     740  2015     6     1     2    19 2015-06-01</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">df_enriched</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/enrich_timestamp.html">enrich_timestamp</a></span><span class="op">(</span><span class="va">df_nested</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; 🛠 Enriching variables from timestamp...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ✅ Finish enriching! New added variables: year, month, day, wday, hour, ymd.</span></span>
+<span><span class="co">#&gt; ⌛ Enriching time: 0.708 secs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_enriched</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 8</span></span>
+<span><span class="co">#&gt;   created_at          grid_id  year month   day  wday  hour ymd       </span></span>
+<span><span class="co">#&gt;   &lt;dttm&gt;                &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;date&gt;    </span></span>
+<span><span class="co">#&gt; 1 2016-04-17 22:43:06    1581  2016     4    17     1    22 2016-04-17</span></span>
+<span><span class="co">#&gt; 2 2014-02-07 07:26:15    1136  2014     2     7     6     7 2014-02-07</span></span>
+<span><span class="co">#&gt; 3 2012-08-18 19:26:31    1038  2012     8    18     7    19 2012-08-18</span></span>
+<span><span class="co">#&gt; 4 2014-11-25 19:39:00    1699  2014    11    25     3    19 2014-11-25</span></span>
+<span><span class="co">#&gt; 5 2014-12-23 01:54:55    1499  2014    12    23     3     1 2014-12-23</span></span>
+<span><span class="co">#&gt; 6 2015-06-01 19:48:18     740  2015     6     1     2    19 2015-06-01</span></span></code></pre></div>
 </div>
-<div id="use-built-in-recipes" class="section level3">
-<h3 class="hasAnchor">
-<a href="#use-built-in-recipes" class="anchor"></a>Use built-in recipes</h3>
+<div class="section level3">
+<h3 id="use-built-in-recipes">Use built-in recipes<a class="anchor" aria-label="anchor" href="#use-built-in-recipes"></a>
+</h3>
 <p>Current available recipes, where <code>HMLC</code> is the default recipe used in <code>identify_location</code>:</p>
 <ul>
 <li>
@@ -204,53 +205,53 @@ The goal of <code>homelocator</code> is to improve the consistency and replicabi
 </ul>
 </li>
 <li>
-<code>OSNA</code>: <a href="https://doi.org/10.1080/10630731003597306">Efstathiades et al.2015</a>
+<code>OSNA</code>: <a href="https://doi.org/10.1080/10630731003597306" class="external-link">Efstathiades et al.2015</a>
 <ul>
 <li>Finds the most ‘popular’ location during ‘rest’, ‘active’ and ‘leisure time. Here we focus on ’rest’ and ‘leisure’ time to find the most possible home location for each user.</li>
 </ul>
 </li>
 <li>
-<code>APDM</code>: <a href="https://doi.org/10.1080/10630731003597306">Ahas et al. 2010</a>
+<code>APDM</code>: <a href="https://doi.org/10.1080/10630731003597306" class="external-link">Ahas et al. 2010</a>
 <ul>
 <li>Calculates the average and standard deviation of start time data points by a single user, in a single location.</li>
 </ul>
 </li>
 </ul>
-<div id="hmlc" class="section level4">
-<h4 class="hasAnchor">
-<a href="#hmlc" class="anchor"></a>HMLC</h4>
+<div class="section level4">
+<h4 id="hmlc">HMLC<a class="anchor" aria-label="anchor" href="#hmlc"></a>
+</h4>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># default recipe: homelocator -- HMLC</span>
-<span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"HMLC"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># default recipe: homelocator -- HMLC</span></span>
+<span><span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"HMLC"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="freq" class="section level4">
-<h4 class="hasAnchor">
-<a href="#freq" class="anchor"></a>FREQ</h4>
+<div class="section level4">
+<h4 id="freq">FREQ<a class="anchor" aria-label="anchor" href="#freq"></a>
+</h4>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># recipe: Frequency -- FREQ</span>
-<span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, 
-                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"FREQ"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># recipe: Frequency -- FREQ</span></span>
+<span><span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, </span>
+<span>                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"FREQ"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="osna" class="section level4">
-<h4 class="hasAnchor">
-<a href="#osna" class="anchor"></a>OSNA</h4>
+<div class="section level4">
+<h4 id="osna">OSNA<a class="anchor" aria-label="anchor" href="#osna"></a>
+</h4>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># recipe: Online Social Network Activity -- OSNA</span>
-<span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, 
-                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"OSNA"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># recipe: Online Social Network Activity -- OSNA</span></span>
+<span><span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, </span>
+<span>                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"OSNA"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="apdm" class="section level4">
-<h4 class="hasAnchor">
-<a href="#apdm" class="anchor"></a>APDM</h4>
+<div class="section level4">
+<h4 id="apdm">APDM<a class="anchor" aria-label="anchor" href="#apdm"></a>
+</h4>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># recipe: Online Social Network Activity -- APDM</span>
-<span class="co">## APDM recipe strictly returns the most likely home location</span>
-<span class="co">## It is important to create your location neighbors table before you use the recipe!!</span>
-<span class="co">## example: st_queen &lt;- function(a, b = a) st_relate(a, b, pattern = "F***T****")</span>
-<span class="co">##          neighbors &lt;- st_queen(df_sf) ===&gt; convert result to dataframe </span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"df_neighbors"</span>, package <span class="op">=</span> <span class="st">"homelocator"</span><span class="op">)</span>
-<span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, 
-                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"APDM"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># recipe: Online Social Network Activity -- APDM</span></span>
+<span><span class="co">## APDM recipe strictly returns the most likely home location</span></span>
+<span><span class="co">## It is important to create your location neighbors table before you use the recipe!!</span></span>
+<span><span class="co">## example: st_queen &lt;- function(a, b = a) st_relate(a, b, pattern = "F***T****")</span></span>
+<span><span class="co">##          neighbors &lt;- st_queen(df_sf) ===&gt; convert result to dataframe </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"df_neighbors"</span>, package <span class="op">=</span> <span class="st">"homelocator"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/identify_location.html">identify_location</a></span><span class="op">(</span><span class="va">test_sample</span>, user <span class="op">=</span> <span class="st">"u_id"</span>, timestamp <span class="op">=</span> <span class="st">"created_at"</span>, location <span class="op">=</span> <span class="st">"grid_id"</span>, </span>
+<span>                  show_n_loc <span class="op">=</span> <span class="fl">1</span>, recipe <span class="op">=</span> <span class="st">"APDM"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -259,30 +260,43 @@ The goal of <code>homelocator</code> is to improve the consistency and replicabi
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing homelocator</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Qingqing Chen <br><small class="roles"> Author, maintainer </small>  </li>
 <li>Ate Poorthuis <br><small class="roles"> Author </small>  </li>
 </ul>
 </div>
 
+
+
   </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Qingqing Chen, Ate Poorthuis.</p>
+  <p></p>
+<p>Developed by Qingqing Chen, Ate Poorthuis.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -290,6 +304,8 @@ The goal of <code>homelocator</code> is to improve the consistency and replicabi
 
   
 
+
+  
 
   </body>
 </html>
